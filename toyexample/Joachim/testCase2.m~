@@ -17,7 +17,22 @@ laneWidth = 3;
 dToInter = 3;
 
 % Setup map
-
+map = figure;
+roadBoarder = plot([laneWidth/2 laneWidth/2],[0 dToInter],'k');
+hold on
+plot([laneWidth/2 FOVsize(1)/2],[dToInter dToInter],'k')
+plot([laneWidth/2 FOVsize(1)/2],[2*laneWidth+dToInter, 2*laneWidth+dToInter],'k')
+plot([laneWidth/2 laneWidth/2], [2*laneWidth+dToInter, FOVsize(2)],'k')
+plot([-1.5*laneWidth -1.5*laneWidth],[0 dToInter],'k')
+plot([-1.5*laneWidth -1.5*FOVsize(1)],[dToInter dToInter],'k')
+plot([-1.5*laneWidth -1.5*FOVsize(1)],[2*laneWidth+dToInter 2*laneWidth+dToInter],'k')
+plot([-1.5*laneWidth -1.5*laneWidth], [2*laneWidth+dToInter, FOVsize(2)],'k')
+midRoad = plot([-laneWidth/2 -laneWidth/2],[0 FOVsize(2)],'k--');
+plot([-FOVsize(1)/2, FOVsize(1)/2],[laneWidth+dToInter, laneWidth+dToInter],'k--')
+xlim([-FOVsize(1)/2,FOVsize(1)/2])
+ylim([0, FOVsize(2)])
+leg = legend([roadBoarder,midRoad],'roadBoarder','midRoad');
+set(leg,'Fontsize',15,'Interpreter','Latex')
 
 % Initate states
 X = cell(1);
@@ -39,12 +54,21 @@ end
 
 turn1 = 0;
 turn2 = 0;
+turn3 = 0;
 turn4 = 0;
 turn5 = 0;
 
-v1 = 10;
+activeCurve1 = 0;
+activeCurve2 = 0;
+activeCurve3 = 0;
+activeCurve4 = 0;
+activeCurve5 = 0;
 
+v1 = 10;
 v2 = 10;
+v3 = 10;
+v4 = 10;
+v5 = 10;
 counter2 = 0;
 
 % Go through the whole time serie
@@ -55,7 +79,9 @@ for k = 2:nbrTimeSteps
         
         % Ugly fix
         [X{k}, labels, PdVec] = checkValid2(X{k},FOVsize,labels,PdVec); % Check if within FOV
-        
+        disp('---------1st---------')
+        labels
+        X{k}
         % Make car 2 turn
         if turn2 == 1
             for i = 1:size(X{k},2)
@@ -70,26 +96,50 @@ for k = 2:nbrTimeSteps
         if turn1 == 1
             for i = 1:size(X{k},2)
                 if X{k}(5,i) == 1
-                    X{k}(1:4,i) = motionCurve(X{k}(1:4,i),0,T,'cv',-10);
+                    X{k}(1:4,i) = motionCurve(X{k-1}(1:4,i),0,T,'cv',-10);
                 end
             end
         end
         
+        % Make car 3 turn
+        if turn3 == 1
+            for i = 1:size(X{k},2)
+                if X{k}(5,i) == 3
+                    for j = 1:
+                    X{k}(1:4,i) = motionCurve(X{k-1}(1:4,i),0,T,'cv',-10);
+                end
+            end
+        end
+        
+        % Make car 5 turn
+        if turn5 == 1
+            for i = 1:size(X{k},2)
+                if X{k}(5,i) == 5
+                    X{k}(1:4,i) = motionCurve(X{k-1}(1:4,i),0,T,'cv',-8);
+                end
+            end
+        end
+        
+        disp('---------2st---------')
+        labels
+        X{k}
         % Ugly fix
         X{k} = X{k}(1:4,:);
-        
         [X{k}, labels, PdVec] = checkValid2(X{k},FOVsize,labels,PdVec); % Check if within FOV
         
         % Make car 3 detectable
-        if counter2 == 5
-            PdVec(3) = Pd;
-            X{k}(end,3) = Pd;
-        end
-        
+%         if counter2 == 5
+%             PdVec(3) = Pd;
+%             X{k}(end,3) = Pd;
+%         end
+    disp('---------3dn---------')
+        labels
+        X{k}
         % Start turn
         for i = 1:size(X{k},2)
+            % Car 2
             if X{k}(5,i) == 2
-                if abs(abs(X{k}(1,i))-1.2*laneWidth) < 0.2
+                if ((abs(abs(X{k}(1,i))-1.2*laneWidth) < 0.2) && (activeCurve2 == 0))
                     turn2 = 1;
                     v2 = sqrt(X{k}(3,i)^2+X{k}(4,i)^2);
                 elseif abs(abs(X{k}(4,i))-v2) < 0.0002
@@ -97,18 +147,41 @@ for k = 2:nbrTimeSteps
                     X{k}(3:4,i) = [0; -v2];
                 end
             end
+            % Car 1
             if X{k}(5,i) == 1
-                if abs(abs(X{k}(2,i))-dToInter-0.8*laneWidth) < 0.2
+                if ((abs(abs(X{k}(2,i))-dToInter-0.7*laneWidth) < 0.2) && (activeCurve1 == 0) )
                     turn1 = 1;
                     v1 = sqrt(X{k}(3,i)^2+X{k}(4,i)^2);
+                    activeCurve1 = 1;
                 elseif abs(abs(X{k}(3,i))-v1) < 0.2
                     turn1 = 0;
                     X{k}(3:4,i) = [v1;0];
                 end
             end
+            % Car 3
+            if X{k}(5,i) == 3
+                if ((abs(abs(X{k}(1,i))-0.2*laneWidth) < 0.2) && (activeCurve3 == 0))
+                    turn3 = 1;
+                    v3 = sqrt(X{k}(3,i)^2+X{k}(4,i)^2);
+                    activeCurve3 = 1;
+                elseif abs(abs(X{k}(4,i))-v3) < 0.000002
+                    turn3 = 0;
+                    X{k}(3:4,i) = [0;v3];
+                end
+            end
+            % Car 5
+            if X{k}(5,i) == 5
+               if ((abs(abs(X{k}(2,i))-dToInter-1.5*laneWidth) < 0.2) && (activeCurve5 == 0))
+                   turn5 = 1;
+                   v5 = sqrt(X{k}(3,i)^2+X{k}(4,i)^2);
+                   activeCurve5 = 1;
+               elseif ((abs(abs(X{k}(4,i))-v5) < 0.002) && (X{k}(4,i) > 0))
+                   turn5 = 0;
+                   X{k}(3:4,i) = [0;v5];
+               end
+            end
         end
         
-        % TODO: MAKE MORE CARS TURN!!
         if k == 10
            x4 = [FOVsize(1)/2; dToInter+1.5*laneWidth; -2; 0; 4; Pd];
            labels = [labels, 4];
@@ -125,7 +198,7 @@ for k = 2:nbrTimeSteps
         
         % Plot each target
         for i = 1:size(X{k},2)
-            cars = figure(map);
+            figure(map);
             plot(X{k}(1,i), X{k}(2,i),['-*', num2str(colors(labels(i)))])
         end
         pause(0.01)
