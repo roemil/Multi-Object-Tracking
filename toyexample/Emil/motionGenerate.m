@@ -19,9 +19,9 @@ if strcmp(model,'cv')
         X = kron([1 T; 0 1],eye(2))*Xprev;
         Q = sigmaQ*kron([T^3/3 T^2/2;T^2/2,T],eye(2));
         % Add noise. NOTE: No correlation between pos and velo
-        for i = 1:size(X,2)
-            X(:,i) = X(:,i)+normrnd(zeros(4,1),sigmaQ*[T^3/3, T^3/3, T, T]',4,1);
-        end
+        %for i = 1:size(X,2)
+        %    X(:,i) = X(:,i)+normrnd(zeros(4,1),sigmaQ*[T^3/3, T^3/3, T, T]',4,1);
+        %end
     else
         disp('ERROR: xprev has the wrong number of states')
         return
