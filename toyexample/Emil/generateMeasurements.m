@@ -4,7 +4,8 @@ function z = generateMeasurements(targets, sigma)
         for j = 1 : size(targets{t},2) % for all targets at time t
             % Gaussian noise in measurement model
             % model is only distance right now
-            z{t}(1,j) = norm(mvnrnd([targets{t}(1,j) targets{t}(2,j)], sigma));
+            %z{t}(1,j) = norm(mvnrnd([targets{t}(1,j) targets{t}(2,j)], sigma));
+            z{t}(1,j) = norm([targets{t}(1,j) targets{t}(2,j)]) + sigma*randn(1);
         end
     end
 end
