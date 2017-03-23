@@ -3,7 +3,7 @@ function [targets] = checkValid(targets, FOV)
     ylim = FOV(2);
     pos = [];
     for m = 1 : size(targets,2)
-        if(targets(1,m) >= xlim || targets(1,m) < 0 || targets(2,m) >= ylim || targets(2,m) < 0)
+        if((abs(targets(1,m)) > xlim) || abs(targets(2,m)) > ylim)
             pos = [pos,m];
             %flag = 0;
 %             %targets{i}

@@ -1,4 +1,4 @@
-function map = generateMap()
+function map = generateMap(laneWidth, FOVsize,dToInter)
 
 map = figure;
 roadBoarder = plot([laneWidth/2 laneWidth/2],[0 dToInter],'k');

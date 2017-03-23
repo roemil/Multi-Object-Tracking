@@ -1,8 +1,10 @@
-function [targets] = checkValid(targets, xlim, ylim)
-                
+function [targets] = checkValid(targets, FOV)
+    xlim = FOV(1);
+    ylim = FOV(2);
+    pos = [];
     for m = 1 : size(targets,2)
-        if(targets(1,m) >= xlim || targets(1,m) < 0 || targets(2,m) >= ylim || targets(2,m) < 0)
-            targets(:,m) = [];
+        if((abs(targets(1,m)) > xlim) || (targets(1,m) < xlim || targets(2,m) >= ylim || targets(2,m) < 0)
+            pos = [pos,m];
             %flag = 0;
 %             %targets{i}
 %             %nbrOftargets = nbrOftargets - 1
@@ -10,7 +12,7 @@ function [targets] = checkValid(targets, xlim, ylim)
 %         else 
 %             flag = 1;
         end 
-        if(m > 
     end
+    targets(:,pos) = [];
 end
     

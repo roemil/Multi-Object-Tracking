@@ -23,18 +23,21 @@ function object = generateNewObject(mode)
             return;
     end
     if(mode == 1)
-        new_target_x = 3.5;
-        new_target_y = 2;
+        new_target_x = 0;
+        new_target_y = 0;
         new_target_vx = 0;
-        new_target_vy = 1;
-    elseif(mode == 2)
-        disp('mode 2 not implemented yet');
-        object = [];
-        return;
+        new_target_vy = randi(2);
+    elseif(mode == 2)       
+        new_target_x = -2.5;
+        new_target_y = 2;
+        new_target_vx = randi(2);
+        new_target_vy = 0;
+        
     elseif(mode == 3)
-        disp('mode 3 not implemented yet');
-        object = [];
-        return;
+        new_target_x = -1;
+        new_target_y = 10;
+        new_target_vx = 0;
+        new_target_vy = -1*randi(2);
     end
     object = [new_target_x; new_target_y;new_target_vx;new_target_vy];
 
