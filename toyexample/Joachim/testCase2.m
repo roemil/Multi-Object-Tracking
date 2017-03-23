@@ -54,12 +54,21 @@ end
 
 turn1 = 0;
 turn2 = 0;
+turn3 = 0;
 turn4 = 0;
 turn5 = 0;
 
-v1 = 10;
+activeCurve1 = 0;
+activeCurve2 = 0;
+activeCurve3 = 0;
+activeCurve4 = 0;
+activeCurve5 = 0;
 
+v1 = 10;
 v2 = 10;
+v3 = 10;
+v4 = 10;
+v5 = 10;
 counter2 = 0;
 
 % Go through the whole time serie
@@ -70,12 +79,16 @@ for k = 2:nbrTimeSteps
         
         % Ugly fix
         [X{k}, labels, PdVec] = checkValid2(X{k},FOVsize,labels,PdVec); % Check if within FOV
-        
+
         % Make car 2 turn
         if turn2 == 1
             for i = 1:size(X{k},2)
                 if X{k}(5,i) == 2
-                    X{k}(1:4,i) = motionCurve(X{k-1}(1:4,i),0,T,'cv',10);
+                    for j = 1:size(X{k-1},2)
+                        if X{k-1}(5,j) == 1
+                            X{k}(1:4,i) = motionCurve(X{k-1}(1:4,i),0,T,'cv',10);
+                        end
+                    end
                 end
             end
             counter2 = counter2+1;
@@ -85,26 +98,56 @@ for k = 2:nbrTimeSteps
         if turn1 == 1
             for i = 1:size(X{k},2)
                 if X{k}(5,i) == 1
-                    X{k}(1:4,i) = motionCurve(X{k}(1:4,i),0,T,'cv',-10);
+                    for j = 1:size(X{k-1},2)
+                        if X{k-1}(5,j) == 1
+                            X{k}(1:4,i) = motionCurve(X{k-1}(1:4,j),0,T,'cv',-10);
+                        end
+                    end
+                end
+            end
+        end
+        
+        % Make car 3 turn
+        if turn3 == 1
+            for i = 1:size(X{k},2)
+                if X{k}(5,i) == 3
+                    for j = 1:size(X{k-1},2)
+                        if X{k-1}(5,j) == 3
+                            X{k}(1:4,i) = motionCurve(X{k-1}(1:4,j),0,T,'cv',-10);
+                        end
+                    end
+                end
+            end
+        end
+        
+        % Make car 5 turn
+        if turn5 == 1
+            for i = 1:size(X{k},2)
+                if X{k}(5,i) == 5
+                    for j = 1:size(X{k-1},2)
+                        if X{k-1}(5,j) == 5
+                            X{k}(1:4,i) = motionCurve(X{k-1}(1:4,j),0,T,'cv',-6);
+                        end
+                    end
                 end
             end
         end
         
         % Ugly fix
         X{k} = X{k}(1:4,:);
-        
         [X{k}, labels, PdVec] = checkValid2(X{k},FOVsize,labels,PdVec); % Check if within FOV
         
         % Make car 3 detectable
-        if counter2 == 5
-            PdVec(3) = Pd;
-            X{k}(end,3) = Pd;
-        end
-        
+%         if counter2 == 5
+%             PdVec(3) = Pd;
+%             X{k}(end,3) = Pd;
+%         end
+
         % Start turn
         for i = 1:size(X{k},2)
+            % Car 2
             if X{k}(5,i) == 2
-                if abs(abs(X{k}(1,i))-1.2*laneWidth) < 0.2
+                if ((abs(abs(X{k}(1,i))-1.2*laneWidth) < 0.2) && (activeCurve2 == 0))
                     turn2 = 1;
                     v2 = sqrt(X{k}(3,i)^2+X{k}(4,i)^2);
                 elseif abs(abs(X{k}(4,i))-v2) < 0.0002
@@ -112,18 +155,41 @@ for k = 2:nbrTimeSteps
                     X{k}(3:4,i) = [0; -v2];
                 end
             end
+            % Car 1
             if X{k}(5,i) == 1
-                if abs(abs(X{k}(2,i))-dToInter-0.8*laneWidth) < 0.2
+                if ((abs(abs(X{k}(2,i))-dToInter-0.7*laneWidth) < 0.2) && (activeCurve1 == 0) )
                     turn1 = 1;
                     v1 = sqrt(X{k}(3,i)^2+X{k}(4,i)^2);
+                    activeCurve1 = 1;
                 elseif abs(abs(X{k}(3,i))-v1) < 0.2
                     turn1 = 0;
                     X{k}(3:4,i) = [v1;0];
                 end
             end
+            % Car 3
+            if X{k}(5,i) == 3
+                if ((abs(abs(X{k}(1,i))-0.2*laneWidth) < 0.2) && (activeCurve3 == 0))
+                    turn3 = 1;
+                    v3 = sqrt(X{k}(3,i)^2+X{k}(4,i)^2);
+                    activeCurve3 = 1;
+                elseif abs(abs(X{k}(4,i))-v3) < 0.000002
+                    turn3 = 0;
+                    X{k}(3:4,i) = [0;v3];
+                end
+            end
+            % Car 5
+            if X{k}(5,i) == 5
+               if ((abs(abs(X{k}(2,i))-dToInter-1.5*laneWidth) < 0.2) && (activeCurve5 == 0))
+                   turn5 = 1;
+                   v5 = sqrt(X{k}(3,i)^2+X{k}(4,i)^2);
+                   activeCurve5 = 1;
+               elseif ((abs(abs(X{k}(4,i))-v5) < 0.02) && (X{k}(4,i) > 0))
+                   turn5 = 0;
+                   X{k}(3:4,i) = [0;v5];
+               end
+            end
         end
         
-        % TODO: MAKE MORE CARS TURN!!
         if k == 10
            x4 = [FOVsize(1)/2; dToInter+1.5*laneWidth; -2; 0; 4; Pd];
            labels = [labels, 4];
@@ -131,8 +197,8 @@ for k = 2:nbrTimeSteps
            X{k} = [X{k}, x4];
         end
         
-        if k == 15
-           x5 = [-laneWidth; FOVsize(2); 0; -2; 5; Pd];
+        if k == 2
+           x5 = [-laneWidth; FOVsize(2); 0; -1.5; 5; Pd];
            labels = [labels, 5];
            PdVec = [PdVec, Pd];
            X{k} = [X{k}, x5];
