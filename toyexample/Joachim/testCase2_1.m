@@ -6,13 +6,13 @@ FOVsize = [20,30];  % FOV [x y]
 sigmaQ = 0.01;  % covariance for change in movement
 T = 0.1;
 nbrInitTargets = 3;
-labels = 1:1:nbrInitTargets;
+labels = cell(1);
+labels{1} = 1:1:nbrInitTargets;
 veloRange = 5;
 colors = ['r','b','k','c','g','y','m'];
 maxNbrTargets = length(colors);
 Pb = 0.05;
 Pd = 0.9;
-R = [1;0.01];
 
 laneWidth = 3;
 dToInter = 3;
@@ -32,36 +32,25 @@ midRoad = plot([-laneWidth/2 -laneWidth/2],[0 FOVsize(2)],'k--');
 plot([-FOVsize(1)/2, FOVsize(1)/2],[laneWidth+dToInter, laneWidth+dToInter],'k--')
 xlim([-FOVsize(1)/2,FOVsize(1)/2])
 ylim([0, FOVsize(2)])
-% leg = legend([roadBoarder,midRoad],'roadBoarder','midRoad');
-% set(leg,'Fontsize',15,'Interpreter','Latex')
-
-object = plot(-10,-10,'k*');
-meas = plot(-10,-10,'o','Color',[.7 .5 0]);
-
-leg = legend([roadBoarder,midRoad,object,meas],'roadBoarder','midRoad','Objects','Measurements');
+leg = legend([roadBoarder,midRoad],'roadBoarder','midRoad');
 set(leg,'Fontsize',15,'Interpreter','Latex')
-
 
 % Initate states
 X = cell(1);
 
 % CV initate each object
-x1 = [-laneWidth; 15; 0; -1;labels(1); Pd];
-x2 = [-1.5*laneWidth-1; dToInter+laneWidth/2; 1; 0; labels(2);Pd];
-x3 = x2+[-1; 0; 0; 0; 0; -Pd];
+x1 = [-laneWidth; 15; 0; -1;labels{1}(1); Pd];
+x2 = [-1.5*laneWidth-1; dToInter+laneWidth/2; 1; 0; labels{1}(2);Pd];
+x3 = x2+[-1; 0; 0; 0; 1; -Pd];
 
-PdVec = [x1(end), x2(end), x3(end)];
+PdVec = {[x1(end), x2(end), x3(end)]};
 
 % CV initiate
 X{1} = [x1,x2,x3];
-
-% Measurement initiate
-Z = cell(1);
-
-initPlot = {};
+      
 for i = 1:nbrInitTargets
     figure(1);
-    initPlot = [initPlot plot(X{1}(1,i), X{1}(2,i),['-*', num2str(colors(labels(i)))])];
+    plot(X{1}(1,i), X{1}(2,i),['-*', num2str(colors(labels{1}(i)))])
 end
 
 turn1 = 0;
@@ -84,8 +73,6 @@ v5 = 10;
 counter2 = 0;
 
 emptyFlag = 0;
-measPlot = {};
-objPlot = {};
 
 % Go through the whole time serie
 for k = 2:nbrTimeSteps
@@ -94,7 +81,7 @@ for k = 2:nbrTimeSteps
         X{k} = motionGenerateControlled(X{k-1}(1:end-2,:),sigmaQ,T,'cv'); % Take step
         
         % Ugly fix
-        [X{k}, labels, PdVec] = checkValid2(X{k},FOVsize,labels,PdVec); % Check if within FOV
+        [X{k}, labels{k}, PdVec{k}] = checkValid2(X{k},FOVsize,labels{k-1},PdVec{k-1}); % Check if within FOV
         
         if isempty(X{k})
             emptyFlag = 1;
@@ -156,7 +143,7 @@ for k = 2:nbrTimeSteps
         
         % Ugly fix
         X{k} = X{k}(1:4,:);
-        [X{k}, labels, PdVec] = checkValid2(X{k},FOVsize,labels,PdVec); % Check if within FOV
+        [X{k}, labels{k}, PdVec{k}] = checkValid2(X{k},FOVsize,labels{k-1},PdVec{k-1}); % Check if within FOV
         
         if isempty(X{k})
             emptyFlag = 1;
@@ -167,7 +154,7 @@ for k = 2:nbrTimeSteps
         if counter2 == 5
             for i = 1:size(X{k},2)
                 if X{k}(5,i) == 3
-                    PdVec(3) = Pd;
+                    PdVec{k}(3) = Pd;
                     X{k}(end,3) = Pd;
                 end
             end
@@ -218,7 +205,7 @@ for k = 2:nbrTimeSteps
                    X{k}(3:4,i) = [0;v5];
                    for j = 1:size(X{k},2)
                        if X{k}(5,j) == 3
-                           PdVec(j) = 0;
+                           PdVec{k}(j) = 0;
                            X{k}(6,j) = 0;
                        end
                    end
@@ -228,57 +215,24 @@ for k = 2:nbrTimeSteps
         
         if k == 10
            x4 = [FOVsize(1)/2; dToInter+1.5*laneWidth; -2; 0; 4; Pd];
-           labels = [labels, 4];
-           PdVec = [PdVec, Pd];
+           labels{k} = [labels{k}, 4];
+           PdVec{k} = [PdVec{k}, Pd];
            X{k} = [X{k}, x4];
         end
         
         if k == 2
            x5 = [-laneWidth; FOVsize(2); 0; -1.3; 5; Pd];
-           labels = [labels, 5];
-           PdVec = [PdVec, Pd];
+           labels{k} = [labels{k}, 5];
+           PdVec{k} = [PdVec{k}, Pd];
            X{k} = [X{k}, x5];
         end
         
-        % Remove init plot
-        if k == 2
-            delete(initPlot)
-        end
-        
         % Plot each target
-        if k > 2
-            delete(objPlot)
-        end
         for i = 1:size(X{k},2)
             figure(map);
-            objPlot = [objPlot plot(X{k}(1,i), X{k}(2,i),['-*', num2str(colors(labels(i)))])];
+            plot(X{k}(1,i), X{k}(2,i),['-*', num2str(colors(labels{k}(i)))])
         end
-        pause(0.001)
-    end
-    
-    Z{k} = [];
-    % Generate measurement if detected
-    for i = 1:size(X{k},2)
-        detObject = unifrnd(0,1);
-        if detObject < X{k}(6,i)
-            Z{k} = [Z{k}, measGenerate(X{k}(:,i),R)];
-        end
-    end
-    
-    % Number of clutter measurements, 0,1,2
-    nbrClutter = randi(3)-1;
-    for i = 1:nbrClutter
-        Z{k} = [Z{k}, [unifrnd(1,20); unifrnd(-pi,pi)]];
-    end
-    
-    %Rearrenge measurement order
-    Z{k} = Z{k}(:,randperm(size(Z{k},2)));
-    if k > 2
-        delete(measPlot)
-    end
-    
-    for i = 1:size(Z{k},2)
-        figure(map)
-        measPlot = [measPlot, plot(Z{k}(1,i)*cos(Z{k}(2,i)),Z{k}(1,i)*sin(Z{k}(2,i)),'o','Color',[.7 .5 0])];
+        pause(0.01)
     end
 end
+        
