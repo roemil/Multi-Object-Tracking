@@ -19,7 +19,8 @@ function object = generateNewObject(mode)
                 new_target_y = 0;
                 new_target_vy = abs(new_target_vy);
             end
-            object = [new_target_x; new_target_y;new_target_vx;new_target_vy];
+            Pd = 0.7;
+            object = [new_target_x; new_target_y;new_target_vx;new_target_vy; Pd];
             return;
     end
     if(mode == 1)
@@ -39,6 +40,7 @@ function object = generateNewObject(mode)
         new_target_vx = 0;
         new_target_vy = -1*randi(2);
     end
-    object = [new_target_x; new_target_y;new_target_vx;new_target_vy];
+    Pd = 0.7;
+    object = [new_target_x; new_target_y;new_target_vx;new_target_vy; Pd];
 
 end
