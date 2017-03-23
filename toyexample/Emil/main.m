@@ -1,4 +1,5 @@
 clear all; clc;clf; close all;
+plotOn = 0;
 xlim = 5;
 ylim = 10; % box where we can see targets
 FOV = [xlim, ylim];
@@ -18,8 +19,8 @@ map = generateMap(laneWidth, FOV,dToInter);
 %%
 hold on;
 %for i = 2 : 20000 %time is running, move targets     
-i = 2;
-while(true)
+nbrOfTimeSteps = 1000;
+for i = 2 : nbrOfTimeSteps
     birth_threshold = random('exp', lambda_b);
     t = t + 0.05;
     targets{i} = targets{i-1};
@@ -42,15 +43,17 @@ while(true)
             nbrOftargets = size(targets{i},2);
         end
     end
-    if(size(targets{i},2) ~= 0)
-        for tar = 1 : size(targets{i},2)
-            h(i,tar) = plot(targets{i}(1,tar),targets{i}(2,tar),colors{targets{i}(5,tar)});
-            pause(0.01)
-            hold on
-            if(i > 20)
-                %if (ishandle(h(1:i-10,tar))) 
-                    delete(h(1:i-10,tar)); 
-                %end;
+    if(plotOn)
+        if(size(targets{i},2) ~= 0)
+            for tar = 1 : size(targets{i},2)
+                h(i,tar) = plot(targets{i}(1,tar),targets{i}(2,tar),colors{targets{i}(5,tar)});
+                pause(0.01)
+                hold on
+                if(i > 20)
+                    %if (ishandle(h(1:i-10,tar))) 
+                        delete(h(1:i-10,tar)); 
+                    %end;
+                end
             end
         end
     end
@@ -59,7 +62,7 @@ while(true)
 %             plotobjects = plotObjects(targets,i,colors,numTar);
 %         end
 %     end
-    i = i + 1;
+    %i = i + 1;
 end
 
 

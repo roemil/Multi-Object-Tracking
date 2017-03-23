@@ -1,0 +1,7 @@
+function z = generateMeasurements(targets, mu, sigma)
+    z = zeros(size(targets,1),size(targets,2));
+    for i = 1 : size(targets,1)
+        for j = 1 : size(targets,2)
+            z(i,j) = mvnrnd([targets{i}(1,j) targets{i}(2,j)], mu, sigma);
+
+end
