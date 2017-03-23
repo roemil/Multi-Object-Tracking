@@ -1,7 +1,10 @@
 clear all; clc;clf; close all;
 xlim = 10;
 ylim = 10; % box where we can see targets
-lambda_b = 200; % Probability of birth
+
+Nu = 3;
+k = 0;
+lambda_b = 2; % Probability of birth
 %birth_threshold = poisspdf(1,lambda_b);
 birth_threshold = random('Poisson', lambda_b);
 flag = 1;
@@ -10,24 +13,31 @@ targets = cell(1);
 nbrOftargets = 1;
 maxNbrofTargets = 5;
 colors = {'bo','go','ro','co','mo','yo','ko'};
+new_target_x = abs(10*randn(1,1)); % spawn new target uniformly
+new_target_y = abs(10*randn(1,1)); % spawn new target uniformly
+new_target_vx = 1;
+new_target_vy = 1;
 labels = [1,2,3,4,5];
-
+targets{1} = [new_target_x;new_target_y;new_target_vx;new_target_vy;labels(1)];
 figure;
 hold on;
 %for i = 2 : 20000 %time is running, move targets     
 i = 2;
 while(true)
-    birth_threshold = random('exp', lambda_b);
+    birth_threshold = random('Poisson', lambda_b);
     t = t + 0.05;
     targets{i} = targets{i-1};
-    if(size(targets{i},2) ~= 0)
-        for m = 1 : size(targets{i},2)
-            targets{i}(:,m) = [motionGenerate(targets{i}(1:4,m),0.5,0.05,'cv');targets{i}(5,m)];
-            
+    if(size(targets{i-1},2) ~= 0)
+        for m = 1 : nbrOftargets
+            targets{i}(:,m) = [motionGenerate(targets{i-1}(1:4,m),0.5,0.05,'cv');targets{i-1}(5,m)];
+            flag = checkValid(targets{i}(:,m), xlim, ylim);
+            if(flag == 0)
+                targets{i}(:,m) = [];
+                targets{i}
+            end
+            nbrOftargets = size(targets{i},2);
         end
     end
-    targets{i} = checkValid(targets{i}, xlim, ylim);
-    nbrOftargets = size(targets{i},2);
     %size(targets{i})
     if((t >= birth_threshold))
         if(nbrOftargets < maxNbrofTargets)
@@ -51,18 +61,17 @@ while(true)
                 new_target_y = 0;
                 new_target_vy = abs(new_target_vy);
             end
-%             for lab = 1 : length(labels)%%%% FIND WHICH LABEL IS FREE
-%                for used_lab = 1 : size(targets{i},2)
-%                    if(any(labels(lab) == targets{i}(5,used_lab)))
-%                     %label is used
-%                    else
-%                        free_lab = labels(lab);
-%                        break;
-%                    end
-%                end
-%             end
-            free_lab = freeLabel(targets{i},labels);
-            targets{i} = [targets{i},[new_target_x; new_target_y;new_target_vx;new_target_vy;free_lab]];
+            for lab = 1 : length(labels)
+               for used_lab = 1 : size(targets,2)
+                   if(labels(lab) == targets{i}(5,used_lab))
+                    %label is used
+                   else
+                       free_lab = labels(lab);
+                   end
+               end
+            end
+                %%%% FIND WHICH LABEL IS FREE
+            targets{i} = [targets{i},[new_target_x; new_target_y;new_target_vx;new_target_vy;labels(nbrOftargets)]];
             %nbrOftargets = size(targets{i},2);
         end
     end
