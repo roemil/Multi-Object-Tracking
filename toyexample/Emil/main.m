@@ -9,15 +9,13 @@ birth_threshold = random('Poisson', lambda_b);
 flag = 1;
 t = 0;
 targets = cell(1);
-nbrOftargets = 1;
+nbrOftargets = 5;
 maxNbrofTargets = 1;
 colors = {'bo','go','ro','co','mo','yo','ko'};
 labels = [1,2,3,4,5];
 laneWidth = 1;
 dToInter = 1.5;
-map = generateMap(laneWidth, FOV,dToInter);
-%
-hold on;
+
 %for i = 2 : 20000 %time is running, move targets     
 nbrOfTimeSteps = 1000;
 for i = 2 : nbrOfTimeSteps
@@ -26,7 +24,7 @@ for i = 2 : nbrOfTimeSteps
     targets{i} = targets{i-1};
     if(size(targets{i},2) ~= 0)
         for m = 1 : size(targets{i},2)
-            targets{i}(:,m) = [motionGenerate(targets{i}(1:4,m),0,0.05,'cv');targets{i}(5,m)];
+            targets{i}(:,m) = [motionGenerate(targets{i}(1:4,m),0,0.05,'cv');targets{i}(5:6,m)];
             
         end
     end
@@ -44,9 +42,11 @@ for i = 2 : nbrOfTimeSteps
         end
     end
     if(plotOn)
+        map = generateMap(laneWidth, FOV,dToInter);
+        hold on;
         if(size(targets{i},2) ~= 0)
             for tar = 1 : size(targets{i},2)
-                h(i,tar) = plot(targets{i}(1,tar),targets{i}(2,tar),colors{targets{i}(5,tar)});
+                h(i,tar) = plot(targets{i}(1,tar),targets{i}(2,tar),colors{targets{i}(6,tar)});
                 pause(0.01)
                 hold on
                 if(i > 20)
@@ -59,15 +59,17 @@ for i = 2 : nbrOfTimeSteps
     end
     %i = i + 1;
 end
-%%
+%
 z = generateMeasurements(targets, 0.5);
-figure;
-
-for t = 1 : size(z,2)
-    for i = 1 : size(z{t},2)
-        plot(t,z{t}(i),'o')
-        hold on;
-        pause(0.1);
+%%
+if(plotOn)
+    figure;
+    for t = 1 : size(z,2)
+        for i = 1 : size(z{t},2)
+            plot(t,z{t}(i),'o')
+            hold on;
+            pause(0.1);
+        end
     end
 end
 
