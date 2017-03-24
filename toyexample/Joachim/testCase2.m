@@ -36,7 +36,7 @@ ylim([0, FOVsize(2)])
 % set(leg,'Fontsize',15,'Interpreter','Latex')
 
 object = plot(-10,-10,'k*');
-meas = plot(-10,-10,'o','Color',[.7 .5 0]);
+meas = plot(-10,-10,'+','Color',[.7 .5 0]);
 
 leg = legend([roadBoarder,midRoad,object,meas],'roadBoarder','midRoad','Objects','Measurements');
 set(leg,'Fontsize',15,'Interpreter','Latex')
@@ -279,6 +279,6 @@ for k = 2:nbrTimeSteps
     
     for i = 1:size(Z{k},2)
         figure(map)
-        measPlot = [measPlot, plot(Z{k}(1,i)*cos(Z{k}(2,i)),Z{k}(1,i)*sin(Z{k}(2,i)),'o','Color',[.7 .5 0])];
+        measPlot = [measPlot, plot(Z{k}(1,i)*cos(Z{k}(2,i)),Z{k}(1,i)*sin(Z{k}(2,i)),'+','Color',[.7 .5 0])];
     end
 end
