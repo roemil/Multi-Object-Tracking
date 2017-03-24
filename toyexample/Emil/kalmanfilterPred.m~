@@ -1,0 +1,14 @@
+function [X,P] = kalmanfilterPred(Xprev, T, P)
+
+F = [1 0 T 0;0 1 0 T;0 0 1 0;0 0 0 1];
+H = [1 0 0 0;0 1 0 0];
+Q = [T^3/3 0 T^2/2 0;
+     0 T^3/3 0 T^2/2;
+     T^2/2 0 T 0;
+     0 T^2/2 0 T];
+
+X = F*Xprev+randn(1,4)*Q;
+P = F*P*A'+Q;
+
+
+end
