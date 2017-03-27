@@ -9,29 +9,19 @@
 %       F:      Motion model
 %       Q:      Motion covariance matrix
 
-function [F, Q] = generateMotionModel(Xprev, sigmaQ, T, model)
+function [F, Q] = generateMotionModel(sigmaQ, T, model)
 
 % Constant velocity
 if strcmp(model,'cv')
-    if size(Xprev,1) == 4
-        % x = [x,y,vx,vy]^T
-        F = kron([1 T; 0 1],eye(2));
-        Q = sigmaQ*kron([T^3/3 T^2/2;T^2/2,T],eye(2));
-    else
-        disp('ERROR: xprev has the wrong number of states')
-        return
-    end
+    % x = [x,y,vx,vy]^T
+    F = kron([1 T; 0 1],eye(2));
+    Q = sigmaQ^2*kron([T^3/3 T^2/2;T^2/2,T],eye(2));
 
 % Constant acceleration
 elseif strcmp(model,'ca')
-    if size(Xprev,1) == 6
-        % x = [x,y,vx,vy,ax,ay]^T
-        F = kron([1 T T^2/2; 0 1 T; 0 0 1],eye(2));
-        Q = sigmaQ*kron([T^5/20 T^4/8 T^3/6;T^4/8 T^3/3 T^2/2;T^3/6 T^2/2 T],eye(2));
-    else
-        disp('ERROR: xprev has the wrong number of states')
-        return
-    end
+    % x = [x,y,vx,vy,ax,ay]^T
+    F = kron([1 T T^2/2; 0 1 T; 0 0 1],eye(2));
+    Q = sigmaQ^2*kron([T^5/20 T^4/8 T^3/6;T^4/8 T^3/3 T^2/2;T^3/6 T^2/2 T],eye(2));
 
 % Coordinated turn
 elseif strcmp(model,'ct')

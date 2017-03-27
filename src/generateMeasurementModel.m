@@ -9,7 +9,7 @@ if strcmp(mode,'linear')
     H = kron([1 0],eye(2));
 elseif strcmp(mode,'nonlinear')
     % Initiate nonlinear measurement model
-    H = @(x,y) {};
+    H = @(x,y) [];
 
     % Generate nonlinear measurement models
     for i = 1:size(measModels,2)
