@@ -32,7 +32,8 @@ XmuUpd = cell(1,1); % XmuUpd{t,z}(i)
 % Xmu = [wu, state, Pu, S]
 
 % Inititate hypotheses
-Xhypo = cell(1,1); % Xhypo{t,z}(i)
+Xhypo = cell(1,1,1); % Xhypo{t,j,z}(i)
+XpotNew = cell(1,1); % XpotNew{t,z}(i)
 
 % Initiate potential targets. X = {t,j}(i)
 %Xpred = cell(1,1,1,5);
@@ -61,7 +62,7 @@ for k = 2:K % For each time step
         XmuPred{k}(i).w = [wb{1} XuUpd{k-1}(i).w];    % Pred weight
         XmuPred{k}(i).state = [Xb{1} XuPred{k}.state];      % Pred state
         XmuPred{k}(i).P = [Pb{1} XuPred{k}(i).P];      % Pred cov    
-        mu = @(x) gaussMix(XuPred{k}(i).w,XuPred{k}(i).state,XuPred{k}(i).P); % Pred Poisson intensity
+        mu = @(x) gaussMix(XuPred{k}(i).w,XuPred{k}(i).state,XuPred{k}(i).P); % Pred Poisson intensity (41)
         
         % MIGHT HAVE MIXED UP PREDICTION STEPS
         
@@ -85,8 +86,10 @@ for k = 2:K % For each time step
     % Update for potential targets detected for the first time
     for z = 1:size(Z{k},2)
         w = zeros(1,size(Z{k},2));
-        Xmutmp = zeros(4,size(XmuPred{k,2},2));
-        Stmp = cell(size(XmuPred{k,2},2));
+        %Xmutmp = zeros(4,size(XmuPred{k,2},2));
+        %Stmp = cell(size(XmuPred{k,2},2));
+        XpotNew{k,z}.state = [];
+        XpotNew{k,z}.P = [];
         for i = 1:size(XmuPred{k,2},2)
             % Pass through Kalman
             [XmuUpd{k,z}(i).state, XmuUpd{k,z}(i).P, XmuUpd{k,z}(i).S] = KFUpd(XmuPred{k}(i).state,H, XmuPred{k}(i).P, R, Z{k}(:,z));
@@ -96,29 +99,47 @@ for k = 2:K % For each time step
             w(1,i) = XmuPred{k}(i).w*mvnpdf(Z{k}(:,z), H*XmuPred{k}(i).state, XmuUpd{k,z}(i).S);
             
             % TODO: temp solution
-            Xmutmp(1:4,i) = XmuPred{k}(i).state;
-            Stmp{i} = XmuUpd{k,z}(i).S;
+            %Xmutmp(1:4,i) = XmuPred{k}(i).state;
+            %Stmp{i} = XmuUpd{k,z}(i).S;
         end
         % Normalize weight
         w = w/sum(w);
         
+        % Find posterior
+        for i = 1:size(w,2)
+            % TODO: Is the moment matching correct? 
+            XpotNew{k,z}.state = XpotNew{k,z}.state+w(1,i)*XmuUpd{k,z}(i).state; % (44)
+            XpotNew{k,z}.P = XpotNew{k,z}.P+w(1,i)*XmuUpd{k,z}(i).P; % (44)
+        end
+        
         e = Pd*generateGaussianMix(Z{k}(:,z), H*Xmutmp, Stmp);
-        XmuUpd{k,z}.w = e+c; % rho
-        XmuUpd{k,z}.r = e/XmuUpd{k,z}.w;
+        XpotNew{k,z}.w = e+c; % rho (45) (44)
+        XpotNew{k,z}.r = e/XmuUpd{k,z}.w; % (43) (44)
+        %XmuUpd{k,z}.w = e+c; % rho
+        %XmuUpd{k,z}.r = e/XmuUpd{k,z}.w;
     end
     
+    %%%% Update for previously potentially detected targets %%%%
     % Create missdetection hypo in index size(Z{k},2)+1
     for j = 1:size(Xpred{k},2)
         for i = 1:size(Xpred{k,j},2)
-            Xhypo{k,size(Z{k},2)+1}(i).w = Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
-            Xhypo{k,size(Z{k},2)+1}(i).r = Xpred{k,j}(i).r*(1-Pd)/(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
-            Xhypo{k,size(Z{k},2)+1}(i).state = Xpred{k,j}(i).state;
-            Xhypo{k,size(Z{k},2)+1}(i).P = Xpred{k,j}(i).P;
+            Xhypo{k,j,size(Z{k},2)+1}(i).w = Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
+            Xhypo{k,j,size(Z{k},2)+1}(i).r = Xpred{k,j}(i).r*(1-Pd)/(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
+            Xhypo{k,j,size(Z{k},2)+1}(i).state = Xpred{k,j}(i).state;
+            Xhypo{k,j,size(Z{k},2)+1}(i).P = Xpred{k,j}(i).P;
         end
     end
             
-    % Update for previously potentially detected targets
+    % Generate hypothesis for each single in each global for each measurement 
     for z = 1:size(Z{k},2)
         for j = 1:size(Xpred{k},2)
             for i = 1:size(Xpred{k,j},2)
+                [Xhypo{k,j,z}(i).state, Xhypo{k,j,z}(i).P, Xhypo{k,j,z}.S] = KFUpd(Xpred{k,j}(i).state, H, Xpred{k,j}(i).P, R, Z{k}(:,i));
+                Xhypo{k,j,z}(i).w = Xpred{k,j}(i).w*Xpred{k,j}(i).r*Pd*mvnrnd(Z{k}(:,z), H*Xpred{k,j}(i).state, Xhypo{k,j,z}.S);
+                Xhypo{k,j,z}(i).r = 1;
+            end
+        end
+    end
+    
+    % TODO: Generate new global hypo from Xhypo and XpotNew
 end
