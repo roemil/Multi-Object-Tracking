@@ -12,7 +12,7 @@ colors = ['r','b','k','c','g','y','m'];
 maxNbrTargets = length(colors);
 Pb = 0.05;
 Pd = 0.9;
-R = [1 0;0 0.01];
+R = [0.1 0;0 0.1];
 
 laneWidth = 3;
 dToInter = 3;
@@ -266,10 +266,10 @@ for k = 2:nbrTimeSteps
     end
     
     % Number of clutter measurements, 0,1,2
-    nbrClutter = randi(3)-1;
-    for i = 1:nbrClutter
-        Z{k} = [Z{k}, [unifrnd(1,20); unifrnd(-pi,pi)]];
-    end
+    %nbrClutter = randi(3)-1;
+    %for i = 1:nbrClutter
+    %    Z{k} = [Z{k}, [unifrnd(1,20); unifrnd(-pi,pi)]];
+    %end
     
     %Rearrenge measurement order
     Z{k} = Z{k}(:,randperm(size(Z{k},2)));
@@ -279,6 +279,7 @@ for k = 2:nbrTimeSteps
     
     for i = 1:size(Z{k},2)
         figure(map)
-        measPlot = [measPlot, plot(Z{k}(1,i)*cos(Z{k}(2,i)),Z{k}(1,i)*sin(Z{k}(2,i)),'+','Color',[.7 .5 0])];
+        measPlot = [measPlot, plot(Z{k}(1,i),Z{k}(2,i),'+','Color',[.7 .5 0])];
+        %measPlot = [measPlot, plot(Z{k}(1,i)*cos(Z{k}(2,i)),Z{k}(1,i)*sin(Z{k}(2,i)),'+','Color',[.7 .5 0])];
     end
 end

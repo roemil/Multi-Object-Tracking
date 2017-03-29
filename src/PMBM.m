@@ -43,8 +43,22 @@ Xupd = cell(1,1);
 % x = [w, state, P, r, z]'
 
 % Generate motion and measurement models
-F = generateMotionModel(sigmaQ, T, 'cv');
+[F, Q] = generateMotionModel(sigmaQ, T, 'cv');
 H = generateMeasurementModel({},'linear');
+
+% TODO: Initial guess??
+XmuUpd{1}(1).w = 1;    % Pred weight
+XmuUpd{1}(1).state = [0 0 0 0]';      % Pred state
+XmuUpd{1}(1).P = 10*eye(4);      % Pred cov
+
+XuUpd{1}(1).w = 1;    % Pred weight
+XuUpd{1}(1).state = [0 0 0 0]';      % Pred state
+XuUpd{1}(1).P = 10*eye(4);      % Pred cov
+
+Xupd{1,1}.w = 1;
+Xupd{1,1}.r = 0;
+Xupd{1,1}.state = [0 0 0 0]';
+Xupd{1,1}.P = 10*eye(4);
 
 K = 100; % Length of sequence
 for k = 2:K % For each time step
@@ -54,26 +68,33 @@ for k = 2:K % For each time step
     
     % Poisson - Assume constant birth atm
     for i = 1:size(XuUpd{k-1},2) % For each single target component i
-        [XmuPred{k}(i).state, XmuPred{k}(i).P] = KFPred(XuUpd{k-1}(i).state,F, XuUpd{k-1}(i).P, Q);
+        [XuPred{k}(i).state, XuPred{k}(i).P] = KFPred(XuUpd{k-1}(i).state,F, XuUpd{k-1}(i).P, Q);
      
 %     XmuPred{k,1} = [wb{1} XuUpd{k-1,1}];    % Pred weight
 %     XmuPred{k,2} = [Xb{1} XuPred{k,2}];      % Pred state
 %     XmuPred{k,3} = [Pb{1} XuPred{k,3}];      % Pred cov
-        XmuPred{k}(i).w = [wb{1} XuUpd{k-1}(i).w];    % Pred weight
-        XmuPred{k}(i).state = [Xb{1} XuPred{k}.state];      % Pred state
-        XmuPred{k}(i).P = [Pb{1} XuPred{k}(i).P];      % Pred cov    
-        mu = @(x) gaussMix(XuPred{k}(i).w,XuPred{k}(i).state,XuPred{k}(i).P); % Pred Poisson intensity (41)
+        XmuPred{k}(i).w = XuUpd{k-1}(i).w;    % Pred weight
+        XmuPred{k}(i).state = XuPred{k}.state;      % Pred state
+        XmuPred{k}(i).P = XuPred{k}(i).P;      % Pred cov    
+        %mu = @(x) gaussMix(XuPred{k}(i).w,XuPred{k}(i).state,XuPred{k}(i).P); % Pred Poisson intensity (41)
         
         % MIGHT HAVE MIXED UP PREDICTION STEPS
-        
+    end
+    
+    % TODO: Fix births. Atm just 1 birth
+    XmuPred{k}(end+1).w = wb{1};
+    XmuPred{k}(end).state = Xb{1};
+    XmuPred{k}(end).P = Pb{1};
+    
+    for i = 1:size(XmuPred{k},2)    
         % Update undetected targets (Poisson component)
         XuUpd{k}(i).w = (1-Pd)*XmuPred{k}(i).w;
         XuUpd{k}(i).state = XmuPred{k}(i).state;
         XuUpd{k}(i).P = XmuPred{k}(i).P;
     end
     
-    for j = 1:size(Xupd{k},2)
-        for i = 1:size(Xupd{k,j},2)
+    for j = 1:size(Xupd{k-1},2)
+        for i = 1:size(Xupd{k-1,j},2)
             % Bernoulli
             Xpred{k,j}(i).w = Xupd{k-1,j}(i).w;      % Pred weight
             [Xpred{k,j}(i).state, Xpred{k,j}(i).P] = KFPred(Xupd{k-1,j}(i).state, F, Xupd{k-1,j}(i).P ,Q);    % Pred state
@@ -85,12 +106,14 @@ for k = 2:K % For each time step
 
     % Update for potential targets detected for the first time
     for z = 1:size(Z{k},2)
-        w = zeros(1,size(Z{k},2));
+        % TODO: Fixed?
+        %w = zeros(1,size(Z{k},2));
+        w = zeros(1,size(XmuPred{k},2));
         %Xmutmp = zeros(4,size(XmuPred{k,2},2));
         %Stmp = cell(size(XmuPred{k,2},2));
-        XpotNew{k,z}.state = [];
-        XpotNew{k,z}.P = [];
-        for i = 1:size(XmuPred{k,2},2)
+        XpotNew{k,z}.state = zeros(4,1);
+        XpotNew{k,z}.P = zeros(4,4);
+        for i = 1:size(XmuPred{k},2)
             % Pass through Kalman
             [XmuUpd{k,z}(i).state, XmuUpd{k,z}(i).P, XmuUpd{k,z}(i).S] = KFUpd(XmuPred{k}(i).state,H, XmuPred{k}(i).P, R, Z{k}(:,z));
             
@@ -99,12 +122,12 @@ for k = 2:K % For each time step
             w(1,i) = XmuPred{k}(i).w*mvnpdf(Z{k}(:,z), H*XmuPred{k}(i).state, XmuUpd{k,z}(i).S);
             
             % TODO: temp solution
-            %Xmutmp(1:4,i) = XmuPred{k}(i).state;
-            %Stmp{i} = XmuUpd{k,z}(i).S;
+            Xmutmp(1:4,i) = XmuPred{k}(i).state;
+            Stmp{i} = XmuUpd{k,z}(i).S;
         end
         % Normalize weight
         w = w/sum(w);
-        
+        % TODOTODO: ERROR HERE!!
         % Find posterior
         for i = 1:size(w,2)
             % TODO: Is the moment matching correct? 
@@ -142,4 +165,9 @@ for k = 2:K % For each time step
     end
     
     % TODO: Generate new global hypo from Xhypo and XpotNew
+    oldInd = 1;
+    for j = 1:size(Xpred{k},2)
+        [newGlob, newInd] = generateGlobalHypo(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd);
+        Xupd{k,oldInd:newInd} = newGlob;
+    end
 end
