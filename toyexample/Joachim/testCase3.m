@@ -44,7 +44,6 @@ meas = plot(-10,-10,'+','Color',[.7 .5 0]);
 leg = legend([roadBoarder,midRoad,object,meas],'roadBoarder','midRoad','Objects','Measurements');
 set(leg,'Fontsize',15,'Interpreter','Latex')
 
-
 % Initate states
 X = cell(1);
 
@@ -60,6 +59,10 @@ X{1} = [x1,x2]; %;,x3];
 
 % Measurement initiate
 Z = cell(1);
+
+for i = 1:2
+    Z{1}(:,i) = measGenerate(X{1}(:,i),R);
+end
 
 initPlot = {};
 for i = 1:nbrInitTargets

@@ -23,7 +23,6 @@ for j = 1:size(pm,1)
             newGlob{jInd}(iInd).r = Xhypo{end}(i).r;
             newGlob{jInd}(iInd).state = Xhypo{end}(i).state;
             newGlob{jInd}(iInd).P = Xhypo{end}(i).P;
-            jInd = jInd+1;
             iInd = iInd+1;
         % Else find which measurement it is associated to
         else
@@ -33,7 +32,6 @@ for j = 1:size(pm,1)
                     newGlob{jInd}(iInd).r = Xhypo{z}(i).r;
                     newGlob{jInd}(iInd).state = Xhypo{z}(i).state;
                     newGlob{jInd}(iInd).P = Xhypo{z}(i).P;
-                    jInd = jInd+1;
                     iInd = iInd+1;
                 end
             end
@@ -55,12 +53,12 @@ for j = 1:size(pm,1)
                     newGlob{jInd}(iInd).r = Xnew{z}(i-size(Xhypo{1},2)).r;
                     newGlob{jInd}(iInd).state = Xnew{z}(i-size(Xhypo{1},2)).state;
                     newGlob{jInd}(iInd).P = Xnew{z}(i-size(Xhypo{1},2)).P;
-                    jInd = jInd+1;
                     iInd = iInd+1;
                 end
             end 
         end
     end
+    jInd = jInd+1;
 end
 
 newInd = oldInd+jInd-1;

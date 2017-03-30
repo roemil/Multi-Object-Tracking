@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [Xpred, Xupd] = PMBM(Z)
+function [Xpred, Xupd, Xest] = PMBM(Z)
 
 % Inititate
 sigmaQ = 1;         % Process (motion) noise
@@ -57,11 +57,13 @@ XuUpd{1}(1).P = 10*eye(4);      % Pred cov
 
 Xupd{1,1}.w = 1;
 Xupd{1,1}.r = 1;
-Xupd{1,1}.state = [0 0 0 0]';
-Xupd{1,1}.P = 10*eye(4);
+Xupd{1,1}.state = [Z{2}(1,1) Z{2}(2,1) 0 0]';
+Xupd{1,1}.P = 0.5*eye(4);
+
+threshold = 0.7;
 
 K = size(Z,2); % Length of sequence
-for k = 2:K % For each time step
+for k = 2:K-6 % For each time step
     k
     %%%%% Prediction %%%%%
     
@@ -180,8 +182,28 @@ for k = 2:K % For each time step
         % TODO: updated generateGlobalHypo to v2!
         [newGlob, newInd] = generateGlobalHypo2(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd,k);
         for jnew = oldInd+1:newInd
-            Xupd{k,jnew} = newGlob{jnew-oldInd};
+            Xtmp{k,jnew} = newGlob{jnew-oldInd};
         end
         oldInd = newInd;
     end
+    jInd = 1;
+    for j = 1:size(Xtmp,2)
+        wGlob = 0;
+        if ~isempty(Xtmp{k,j})
+            for i = 1:size(Xtmp{k,j},2)
+                if ~isempty(Xtmp{k,j}(i).w)
+                    wGlob = wGlob+Xtmp{k,j}(i).w;
+                end
+            end
+            disp(['k: ', num2str(k), ' j: ',num2str(j)])
+            wGlob
+            if wGlob > 0.2
+                for i = 1:size(Xtmp{k,j},2)
+                    Xupd{k,jInd}(i) = Xtmp{k,j}(i);
+                end
+                jInd = jInd+1;
+            end
+        end
+    end
+    Xest{k} = est1(Xupd, threshold);
 end
