@@ -97,6 +97,9 @@ for k = 2:K % For each time step
     for j = 1:size(Xupd{k-1},2)
         for i = 1:size(Xupd{k-1,j},2)
             % Bernoulli
+            if Xupd{k-1,j}(i).w == 0
+                %keyboard
+            end
             Xpred{k,j}(i).w = Xupd{k-1,j}(i).w;      % Pred weight
             [Xpred{k,j}(i).state, Xpred{k,j}(i).P] = KFPred(Xupd{k-1,j}(i).state, F, Xupd{k-1,j}(i).P ,Q);    % Pred state
             Xpred{k,j}(i).r = Ps*Xupd{k-1,j}(i).r;   % Pred prob. of existence
@@ -147,6 +150,9 @@ for k = 2:K % For each time step
     % Create missdetection hypo in index size(Z{k},2)+1
     for j = 1:size(Xpred{k},2)
         for i = 1:size(Xpred{k,j},2)
+            if Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd)) == 0
+                %keyboard
+            end
             Xhypo{k,j,size(Z{k},2)+1}(i).w = Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
             Xhypo{k,j,size(Z{k},2)+1}(i).r = Xpred{k,j}(i).r*(1-Pd)/(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
             Xhypo{k,j,size(Z{k},2)+1}(i).state = Xpred{k,j}(i).state;
@@ -160,6 +166,9 @@ for k = 2:K % For each time step
             for i = 1:size(Xpred{k,j},2)
                 [Xhypo{k,j,z}(i).state, Xhypo{k,j,z}(i).P, Xhypo{k,j,z}(i).S] = KFUpd(Xpred{k,j}(i).state, H, Xpred{k,j}(i).P, R, Z{k}(:,z));
                 Xhypo{k,j,z}(i).w = Xpred{k,j}(i).w*Xpred{k,j}(i).r*Pd*mvnpdf(Z{k}(:,z), H*Xpred{k,j}(i).state, Xhypo{k,j,z}(i).S);
+                if Xhypo{k,j,z}(i).w == 0
+                    %keyboard
+                end
                 Xhypo{k,j,z}(i).r = 1;
             end
         end
