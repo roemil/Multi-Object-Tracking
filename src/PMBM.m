@@ -60,8 +60,9 @@ Xupd{1,1}.r = 0;
 Xupd{1,1}.state = [0 0 0 0]';
 Xupd{1,1}.P = 10*eye(4);
 
-K = 100; % Length of sequence
+K = size(Z,2); % Length of sequence
 for k = 2:K % For each time step
+    k
     %%%%% Prediction %%%%%
     
     % TODO: Special case for k == 1?? 
@@ -135,9 +136,9 @@ for k = 2:K % For each time step
             XpotNew{k,z}.P = XpotNew{k,z}.P+w(1,i)*XmuUpd{k,z}(i).P; % (44)
         end
         
-        e = Pd*generateGaussianMix(Z{k}(:,z), H*Xmutmp, Stmp);
+        e = Pd*generateGaussianMix(Z{k}(:,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
         XpotNew{k,z}.w = e+c; % rho (45) (44)
-        XpotNew{k,z}.r = e/XmuUpd{k,z}.w; % (43) (44)
+        XpotNew{k,z}.r = e/XpotNew{k,z}.w; % (43) (44)
         %XmuUpd{k,z}.w = e+c; % rho
         %XmuUpd{k,z}.r = e/XmuUpd{k,z}.w;
     end
@@ -152,22 +153,26 @@ for k = 2:K % For each time step
             Xhypo{k,j,size(Z{k},2)+1}(i).P = Xpred{k,j}(i).P;
         end
     end
-            
+         
     % Generate hypothesis for each single in each global for each measurement 
     for z = 1:size(Z{k},2)
         for j = 1:size(Xpred{k},2)
             for i = 1:size(Xpred{k,j},2)
-                [Xhypo{k,j,z}(i).state, Xhypo{k,j,z}(i).P, Xhypo{k,j,z}.S] = KFUpd(Xpred{k,j}(i).state, H, Xpred{k,j}(i).P, R, Z{k}(:,i));
-                Xhypo{k,j,z}(i).w = Xpred{k,j}(i).w*Xpred{k,j}(i).r*Pd*mvnrnd(Z{k}(:,z), H*Xpred{k,j}(i).state, Xhypo{k,j,z}.S);
+                [Xhypo{k,j,z}(i).state, Xhypo{k,j,z}(i).P, Xhypo{k,j,z}(i).S] = KFUpd(Xpred{k,j}(i).state, H, Xpred{k,j}(i).P, R, Z{k}(:,z));
+                Xhypo{k,j,z}(i).w = Xpred{k,j}(i).w*Xpred{k,j}(i).r*Pd*mvnpdf(Z{k}(:,z), H*Xpred{k,j}(i).state, Xhypo{k,j,z}(i).S);
                 Xhypo{k,j,z}(i).r = 1;
             end
         end
     end
     
     % TODO: Generate new global hypo from Xhypo and XpotNew
-    oldInd = 1;
+    oldInd = 0;
     for j = 1:size(Xpred{k},2)
-        [newGlob, newInd] = generateGlobalHypo(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd);
-        Xupd{k,oldInd:newInd} = newGlob;
+        % TODO: updated generateGlobalHypo to v2!
+        [newGlob, newInd] = generateGlobalHypo2(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd,k);
+        for jnew = oldInd+1:newInd
+            Xupd{k,jnew} = newGlob{jnew-oldInd};
+        end
+        oldInd = newInd;
     end
 end
