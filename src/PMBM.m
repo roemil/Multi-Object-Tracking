@@ -56,7 +56,7 @@ XuUpd{1}(1).state = [0 0 0 0]';      % Pred state
 XuUpd{1}(1).P = 10*eye(4);      % Pred cov
 
 Xupd{1,1}.w = 1;
-Xupd{1,1}.r = 0;
+Xupd{1,1}.r = 1;
 Xupd{1,1}.state = [0 0 0 0]';
 Xupd{1,1}.P = 10*eye(4);
 
