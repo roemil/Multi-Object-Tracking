@@ -1,7 +1,7 @@
 function [newGlob, newInd] = generateGlobalHypo2(Xhypo, Xnew, Z, oldInd,k)
 
 % TODO: Is this correct?
-targets = 1:(size(Xhypo{1},2)+size(Xnew,2)+size(Z,2));
+targets = 1:(size(Xhypo{1},2)+size(Xnew,2));
 
 combs = nchoosek(targets,size(Z,2));
 
@@ -38,24 +38,15 @@ for j = 1:size(pm,1)
         end
     end
     % Update all pot new detected targets
-    for i = size(Xhypo{1},2)+1:size(Xhypo{1},2)+size(Xnew{1},2)
-        % If target is not associated to any measurement set it to MD
-        if (sum(i == pm(j,:)) == 0)
-            %newGlob{j}(i).state = Xnew{z}(i-size(Xhypo{1},2)).state;
-            %newGlob{j}(i).P = Xnew{z}(i-size(Xhypo{1},2)).P;
-            %newGlob{j}(i).w = 1;
-            %newGlob{j}(i).r = 0;
-        % Else find which measurement it is associated to
-        else
-            for z = 1:size(Z,2)
-                if ((i == pm(j,z)) && (Xnew{z}(i-size(Xhypo{1},2)).r ~= 0) && (Xnew{z}(i-size(Xhypo{1},2)).w ~= 0))
-                    newGlob{jInd}(iInd).w = Xnew{z}(i-size(Xhypo{1},2)).w;
-                    newGlob{jInd}(iInd).r = Xnew{z}(i-size(Xhypo{1},2)).r;
-                    newGlob{jInd}(iInd).state = Xnew{z}(i-size(Xhypo{1},2)).state;
-                    newGlob{jInd}(iInd).P = Xnew{z}(i-size(Xhypo{1},2)).P;
-                    iInd = iInd+1;
-                end
-            end 
+    for i = size(Xhypo{1},2)+1:size(Xhypo{1},2)+size(Xnew,2)
+        for z = 1:size(Z,2)
+            if ((i == pm(j,z)) && (Xnew{z}.r ~= 0) && (Xnew{z}.w ~= 0))
+                newGlob{jInd}(iInd).w = Xnew{z}.w;
+                newGlob{jInd}(iInd).r = Xnew{z}.r;
+                newGlob{jInd}(iInd).state = Xnew{z}.state;
+                newGlob{jInd}(iInd).P = Xnew{z}.P;
+                iInd = iInd+1;
+            end
         end
     end
     jInd = jInd+1;

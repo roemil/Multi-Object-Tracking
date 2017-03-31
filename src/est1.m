@@ -13,7 +13,7 @@
 function Xest = est1(Xupd, threshold)
 M = -1;
 prod = 1;
-for j = 1:size(Xupd{end},2)
+for j = 1:size(Xupd,2)
     for i = 1 : size(Xupd{end,j},2) % find index of which global hyp is 
         prod= prod*Xupd{end,j}(i).w;% most likely
     end
