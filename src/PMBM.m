@@ -112,6 +112,9 @@ for k = 2:K % For each time step
 
     % Update for potential targets detected for the first time
     for z = 1:size(Z{k},2)
+        nbrOfMeas = size(Z{k},2);
+        nbrOfGlobHyp = size(Xpred{k},2);
+        nbrOfTargHyp = size(Xpred{k,j},2);
         % TODO: Fixed?
         %w = zeros(1,size(Z{k},2));
         w = zeros(1,size(XmuPred{k},2));
@@ -150,22 +153,22 @@ for k = 2:K % For each time step
     
     %%%% Update for previously potentially detected targets %%%%
     % Create missdetection hypo in index size(Z{k},2)+1
-    for j = 1:size(Xpred{k},2)
-        for i = 1:size(Xpred{k,j},2)
+    for j = 1:nbrOfGlobHyp
+        for i = 1:nbrOfTargHyp
             if Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd)) == 0
                 %keyboard
             end
-            Xhypo{k,j,size(Z{k},2)+1}(i).w = Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
-            Xhypo{k,j,size(Z{k},2)+1}(i).r = Xpred{k,j}(i).r*(1-Pd)/(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
-            Xhypo{k,j,size(Z{k},2)+1}(i).state = Xpred{k,j}(i).state;
-            Xhypo{k,j,size(Z{k},2)+1}(i).P = Xpred{k,j}(i).P;
+            Xhypo{k,j,nbrOfMeas+1}(i).w = Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
+            Xhypo{k,j,nbrOfMeas+1}(i).r = Xpred{k,j}(i).r*(1-Pd)/(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
+            Xhypo{k,j,nbrOfMeas+1}(i).state = Xpred{k,j}(i).state;
+            Xhypo{k,j,nbrOfMeas+1}(i).P = Xpred{k,j}(i).P;
         end
     end
          
     % Generate hypothesis for each single in each global for each measurement 
-    for z = 1:size(Z{k},2)
-        for j = 1:size(Xpred{k},2)
-            for i = 1:size(Xpred{k,j},2)
+    for z = 1:nbrOfMeas
+        for j = 1:nbrOfGlobHyp
+            for i = 1:nbrOfTargHyp
                 [Xhypo{k,j,z}(i).state, Xhypo{k,j,z}(i).P, Xhypo{k,j,z}(i).S] = KFUpd(Xpred{k,j}(i).state, H, Xpred{k,j}(i).P, R, Z{k}(:,z));
                 Xhypo{k,j,z}(i).w = Xpred{k,j}(i).w*Xpred{k,j}(i).r*Pd*mvnpdf(Z{k}(:,z), H*Xpred{k,j}(i).state, Xhypo{k,j,z}(i).S);
                 if Xhypo{k,j,z}(i).w == 0
@@ -178,7 +181,7 @@ for k = 2:K % For each time step
     
     % TODO: Generate new global hypo from Xhypo and XpotNew
     oldInd = 0;
-    for j = 1:size(Xpred{k},2)
+    for j = 1:nbrOfGlobHyp
         % TODO: updated generateGlobalHypo to v2!
         [newGlob, newInd] = generateGlobalHypo2(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd,k);
         for jnew = oldInd+1:newInd
