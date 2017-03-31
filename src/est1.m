@@ -13,7 +13,7 @@
 function Xest = est1(Xupd, threshold)
 M = 0;
 prod = 1;
-for j = 1:size(Xupd{end},2)
+for j = 1:size(Xupd,2)
     for i = 1 : size(Xupd{end,j},2) % find index of which global hyp is 
         prod= prod*Xupd{end,j}(i).w;% most likely
     end
@@ -25,7 +25,6 @@ end
 index = 1;
 for i = 1 : size(Xupd{end,ind},2)
     if(Xupd{end,ind}(i).r > threshold) % if prob. of existence great enough
-        Xupd{end,ind}(i).r
         Xest{index} = Xupd{end,ind}(i).state; % store mean (i.e states)
         index = index + 1;
     end

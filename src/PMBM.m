@@ -63,7 +63,7 @@ Xupd{1,1}.P = 0.5*eye(4);
 threshold = 0.7;
 
 K = size(Z,2); % Length of sequence
-for k = 2:K-6 % For each time step
+for k = 2:K % For each time step
     k
     %%%%% Prediction %%%%%
     
@@ -188,16 +188,14 @@ for k = 2:K-6 % For each time step
     end
     jInd = 1;
     for j = 1:size(Xtmp,2)
-        wGlob = 0;
+        wGlob = 1;
         if ~isempty(Xtmp{k,j})
             for i = 1:size(Xtmp{k,j},2)
                 if ~isempty(Xtmp{k,j}(i).w)
-                    wGlob = wGlob+Xtmp{k,j}(i).w;
+                    wGlob = wGlob*Xtmp{k,j}(i).w;
                 end
             end
-            disp(['k: ', num2str(k), ' j: ',num2str(j)])
-            wGlob
-            if wGlob > 0.2
+            if wGlob > 0.0005
                 for i = 1:size(Xtmp{k,j},2)
                     Xupd{k,jInd}(i) = Xtmp{k,j}(i);
                 end
