@@ -117,7 +117,7 @@ for k = 2:K-6 % For each time step
     % Update for potential targets detected for the first time
     nbrOfMeas = size(Z{k},2);
     nbrOfGlobHyp = size(Xpred{k},2);
-    XpotNew = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k,c);
+    XpotNew = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k, c);
     
     %%%% Update for previously potentially detected targets %%%%
     Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp,k, Pd, H, R, Z);
