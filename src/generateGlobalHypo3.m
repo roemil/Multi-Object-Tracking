@@ -1,58 +1,65 @@
-function [newGlob, newInd] = generateGlobalHypo3(Xhypo, Xnew, Z, oldInd,k)
+function [newGlob, newInd] = generateGlobalHypo3(Xhypo, Xnew, Z, oldInd)
 
-% TODO: Is this correct?
-targetsOld = 1:size(Xhypo{1},2);
+m = size(Z,2);
 
-combsOld = nchoosek(targetsOld,size(Z,2));
-
-pmOld = [];
-for i = 1:size(combsOld,1)
-    pmOld = [pmOld; perms(combsOld(i,:))];
-end
-
-jInd = 1;
-for j = 1:size(pmOld,1)
-    iInd = 1;
-    % Update all previously detected targets
-    for i = 1:size(Xhypo{1},2)
-        % If target is not associated to any measurement set it to MD
-        if ((sum(i == pmOld(j,:)) == 0) && ((Xhypo{end}(i).r ~= 0) && (Xhypo{end}(i).w ~= 0)))
-            newGlob{jInd}(iInd).w = Xhypo{end}(i).w;
-            newGlob{jInd}(iInd).r = Xhypo{end}(i).r;
-            newGlob{jInd}(iInd).state = Xhypo{end}(i).state;
-            newGlob{jInd}(iInd).P = Xhypo{end}(i).P;
-            iInd = iInd+1;
-        % Else find which measurement it is associated to
-        else
-            for z = 1:size(Z,2)
-                if ((i == pmOld(j,z)) && (Xhypo{z}(i).r ~= 0) && (Xhypo{z}(i).w ~= 0))
-                    newGlob{jInd}(iInd).w = Xhypo{z}(i).w;
-                    newGlob{jInd}(iInd).r = Xhypo{z}(i).r;
-                    newGlob{jInd}(iInd).state = Xhypo{z}(i).state;
-                    newGlob{jInd}(iInd).P = Xhypo{z}(i).P;
-                    iInd = iInd+1;
-                end
-            end
-        end
-    end
-    jInd = jInd+1;
-end
-
-% Update all pot new detected targets
-for z = 1:size(Z,2)
-    for i = 
-for i = size(Xhypo{1},2)+1:size(Xhypo{1},2)+size(Xnew,2)
-    for z = 1:size(Z,2)
-        if ((i == pmOld(j,z)) && (Xnew{z}.r ~= 0) && (Xnew{z}.w ~= 0))
-            newGlob{jInd}(iInd).w = Xnew{z}.w;
-            newGlob{jInd}(iInd).r = Xnew{z}.r;
-            newGlob{jInd}(iInd).state = Xnew{z}.state;
-            newGlob{jInd}(iInd).P = Xnew{z}.P;
-            iInd = iInd+1;
-        end
+indexVec = 1:2*m;
+for i = 1:2*m
+    if i <= m
+        Xtmp{i} = Xhypo{i};
+    else
+        Xtmp{i} = Xnew{i-m};
     end
 end
-jInd = jInd+1;
+
+%A = zeros(2^m,m);
+%for z = 1:m
+%    old = repmat(z,2^(z-1),1);
+%    new = repmat(z+m,2^(z-1),1);
+%    A(:,z) = repmat([old; new],2^m/2^(z),1);
+%end
+
+nbrOldTargets = size(Xhypo{1,1,1},2);
+A = cell(1);
+
+const1 = 0;
+for i = 0:nbrOldTargets-1
+    A{i+1} = zeros(2^m,m);
+    for z = 1:m
+        const2 = const1+z;
+        if const2>nbrOldTargets
+            const2 = abs(nbrOldTargets-const2);
+        end
+        old = repmat(const2,2^(z-1),1);
+        new = repmat(z+m,2^(z-1),1);
+        A{i+1}(:,z) = repmat([old; new],2^m/2^(z),1);
+    end
+    const1 = const1+1;
+    if const1>nbrOldTargets
+        const1 = 1;
+    end
+end
+
+% minSum = sum((m+2):2*m)+1;
+% iInd = 1;
+% for i = 1:2^m
+%     if sum(Atmp(i,:)) >= minSum
+%         A(iInd,:) = Atmp(i,:);
+%         iInd = iInd+1;
+%     end
+% end
+
+iInd = 1;
+for j = 1:2^m
+    for z = 1:m
+        newGlob{j}(iInd) = Xtmp{z}(A(j,z));
+    end
+end
+
+% for j = 1:nbrOldTargets*2^m
+%     for i = 1:nbrOldTargets
+%         for z = 1:m
+%             if z == 1
+%                 old = repmat(Xhypo{z}(i),2^(z-1),[]);
 
 
 newInd = oldInd+jInd-1;
