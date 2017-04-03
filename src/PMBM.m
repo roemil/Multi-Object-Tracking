@@ -55,16 +55,15 @@ XuUpd{1}(1).w = 1;    % Pred weight
 XuUpd{1}(1).state = [0 0 0 0]';      % Pred state
 XuUpd{1}(1).P = 10*eye(4);      % Pred cov
 
-% Xupd{1,1}.w = 1;
-% Xupd{1,1}.r = 1;
-% Xupd{1,1}.state = [Z{2}(1,1) Z{2}(2,1) 0 0]';
-% Xupd{1,1}.P = 0.5*eye(4);
-Xtmp = cell(1);
+Xupd{1,1}.w = 1;
+Xupd{1,1}.r = 1;
+Xupd{1,1}.state = [Z{2}(1,1) Z{2}(2,1) 0 0]';
+Xupd{1,1}.P = 0.5*eye(4);
+%Xtmp = cell(1);
 threshold = 0.7;
 
 K = size(Z,2); % Length of sequence
 for k = 2:K-6 % For each time step
-    k
     %%%%% Prediction %%%%%
     
     % TODO: Special case for k == 1?? 
@@ -89,12 +88,13 @@ for k = 2:K-6 % For each time step
     XmuPred{k}(end).state = Xb{1};
     XmuPred{k}(end).P = Pb{1};
     
-    for i = 1:size(XmuPred{k},2)    
-        % Update undetected targets (Poisson component)
-        XuUpd{k}(i).w = (1-Pd)*XmuPred{k}(i).w;
-        XuUpd{k}(i).state = XmuPred{k}(i).state;
-        XuUpd{k}(i).P = XmuPred{k}(i).P;
-    end
+%     for i = 1:size(XmuPred{k},2)    
+%         % Update undetected targets (Poisson component)
+%         XuUpd{k}(i).w = (1-Pd)*XmuPred{k}(i).w;
+%         XuUpd{k}(i).state = XmuPred{k}(i).state;
+%         XuUpd{k}(i).P = XmuPred{k}(i).P;
+%     end
+    XuUpd = updatePoisson(XmuPred,k,Pd);
     
     if(isempty(Xupd{k-1}))
         Xpred{k} = [];
@@ -117,76 +117,10 @@ for k = 2:K-6 % For each time step
     % Update for potential targets detected for the first time
     nbrOfMeas = size(Z{k},2);
     nbrOfGlobHyp = size(Xpred{k},2);
-    for z = 1:nbrOfMeas
-        % TODO: Fixed?
-        %w = zeros(1,size(Z{k},2));
-        w = zeros(1,size(XmuPred{k},2));
-        %Xmutmp = zeros(4,size(XmuPred{k,2},2));
-        %Stmp = cell(size(XmuPred{k,2},2));
-        XpotNew{k,z}.state = zeros(4,1);
-        XpotNew{k,z}.P = zeros(4,4);
-        for i = 1:size(XmuPred{k},2)
-            % Pass through Kalman
-            [XmuUpd{k,z}(i).state, XmuUpd{k,z}(i).P, XmuUpd{k,z}(i).S] = KFUpd(XmuPred{k}(i).state,H, XmuPred{k}(i).P, R, Z{k}(:,z));
-            
-            % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
-            % Compute weight
-            w(1,i) = XmuPred{k}(i).w*mvnpdf(Z{k}(:,z), H*XmuPred{k}(i).state, XmuUpd{k,z}(i).S);
-            
-            % TODO: temp solution
-            Xmutmp(1:4,i) = XmuPred{k}(i).state;
-            Stmp{i} = XmuUpd{k,z}(i).S;
-        end
-        % Normalize weight
-        w = w/sum(w);
-        % TODOTODO: ERROR HERE!!
-        % Find posterior
-        for i = 1:size(w,2)
-            % TODO: Is the moment matching correct? 
-            XpotNew{k,z}.state = XpotNew{k,z}.state+w(1,i)*XmuUpd{k,z}(i).state; % (44)
-            XpotNew{k,z}.P = XpotNew{k,z}.P+w(1,i)*XmuUpd{k,z}(i).P; % (44)
-        end
-        
-        e = Pd*generateGaussianMix(Z{k}(:,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
-        XpotNew{k,z}.w = e+c; % rho (45) (44)
-        XpotNew{k,z}.r = e/XpotNew{k,z}.w; % (43) (44)
-        %XmuUpd{k,z}.w = e+c; % rho
-        %XmuUpd{k,z}.r = e/XmuUpd{k,z}.w;
-    end
+    XpotNew = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k,c);
     
     %%%% Update for previously potentially detected targets %%%%
-    % Create missdetection hypo in index size(Z{k},2)+1
-    if(~isempty(Xpred{k})) % If we don't have global hypotheses then we 
-                          % don't have any prevously detected targets
-        for j = 1:nbrOfGlobHyp
-            for i = 1:size(Xpred{k,j},2);
-                if Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd)) == 0
-                    %keyboard
-                end
-                Xhypo{k,j,nbrOfMeas+1}(i).w = Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
-                Xhypo{k,j,nbrOfMeas+1}(i).r = Xpred{k,j}(i).r*(1-Pd)/(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
-                Xhypo{k,j,nbrOfMeas+1}(i).state = Xpred{k,j}(i).state;
-                Xhypo{k,j,nbrOfMeas+1}(i).P = Xpred{k,j}(i).P;
-            end
-        end
-    end
-         
-    % Generate hypothesis for each single in each global for each measurement 
-    if(~isempty(Xpred{k}))
-        for z = 1:nbrOfMeas
-            for j = 1:nbrOfGlobHyp
-                for i = 1:size(Xpred{k,j},2);
-                    [Xhypo{k,j,z}(i).state, Xhypo{k,j,z}(i).P, Xhypo{k,j,z}(i).S] = KFUpd(Xpred{k,j}(i).state, H, Xpred{k,j}(i).P, R, Z{k}(:,z));
-                    Xhypo{k,j,z}(i).w = Xpred{k,j}(i).w*Xpred{k,j}(i).r*Pd*mvnpdf(Z{k}(:,z), H*Xpred{k,j}(i).state, Xhypo{k,j,z}(i).S);
-                    if Xhypo{k,j,z}(i).w == 0
-                        %keyboard
-                    end
-                    Xhypo{k,j,z}(i).r = 1;
-                end
-            end
-        end
-    end
-    
+    Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp,k, Pd, H, R, Z);
     % TODO: Generate new global hypo from Xhypo and XpotNew
     oldInd = 0;
     for j = 1:nbrOfGlobHyp
@@ -200,7 +134,7 @@ for k = 2:K-6 % For each time step
         oldInd = newInd;
     end
     jInd = 1;
-    if(~isempty(Xtmp{1})) % TODO: Quick fix - Xtmp will depend on generateGlobalHyp
+    %if(~isempty(Xtmp{1})) % TODO: Quick fix - Xtmp will depend on generateGlobalHyp
         for j = 1:size(Xtmp,2)
             wGlob = 1;
             if ~isempty(Xtmp{k,j})
@@ -217,8 +151,8 @@ for k = 2:K-6 % For each time step
                 end
             end
         end
-    else
-        Xupd{k} = [];
-    end
+    %else
+     %   Xupd{k} = [];
+    %end
     Xest{k} = est1(Xupd, threshold);
 end
