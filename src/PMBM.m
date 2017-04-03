@@ -55,15 +55,15 @@ XuUpd{1}(1).w = 1;    % Pred weight
 XuUpd{1}(1).state = [0 0 0 0]';      % Pred state
 XuUpd{1}(1).P = 10*eye(4);      % Pred cov
 
-Xupd{1,1}.w = 1;
-Xupd{1,1}.r = 1;
-Xupd{1,1}.state = [Z{2}(1,1) Z{2}(2,1) 0 0]';
-Xupd{1,1}.P = 0.5*eye(4);
-
+% Xupd{1,1}.w = 1;
+% Xupd{1,1}.r = 1;
+% Xupd{1,1}.state = [Z{2}(1,1) Z{2}(2,1) 0 0]';
+% Xupd{1,1}.P = 0.5*eye(4);
+Xtmp = cell(1);
 threshold = 0.7;
 
 K = size(Z,2); % Length of sequence
-for k = 2:K % For each time step
+for k = 2:K-6 % For each time step
     k
     %%%%% Prediction %%%%%
     
@@ -96,24 +96,28 @@ for k = 2:K % For each time step
         XuUpd{k}(i).P = XmuPred{k}(i).P;
     end
     
-    for j = 1:size(Xupd{k-1},2)
-        for i = 1:size(Xupd{k-1,j},2)
-            % Bernoulli
-            if Xupd{k-1,j}(i).w == 0
-                %keyboard
+    if(isempty(Xupd{k-1}))
+        Xpred{k} = [];
+    else
+        for j = 1:size(Xupd{k-1},2)
+            for i = 1:size(Xupd{k-1,j},2)
+                % Bernoulli
+                if Xupd{k-1,j}(i).w == 0
+                    %keyboard
+                end
+                Xpred{k,j}(i).w = Xupd{k-1,j}(i).w;      % Pred weight
+                [Xpred{k,j}(i).state, Xpred{k,j}(i).P] = KFPred(Xupd{k-1,j}(i).state, F, Xupd{k-1,j}(i).P ,Q);    % Pred state
+                Xpred{k,j}(i).r = Ps*Xupd{k-1,j}(i).r;   % Pred prob. of existence
             end
-            Xpred{k,j}(i).w = Xupd{k-1,j}(i).w;      % Pred weight
-            [Xpred{k,j}(i).state, Xpred{k,j}(i).P] = KFPred(Xupd{k-1,j}(i).state, F, Xupd{k-1,j}(i).P ,Q);    % Pred state
-            Xpred{k,j}(i).r = Ps*Xupd{k-1,j}(i).r;   % Pred prob. of existence
         end
     end
 
     %%%%% Update %%%%%
 
     % Update for potential targets detected for the first time
-    for z = 1:size(Z{k},2)
-        nbrOfMeas = size(Z{k},2);
-        nbrOfGlobHyp = size(Xpred{k},2);
+    nbrOfMeas = size(Z{k},2);
+    nbrOfGlobHyp = size(Xpred{k},2);
+    for z = 1:nbrOfMeas
         % TODO: Fixed?
         %w = zeros(1,size(Z{k},2));
         w = zeros(1,size(XmuPred{k},2));
@@ -152,29 +156,33 @@ for k = 2:K % For each time step
     
     %%%% Update for previously potentially detected targets %%%%
     % Create missdetection hypo in index size(Z{k},2)+1
-    for j = 1:nbrOfGlobHyp
-        %nbrOfTargHyp = size(Xpred{k,j},2);
-        for i = 1:size(Xpred{k,j},2);
-            if Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd)) == 0
-                %keyboard
+    if(~isempty(Xpred{k})) % If we don't have global hypotheses then we 
+                          % don't have any prevously detected targets
+        for j = 1:nbrOfGlobHyp
+            for i = 1:size(Xpred{k,j},2);
+                if Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd)) == 0
+                    %keyboard
+                end
+                Xhypo{k,j,nbrOfMeas+1}(i).w = Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
+                Xhypo{k,j,nbrOfMeas+1}(i).r = Xpred{k,j}(i).r*(1-Pd)/(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
+                Xhypo{k,j,nbrOfMeas+1}(i).state = Xpred{k,j}(i).state;
+                Xhypo{k,j,nbrOfMeas+1}(i).P = Xpred{k,j}(i).P;
             end
-            Xhypo{k,j,nbrOfMeas+1}(i).w = Xpred{k,j}(i).w*(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
-            Xhypo{k,j,nbrOfMeas+1}(i).r = Xpred{k,j}(i).r*(1-Pd)/(1-Xpred{k,j}(i).r+Xpred{k,j}(i).r*(1-Pd));
-            Xhypo{k,j,nbrOfMeas+1}(i).state = Xpred{k,j}(i).state;
-            Xhypo{k,j,nbrOfMeas+1}(i).P = Xpred{k,j}(i).P;
         end
     end
          
     % Generate hypothesis for each single in each global for each measurement 
-    for z = 1:nbrOfMeas
-        for j = 1:nbrOfGlobHyp
-            for i = 1:size(Xpred{k,j},2);
-                [Xhypo{k,j,z}(i).state, Xhypo{k,j,z}(i).P, Xhypo{k,j,z}(i).S] = KFUpd(Xpred{k,j}(i).state, H, Xpred{k,j}(i).P, R, Z{k}(:,z));
-                Xhypo{k,j,z}(i).w = Xpred{k,j}(i).w*Xpred{k,j}(i).r*Pd*mvnpdf(Z{k}(:,z), H*Xpred{k,j}(i).state, Xhypo{k,j,z}(i).S);
-                if Xhypo{k,j,z}(i).w == 0
-                    %keyboard
+    if(~isempty(Xpred{k}))
+        for z = 1:nbrOfMeas
+            for j = 1:nbrOfGlobHyp
+                for i = 1:size(Xpred{k,j},2);
+                    [Xhypo{k,j,z}(i).state, Xhypo{k,j,z}(i).P, Xhypo{k,j,z}(i).S] = KFUpd(Xpred{k,j}(i).state, H, Xpred{k,j}(i).P, R, Z{k}(:,z));
+                    Xhypo{k,j,z}(i).w = Xpred{k,j}(i).w*Xpred{k,j}(i).r*Pd*mvnpdf(Z{k}(:,z), H*Xpred{k,j}(i).state, Xhypo{k,j,z}(i).S);
+                    if Xhypo{k,j,z}(i).w == 0
+                        %keyboard
+                    end
+                    Xhypo{k,j,z}(i).r = 1;
                 end
-                Xhypo{k,j,z}(i).r = 1;
             end
         end
     end
@@ -192,21 +200,25 @@ for k = 2:K % For each time step
         oldInd = newInd;
     end
     jInd = 1;
-    for j = 1:size(Xtmp,2)
-        wGlob = 1;
-        if ~isempty(Xtmp{k,j})
-            for i = 1:size(Xtmp{k,j},2)
-                if ~isempty(Xtmp{k,j}(i).w)
-                    wGlob = wGlob*Xtmp{k,j}(i).w;
-                end
-            end
-            if wGlob > 0.0005
+    if(~isempty(Xtmp{1})) % TODO: Quick fix - Xtmp will depend on generateGlobalHyp
+        for j = 1:size(Xtmp,2)
+            wGlob = 1;
+            if ~isempty(Xtmp{k,j})
                 for i = 1:size(Xtmp{k,j},2)
-                    Xupd{k,jInd}(i) = Xtmp{k,j}(i);
+                    if ~isempty(Xtmp{k,j}(i).w)
+                        wGlob = wGlob*Xtmp{k,j}(i).w;
+                    end
                 end
-                jInd = jInd+1;
+                if wGlob > 0.0005
+                    for i = 1:size(Xtmp{k,j},2)
+                        Xupd{k,jInd}(i) = Xtmp{k,j}(i);
+                    end
+                    jInd = jInd+1;
+                end
             end
         end
+    else
+        Xupd{k} = [];
     end
     Xest{k} = est1(Xupd, threshold);
 end
