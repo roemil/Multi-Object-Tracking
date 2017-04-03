@@ -88,29 +88,12 @@ for k = 2:K-6 % For each time step
     XmuPred{k}(end).state = Xb{1};
     XmuPred{k}(end).P = Pb{1};
     
-%     for i = 1:size(XmuPred{k},2)    
-%         % Update undetected targets (Poisson component)
-%         XuUpd{k}(i).w = (1-Pd)*XmuPred{k}(i).w;
-%         XuUpd{k}(i).state = XmuPred{k}(i).state;
-%         XuUpd{k}(i).P = XmuPred{k}(i).P;
-%     end
     XuUpd = updatePoisson(XmuPred,k,Pd);
     
-%     if(isempty(Xupd{k-1}))
-%         Xpred{k} = [];
-%     else
-%         for j = 1:size(Xupd{k-1},2)
-%             for i = 1:size(Xupd{k-1,j},2)
-%                 % Bernoulli
-%                 Xpred{k,j}(i).w = Xupd{k-1,j}(i).w;      % Pred weight
-%                 [Xpred{k,j}(i).state, Xpred{k,j}(i).P] = KFPred(Xupd{k-1,j}(i).state, F, Xupd{k-1,j}(i).P ,Q);    % Pred state
-%                 Xpred{k,j}(i).r = Ps*Xupd{k-1,j}(i).r;   % Pred prob. of existence
-%             end
-%         end
-%     end
     Xpred = predictDetectedBernoulli(Xupd, F, Q, Ps, k);
+    
+    
     %%%%% Update %%%%%
-
     % Update for potential targets detected for the first time
     nbrOfMeas = size(Z{k},2);
     nbrOfGlobHyp = size(Xpred{k},2);

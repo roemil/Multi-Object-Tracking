@@ -1,3 +1,12 @@
+%   Function to predict detected targets with Kalman.
+%   Input: Last updated posterior, Motion model F, Motion noise Q,
+%   Probability of Survival Ps, time k
+%   
+%   Output: Predicted states
+%
+%
+%
+%
 function Xpred = predictDetectedBernoulli(Xupd, F, Q, Ps, k)    
     if(isempty(Xupd{k-1}))
         Xpred{k} = [];
