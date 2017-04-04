@@ -65,7 +65,7 @@ end
 %Xupd{1,1}.P = 0.5*eye(4);
 Xupd = cell(1);
 %Xtmp = cell(1);
-threshold = 0.05;
+threshold = 0.1;
 
 K = size(Z,2); % Length of sequence
 for k = 2:K % For each time step
@@ -82,7 +82,7 @@ for k = 2:K % For each time step
 %     XmuPred{k,2} = [Xb{1} XuPred{k,2}];      % Pred state
 %     XmuPred{k,3} = [Pb{1} XuPred{k,3}];      % Pred cov
         XmuPred{k}(i).w = XuUpd{k-1}(i).w;    % Pred weight
-        XmuPred{k}(i).state = XuPred{k}.state;      % Pred state
+        XmuPred{k}(i).state = XuPred{k}(i).state;      % Pred state
         XmuPred{k}(i).P = XuPred{k}(i).P;      % Pred cov    
         %mu = @(x) gaussMix(XuPred{k}(i).w,XuPred{k}(i).state,XuPred{k}(i).P); % Pred Poisson intensity (41)
         
@@ -144,7 +144,7 @@ for k = 2:K % For each time step
             end
         end
     end
-    Xest{k} = est1(Xtmp2, threshold,k)
+    Xest{k} = est1(Xtmp2, threshold,k);
     for j = 1:size(Xtmp2,2)
         iInd = 1;
         for i = 1:size(Xtmp2{k,j},2)
