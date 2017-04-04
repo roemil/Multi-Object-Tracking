@@ -28,6 +28,8 @@ prod = 1;
             if(Xupd{end,ind}(i).r > threshold) % if prob. of existence great enough
                 Xest{index} = Xupd{end,ind}(i).state; % store mean (i.e states)
                 index = index + 1;
+            else
+                Xest{index} = [];
             end
         end
     else
