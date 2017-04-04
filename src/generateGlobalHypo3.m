@@ -1,65 +1,36 @@
 function [newGlob, newInd] = generateGlobalHypo3(Xhypo, Xnew, Z, oldInd)
 
 m = size(Z,2);
-
-indexVec = 1:2*m;
-for i = 1:2*m
-    if i <= m
-        Xtmp{i} = Xhypo{i};
-    else
-        Xtmp{i} = Xnew{i-m};
-    end
-end
-
-%A = zeros(2^m,m);
-%for z = 1:m
-%    old = repmat(z,2^(z-1),1);
-%    new = repmat(z+m,2^(z-1),1);
-%    A(:,z) = repmat([old; new],2^m/2^(z),1);
-%end
-
 nbrOldTargets = size(Xhypo{1,1,1},2);
-A = cell(1);
 
-const1 = 0;
-for i = 0:nbrOldTargets-1
-    A{i+1} = zeros(2^m,m);
-    for z = 1:m
-        const2 = const1+z;
-        if const2>nbrOldTargets
-            const2 = abs(nbrOldTargets-const2);
+A = generateGlobalInd(m, nbrOldTargets);
+
+for i = 1:m
+    Xtmp{i} = Xhypo{i};
+end
+for z = 1:m
+    Xtmp{z}(end+z) = Xnew{z};
+end
+
+jInd = 1;
+for i = 1:size(A,2)
+    for row = 1:size(A{i},1)
+        newGlob{jInd}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',1,'r',0,'S',0);
+        for col = 1:size(A{i},2)
+            newGlob{jInd}(A{i}(row,col)) = Xtmp{col}(A{i}(row,col));
         end
-        old = repmat(const2,2^(z-1),1);
-        new = repmat(z+m,2^(z-1),1);
-        A{i+1}(:,z) = repmat([old; new],2^m/2^(z),1);
-    end
-    const1 = const1+1;
-    if const1>nbrOldTargets
-        const1 = 1;
-    end
-end
-
-% minSum = sum((m+2):2*m)+1;
-% iInd = 1;
-% for i = 1:2^m
-%     if sum(Atmp(i,:)) >= minSum
-%         A(iInd,:) = Atmp(i,:);
-%         iInd = iInd+1;
-%     end
-% end
-
-iInd = 1;
-for j = 1:2^m
-    for z = 1:m
-        newGlob{j}(iInd) = Xtmp{z}(A(j,z));
+        for target = 1:size(newGlob{jInd},2)
+            if isempty(newGlob{jInd}(target).state)
+                if target <= nbrOldTargets
+                    newGlob{jInd}(target) = Xhypo{end}(target);
+                else
+                    newGlob{jInd}(target).state = Xnew{target-nbrOldTargets}.state;
+                    newGlob{jInd}(target).P = Xnew{target-nbrOldTargets}.P;
+                end
+            end
+        end
+        jInd = jInd+1;
     end
 end
-
-% for j = 1:nbrOldTargets*2^m
-%     for i = 1:nbrOldTargets
-%         for z = 1:m
-%             if z == 1
-%                 old = repmat(Xhypo{z}(i),2^(z-1),[]);
-
 
 newInd = oldInd+jInd-1;
