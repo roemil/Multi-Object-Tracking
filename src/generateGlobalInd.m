@@ -1,8 +1,18 @@
+% Function to find all valid combinations of old potential targets and
+% newly detected potential targets
+% 
+% Input:    m:              Number of measurements
+%           nbrOldTargets   Number of old potential targets
+%
+% Output:   A:              Indeces for all combinations of targets
+%
+%
+
 function A = generateGlobalInd(m,nbrOldTargets)
 
-targets = 1:nbrOldTargets;
-
+%
 if nbrOldTargets >= m
+    targets = 1:nbrOldTargets;
     combs = nchoosek(targets,m);
     pm = [];
     for i = 1:size(combs,1)
