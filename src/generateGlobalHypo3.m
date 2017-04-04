@@ -20,7 +20,7 @@ m = size(Z,2);
 % If we have hypotheses from previously potential targets, find all
 % combinations. Else the only global hypothesis consists of newly detected
 % potential targets
-if ~isempty(Xhypo)
+if ~isempty(Xhypo{1})
     nbrOldTargets = size(Xhypo{1,1,1},2);
     A = generateGlobalInd(m, nbrOldTargets);
 else
@@ -29,7 +29,7 @@ else
 end
 
 % Store old hypotheses and new hypotheses in a common variable
-if ~isempty(Xhypo)
+if ~isempty(Xhypo{1})
     for i = 1:m
         Xtmp{i} = Xhypo{i};
     end
