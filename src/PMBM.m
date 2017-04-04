@@ -59,11 +59,13 @@ Xupd{1,1}.w = 1;
 Xupd{1,1}.r = 1;
 Xupd{1,1}.state = [Z{2}(1,1) Z{2}(2,1) 0 0]';
 Xupd{1,1}.P = 0.5*eye(4);
+%Xupd = cell(1);
 %Xtmp = cell(1);
-threshold = 0.7;
+threshold = 0.2;
 
 K = size(Z,2); % Length of sequence
 for k = 2:K-6 % For each time step
+    k
     %%%%% Prediction %%%%%
     
     % TODO: Special case for k == 1?? 
@@ -96,7 +98,7 @@ for k = 2:K-6 % For each time step
     %%%%% Update %%%%%
     % Update for potential targets detected for the first time
     nbrOfMeas = size(Z{k},2);
-    nbrOfGlobHyp = size(Xpred{k},2);
+    nbrOfGlobHyp = size(Xpred,2);
     XpotNew = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k, c);
     
     %%%% Update for previously potentially detected targets %%%%
@@ -115,24 +117,24 @@ for k = 2:K-6 % For each time step
     end
     jInd = 1;
     %if(~isempty(Xtmp{1})) % TODO: Quick fix - Xtmp will depend on generateGlobalHyp
-        for j = 1:size(Xtmp,2)
-            wGlob = 1;
-            if ~isempty(Xtmp{k,j})
-                for i = 1:size(Xtmp{k,j},2)
-                    if ~isempty(Xtmp{k,j}(i).w)
-                        wGlob = wGlob*Xtmp{k,j}(i).w;
-                    end
-                end
-                if wGlob > 0.0005
-                    for i = 1:size(Xtmp{k,j},2)
-                        Xupd{k,jInd}(i) = Xtmp{k,j}(i);
-                    end
-                    jInd = jInd+1;
+    for j = 1:size(Xtmp,2)
+        wGlob = 1;
+        wSum = 0;
+        if ~isempty(Xtmp{k,j})
+            for i = 1:size(Xtmp{k,j},2)
+                if ~isempty(Xtmp{k,j}(i).w)
+                    wGlob = wGlob*Xtmp{k,j}(i).w;
+                    wSum = wSum + Xtmp{k,j}(i).w;
                 end
             end
+            if wGlob > 0.0005
+                for i = 1:size(Xtmp{k,j},2)
+                    Xupd{k,jInd}(i) = Xtmp{k,j}(i);
+                    Xupd{k,jInd}(i).w = Xupd{k,jInd}(i).w/wSum;
+                end
+                jInd = jInd+1;
+            end
         end
-    %else
-     %   Xupd{k} = [];
-    %end
+    end
     Xest{k} = est1(Xupd, threshold);
 end

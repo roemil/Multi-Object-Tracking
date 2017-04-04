@@ -11,7 +11,7 @@ function Xpred = predictDetectedBernoulli(Xupd, F, Q, Ps, k)
     if(isempty(Xupd{k-1}))
         Xpred{k} = [];
     else
-        for j = 1:size(Xupd{k-1},2)
+        for j = 1:size(Xupd,2)
             for i = 1:size(Xupd{k-1,j},2)
                 % Bernoulli
                 Xpred{k,j}(i).w = Xupd{k-1,j}(i).w;      % Pred weight
