@@ -55,16 +55,16 @@ XuUpd{1}(1).w = 1;    % Pred weight
 XuUpd{1}(1).state = [0 0 0 0]';      % Pred state
 XuUpd{1}(1).P = 10*eye(4);      % Pred cov
 
-Xupd{1,1}.w = 1;
-Xupd{1,1}.r = 1;
-Xupd{1,1}.state = [Z{2}(1,1) Z{2}(2,1) 0 0]';
-Xupd{1,1}.P = 0.5*eye(4);
-%Xupd = cell(1);
+%Xupd{1,1}.w = 1;
+%Xupd{1,1}.r = 1;
+%Xupd{1,1}.state = [Z{2}(1,1) Z{2}(2,1) 0 0]';
+%Xupd{1,1}.P = 0.5*eye(4);
+Xupd = cell(1);
 %Xtmp = cell(1);
 threshold = 0.2;
 
 K = size(Z,2); % Length of sequence
-for k = 2:K-6 % For each time step
+for k = 2:K % For each time step
     k
     %%%%% Prediction %%%%%
     

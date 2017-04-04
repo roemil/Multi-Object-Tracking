@@ -1,5 +1,9 @@
 function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp,k, Pd, H, R, Z)
 % Create missdetection hypo in index size(Z{k},2)+1
+    if(isempty(Xpred{k}))
+        Xhypo{k,1} = [];
+        return;
+    end
     if(~isempty(Xpred{k})) % If we don't have global hypotheses then we 
                           % don't have any prevously detected targets
         for j = 1:nbrOfGlobHyp
