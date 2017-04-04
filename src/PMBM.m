@@ -107,7 +107,7 @@ for k = 2:K-6 % For each time step
         % TODO: updated generateGlobalHypo to v2!
         % TODOTODOTODO: Generate hypo is wrong. We have constraints on
         % measurements on all X!!!
-        [newGlob, newInd] = generateGlobalHypo2(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd,k);
+        [newGlob, newInd] = generateGlobalHypo3(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd);
         for jnew = oldInd+1:newInd
             Xtmp{k,jnew} = newGlob{jnew-oldInd};
         end
