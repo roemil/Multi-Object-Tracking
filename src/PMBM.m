@@ -13,8 +13,8 @@ Ps = 0.9;   % Survival probability
 c = 0.2;    % clutter intensity
 
 % Initiate birth
-Xb{1} = [Z{2}; 0; 0];
-Pb{1} = diag([2, 2, 1, 1]);
+Xb{1} = [Z{2}(:,1); 0.1; 0.1];
+Pb{1} = 2*diag([2, 2, 1, 1]);
 wb{1} = 1;
 
 % Initiate undetected targets
@@ -47,13 +47,17 @@ Xupd = cell(1,1);
 H = generateMeasurementModel({},'linear');
 
 % TODO: Initial guess??
-XmuUpd{1}(1).w = 1;    % Pred weight
-XmuUpd{1}(1).state = [0 0 0 0]';      % Pred state
-XmuUpd{1}(1).P = 2*eye(4);      % Pred cov
+for i = 1:100
+    XmuUpd{1}(i).w = 1;    % Pred weight
+    XmuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
+        unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
+    XmuUpd{1}(i).P = 5*eye(4);      % Pred cov
 
-XuUpd{1}(1).w = 1;    % Pred weight
-XuUpd{1}(1).state = [0 0 0 0]';      % Pred state
-XuUpd{1}(1).P = 2*eye(4);      % Pred cov
+    XuUpd{1}(i).w = 1;    % Pred weight
+    XuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
+        unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
+    XuUpd{1}(i).P = 5*eye(4);      % Pred cov
+end
 
 %Xupd{1,1}.w = 1;
 %Xupd{1,1}.r = 1;
@@ -61,7 +65,7 @@ XuUpd{1}(1).P = 2*eye(4);      % Pred cov
 %Xupd{1,1}.P = 0.5*eye(4);
 Xupd = cell(1);
 %Xtmp = cell(1);
-threshold = 0.2;
+threshold = 0.05;
 
 K = size(Z,2); % Length of sequence
 for k = 2:K % For each time step
@@ -86,8 +90,9 @@ for k = 2:K % For each time step
     end
     
     % TODO: Fix births. Atm just 1 birth
-    XmuPred{k}(end+1).w = wb{1};
-    XmuPred{k}(end).state = Xb{1};
+    XmuPred{k}(end+1).w = 1; %wb{1};
+    XmuPred{k}(end).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
+        unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';%Xb{1};
     XmuPred{k}(end).P = Pb{1};
     
     XuUpd = updatePoisson(XmuPred,k,Pd);
@@ -98,7 +103,11 @@ for k = 2:K % For each time step
     %%%%% Update %%%%%
     % Update for potential targets detected for the first time
     nbrOfMeas = size(Z{k},2);
-    nbrOfGlobHyp = size(Xpred{k},2);
+    if ~isempty(Xpred{k})
+        nbrOfGlobHyp = size(Xpred,2);
+    else
+        nbrOfGlobHyp = 0;
+    end
     XpotNew = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k, c);
     
     %%%% Update for previously potentially detected targets %%%%
@@ -129,16 +138,21 @@ for k = 2:K % For each time step
             end
             if wGlob > 0.0005
                 for i = 1:size(Xtmp{k,j},2)
-                    Xupd{k,jInd}(i) = Xtmp{k,j}(i);
+                    Xtmp2{k,jInd}(i) = Xtmp{k,j}(i);
                 end
                 jInd = jInd+1;
             end
         end
     end
-    Xest{k} = est1(Xupd, threshold);
-    for j = 1:size(Xupd,2)
-        for i = 1:size(Xupd{k,j},2)
-            Xupd{k,j}(i).w = Xupd{k,j}(i).w/wSum(j);
+    Xest{k} = est1(Xtmp2, threshold,k)
+    for j = 1:size(Xtmp2,2)
+        iInd = 1;
+        for i = 1:size(Xtmp2{k,j},2)
+            if Xtmp2{k,j}(i).r > threshold
+                Xupd{k,j}(iInd) = Xtmp2{k,j}(i);
+                Xupd{k,j}(iInd).w = Xtmp2{k,j}(i).w/wSum(j);
+                iInd = iInd+1;
+            end
         end
     end
 end
