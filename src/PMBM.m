@@ -67,7 +67,7 @@ Xupd = cell(1);
 %Xtmp = cell(1);
 threshold = 0.1;
 
-K = size(Z,2); % Length of sequence
+K = 10; %size(Z,2); % Length of sequence
 for k = 2:K % For each time step
     k
     %%%%% Prediction %%%%%
