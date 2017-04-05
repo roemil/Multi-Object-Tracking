@@ -2,8 +2,8 @@
 function [Xpred, Xupd, Xest] = PMBM(Z)
 
 % Inititate
-sigmaQ = 1;         % Process (motion) noise
-R = [1 0;0 1];    % Measurement noise
+sigmaQ = 0.2*1;         % Process (motion) noise
+R = 0.1*[1 0;0 1];    % Measurement noise
 T = 0.1; % sampling time, 1/fps
 FOVsize = [20,30]; % in m
 
@@ -67,7 +67,7 @@ Xupd = cell(1);
 %Xtmp = cell(1);
 threshold = 0.1;
 
-K = 10; %size(Z,2); % Length of sequence
+K =size(Z,2); % Length of sequence
 for k = 2:K % For each time step
     k
     %%%%% Prediction %%%%%

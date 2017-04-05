@@ -8,6 +8,10 @@ function [z, zclutter] = generateMeasurements(targets, sigma,mode)
                 % model is only distance+angle right now
                 %z{t}(1,j) = norm(mvnrnd([targets{t}(1,j) targets{t}(2,j)], sigma));
                 r1 = rand(1);
+%                 if(r1 <= targets{t}(5,j))
+%                     x = [targets{t}(1,j) targets{t}(2,j)];
+%                     z{t} = [z{t}; norm(x+ sigma(1)*randn(1)), atan2(x(2),x(1))+sigma(2)];
+%                 end
                 if(r1 <= targets{t}(5,j))
                     x = [targets{t}(1,j) targets{t}(2,j)];
                     z{t} = [z{t}; norm(x+ sigma(1)*randn(1)), atan2(x(2),x(1))+sigma(2)];
@@ -30,9 +34,13 @@ function [z, zclutter] = generateMeasurements(targets, sigma,mode)
 
         end
     elseif(strcmp(mode,'KF'))
+        tind = 1;
         for t = 1 : size(targets,2) % for all time steps
+            for j = 1 : size(targets{t},2)
             %z{t} = mvnrnd([targets{t}(1) targets{t}(2)], sigma);
-            z{t} = [targets{t}(1) + randn(1)*sigma(1,1)^2; targets{t}(2) + randn(1)*sigma(2,2)^2];
+                z{tind}(:,j) = [targets{t}(1,j) + randn(1)*sigma(1)^2; targets{t}(2,j) + randn(1)*sigma(2)^2];
+            end
+            tind = tind + 1;
         end
     end
 end

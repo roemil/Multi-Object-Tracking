@@ -12,6 +12,7 @@
 
 function Xest = est1(Xupd, threshold,k)
     M = -1;
+    Xest = cell(1);
     if(~isempty(Xupd{k}))
         for j = 1:size(Xupd,2)
             prod = 1;

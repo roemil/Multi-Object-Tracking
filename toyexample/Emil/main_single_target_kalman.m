@@ -60,15 +60,24 @@ for t = 2 : size(z,2)
     [X{t},P] = kalmanfilterPred(X{t-1}, T, P, F, Q);
     [X{t},P] = kalmanfilterUpd(X{t-1}, P, T, H, R,z{t});
 end
-
+%%
+targets2 = cell(1);
+pred2 = cell(1);
+meas2 = cell(1);
 figure;
 hold on;
 for t = 1 : nbrOfTimeSteps
     if(size(targets{t},2) ~= 0)
         gt(t) = plot(targets{t}(1),targets{t}(2),colors{targets{t}(6)});
         hold on
+        targets2{t} = [targets{t}(1);5-targets{t}(2)];
+        plot(targets2{t}(1),targets2{t}(2),colors{targets{t}(6)});
         pred(t) = plot(X{t}(1),X{t}(2),'ok');
+        pred2{t} = [X{t}(1);5-X{t}(2)];
+        plot(pred2{t}(1),pred2{t}(2),'ok');
         meas(t) = plot(z{t}(1),z{t}(2),'or');
+        meas2{t} = [z{t}(1);5-z{t}(2)];
+        plot(meas2{t}(1),meas2{t}(2),'or');
     end
 end
 legend('Ground truth','pred','meas')

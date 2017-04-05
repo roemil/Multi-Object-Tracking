@@ -45,7 +45,7 @@ for i = 2 : nbrOfTimeSteps
     %i = i + 1;
 end
 %
-[z, zclutter] = generateMeasurements(targets, sigma,'std');
+[z, zclutter] = generateMeasurements(targets, sigma,'KF');
 %
 if(plotOn)
     map = generateMap(laneWidth, FOV,dToInter);
