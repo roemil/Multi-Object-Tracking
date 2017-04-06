@@ -12,7 +12,7 @@ colors = ['r','b','k','c','g','y','m'];
 maxNbrTargets = length(colors);
 Pb = 0.05;
 Pd = 0.9;
-R = [0.1 0;0 0.1];
+R = [0.01 0;0 0.01];
 
 laneWidth = 3;
 dToInter = 3;

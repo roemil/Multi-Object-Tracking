@@ -45,9 +45,9 @@ Xupd = cell(1,1);
 % Generate motion and measurement models
 [F, Q] = generateMotionModel(sigmaQ, T, 'cv');
 H = generateMeasurementModel({},'linear');
-Q
+
 % TODO: Initial guess??
-for i = 1:40
+for i = 1:80
     XmuUpd{1}(i).w = 1;    % Pred weight
 %     XmuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
 %         unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
@@ -69,10 +69,11 @@ end
 %Xupd{1,1}.P = 0.5*eye(4);
 Xupd = cell(1);
 %Xtmp = cell(1);
-threshold = 0.1;
+threshold = 0.3;
+wThresh = 1e-4;
 
 K =size(Z,2); % Length of sequence
-for k = 2:35 %K % For each time step
+for k = 2:40 %K % For each time step
     k
     %%%%% Prediction %%%%%
     
@@ -133,18 +134,18 @@ for k = 2:35 %K % For each time step
     jInd = 1;
     %if(~isempty(Xtmp{1})) % TODO: Quick fix - Xtmp will depend on generateGlobalHyp
     for j = 1:size(Xtmp,2)
-        wGlob = 1;
+        wGlob(jInd) = 1;
         wSum(jInd) = 0;
         if ~isempty(Xtmp{k,j})
             for i = 1:size(Xtmp{k,j},2)
                 if ~isempty(Xtmp{k,j}(i).w)
-                    wGlob = wGlob*Xtmp{k,j}(i).w;
+                    wGlob(jInd) = wGlob(jInd)*Xtmp{k,j}(i).w;
                     if Xtmp{k,j}(i).r > threshold
                         wSum(jInd) = wSum(jInd) + Xtmp{k,j}(i).w;
                     end
                 end
             end
-            if wGlob > 0.005 %0.0005
+            if wGlob(jInd) > wThresh %0.0005 % For 2 targets/meas 0.005
                 for i = 1:size(Xtmp{k,j},2)
                     Xtmp2{k,jInd}(i) = Xtmp{k,j}(i);
                 end
@@ -152,16 +153,23 @@ for k = 2:35 %K % For each time step
             end
         end
     end
+    if k == 5 % Added
+        wThresh = mean(wGlob); % Added
+    elseif ((k > 5) && (mean(wGlob)<wThresh)) % Added
+        wThresh = mean(wGlob);% Added
+    end% Added
     Xest{k} = est1(Xtmp2, threshold,k);
     for j = 1:size(Xtmp2,2)
-        iInd = 1;
-        for i = 1:size(Xtmp2{k,j},2)
-            if Xtmp2{k,j}(i).r > threshold
-                Xupd{k,j}(iInd) = Xtmp2{k,j}(i);
-                Xupd{k,j}(iInd).w = Xtmp2{k,j}(i).w/wSum(j);
-                iInd = iInd+1;
+        if wGlob(j) >= mean(wGlob)% Added
+            iInd = 1;
+            for i = 1:size(Xtmp2{k,j},2)
+                if Xtmp2{k,j}(i).r > threshold
+                    Xupd{k,j}(iInd) = Xtmp2{k,j}(i);
+                    Xupd{k,j}(iInd).w = Xtmp2{k,j}(i).w/wSum(j);
+                    iInd = iInd+1;
+                end
             end
         end
     end
-    size(Xtmp2,2)
+    jInd-1
 end
