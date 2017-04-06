@@ -153,21 +153,14 @@ for k = 2:40 %K % For each time step
             end
         end
     end
-    if k == 5 % Added
-        wThresh = mean(wGlob); % Added
-    elseif ((k > 5) && (mean(wGlob)<wThresh)) % Added
-        wThresh = mean(wGlob);% Added
-    end% Added
     Xest{k} = est1(Xtmp2, threshold,k);
     for j = 1:size(Xtmp2,2)
-        if wGlob(j) >= mean(wGlob)% Added
-            iInd = 1;
-            for i = 1:size(Xtmp2{k,j},2)
-                if Xtmp2{k,j}(i).r > threshold
-                    Xupd{k,j}(iInd) = Xtmp2{k,j}(i);
-                    Xupd{k,j}(iInd).w = Xtmp2{k,j}(i).w/wSum(j);
-                    iInd = iInd+1;
-                end
+        iInd = 1;
+        for i = 1:size(Xtmp2{k,j},2)
+            if Xtmp2{k,j}(i).r > threshold
+                Xupd{k,j}(iInd) = Xtmp2{k,j}(i);
+                Xupd{k,j}(iInd).w = Xtmp2{k,j}(i).w/wSum(j);
+                iInd = iInd+1;
             end
         end
     end
