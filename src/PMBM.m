@@ -1,9 +1,9 @@
 %%%%% PMBM %%%%%
-function [Xpred, Xupd, Xest] = PMBM(Z)
+function [pred, Xupd, Xest] = PMBM(Z)
 
 % Inititate
 sigmaQ = 2;         % Process (motion) noise
-R = 0.01*[1 0;0 1];    % Measurement noise
+R = 0.1*[1 0;0 1];    % Measurement noise
 T = 0.1; % sampling time, 1/fps
 FOVsize = [20,30]; % in m
 
@@ -45,7 +45,7 @@ Xupd = cell(1,1);
 % Generate motion and measurement models
 [F, Q] = generateMotionModel(sigmaQ, T, 'cv');
 H = generateMeasurementModel({},'linear');
-
+Q
 % TODO: Initial guess??
 for i = 1:40
     XmuUpd{1}(i).w = 1;    % Pred weight
@@ -72,7 +72,7 @@ Xupd = cell(1);
 threshold = 0.1;
 
 K =size(Z,2); % Length of sequence
-for k = 2:15 %K % For each time step
+for k = 2:35 %K % For each time step
     k
     %%%%% Prediction %%%%%
     
@@ -105,7 +105,7 @@ for k = 2:15 %K % For each time step
     
     Xpred = predictDetectedBernoulli(Xupd, F, Q, Ps, k);
     
-    
+    pred{k} = Xpred{k};
     %%%%% Update %%%%%
     % Update for potential targets detected for the first time
     nbrOfMeas = size(Z{k},2);
@@ -144,7 +144,7 @@ for k = 2:15 %K % For each time step
                     end
                 end
             end
-            if wGlob > 0.1 %0.0005
+            if wGlob > 0.005 %0.0005
                 for i = 1:size(Xtmp{k,j},2)
                     Xtmp2{k,jInd}(i) = Xtmp{k,j}(i);
                 end
