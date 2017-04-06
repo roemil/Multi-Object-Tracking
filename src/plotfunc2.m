@@ -1,6 +1,6 @@
 function plotfunc2(Xest,Z,Xtrue)
 % ONLY 2 targets
-N = 40; %size(Z,2);
+N = 15; %size(Z,2);
 %t = cell(1,2);
 t1 = zeros(4,N);
 t2 = zeros(4,N);

@@ -72,7 +72,7 @@ Xupd = cell(1);
 threshold = 0.1;
 
 K =size(Z,2); % Length of sequence
-for k = 2:80 %K % For each time step
+for k = 2:15 %K % For each time step
     k
     %%%%% Prediction %%%%%
     
