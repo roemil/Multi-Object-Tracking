@@ -3,7 +3,7 @@ function [Xpred, Xupd, Xest] = PMBM(Z)
 
 % Inititate
 sigmaQ = 2;         % Process (motion) noise
-R = 0.1*[1 0;0 1];    % Measurement noise
+R = 0.01*[1 0;0 1];    % Measurement noise
 T = 0.1; % sampling time, 1/fps
 FOVsize = [20,30]; % in m
 
@@ -144,7 +144,7 @@ for k = 2:15 %K % For each time step
                     end
                 end
             end
-            if wGlob > 0.002 %0.0005
+            if wGlob > 0.1 %0.0005
                 for i = 1:size(Xtmp{k,j},2)
                     Xtmp2{k,jInd}(i) = Xtmp{k,j}(i);
                 end
@@ -163,4 +163,5 @@ for k = 2:15 %K % For each time step
             end
         end
     end
+    size(Xtmp2,2)
 end
