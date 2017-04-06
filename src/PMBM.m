@@ -47,7 +47,7 @@ Xupd = cell(1,1);
 H = generateMeasurementModel({},'linear');
 
 % TODO: Initial guess??
-for i = 1:80
+for i = 1:40
     XmuUpd{1}(i).w = 1;    % Pred weight
 %     XmuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
 %         unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
@@ -69,11 +69,11 @@ end
 %Xupd{1,1}.P = 0.5*eye(4);
 Xupd = cell(1);
 %Xtmp = cell(1);
-threshold = 0.3;
-wThresh = 1e-4;
+threshold = 0.1;
+wThresh = 0.005;
 
 K =size(Z,2); % Length of sequence
-for k = 2:40 %K % For each time step
+for k = 2:20 %K % For each time step
     k
     %%%%% Prediction %%%%%
     
