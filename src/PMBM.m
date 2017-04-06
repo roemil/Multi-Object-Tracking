@@ -2,7 +2,7 @@
 function [Xpred, Xupd, Xest] = PMBM(Z)
 
 % Inititate
-sigmaQ = 0.2*1;         % Process (motion) noise
+sigmaQ = 2;         % Process (motion) noise
 R = 0.1*[1 0;0 1];    % Measurement noise
 T = 0.1; % sampling time, 1/fps
 FOVsize = [20,30]; % in m
@@ -13,8 +13,8 @@ Ps = 0.9;   % Survival probability
 c = 0.2;    % clutter intensity
 
 % Initiate birth
-Xb{1} = [Z{2}(:,1); 0.1; 0.1];
-Pb{1} = 2*diag([2, 2, 1, 1]);
+Xb{1} = [Z{2}(:,1); unifrnd(-0.2,0.2); unifrnd(-0.2,0.2)];
+Pb{1} = 7*eye(4); %4*diag([2, 2, 1, 1]);
 wb{1} = 1;
 
 % Initiate undetected targets
@@ -47,16 +47,20 @@ Xupd = cell(1,1);
 H = generateMeasurementModel({},'linear');
 
 % TODO: Initial guess??
-for i = 1:100
+for i = 1:40
     XmuUpd{1}(i).w = 1;    % Pred weight
+%     XmuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
+%         unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
     XmuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
-        unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
-    XmuUpd{1}(i).P = 5*eye(4);      % Pred cov
+        unifrnd(0, FOVsize(2)), unifrnd(-0.2,0.2), unifrnd(-0.2,0.2)]';      % Pred state
+    XmuUpd{1}(i).P = 7*eye(4);      % Pred cov
 
     XuUpd{1}(i).w = 1;    % Pred weight
+%     XuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
+%         unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
     XuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
-        unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
-    XuUpd{1}(i).P = 5*eye(4);      % Pred cov
+        unifrnd(0, FOVsize(2)), unifrnd(-0.2,0.2), unifrnd(-0.2,0.2)]';      % Pred state
+    XuUpd{1}(i).P = 7*eye(4);      % Pred cov
 end
 
 %Xupd{1,1}.w = 1;
@@ -68,7 +72,7 @@ Xupd = cell(1);
 threshold = 0.1;
 
 K =size(Z,2); % Length of sequence
-for k = 2:K % For each time step
+for k = 2:80 %K % For each time step
     k
     %%%%% Prediction %%%%%
     
@@ -91,8 +95,10 @@ for k = 2:K % For each time step
     
     % TODO: Fix births. Atm just 1 birth
     XmuPred{k}(end+1).w = 1; %wb{1};
+%     XmuPred{k}(end).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
+%         unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';%Xb{1};
     XmuPred{k}(end).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
-        unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';%Xb{1};
+        unifrnd(0, FOVsize(2)), unifrnd(-0.2,0.2), unifrnd(-0.2,0.2)]';%Xb{1};
     XmuPred{k}(end).P = Pb{1};
     
     XuUpd = updatePoisson(XmuPred,k,Pd);
@@ -133,10 +139,12 @@ for k = 2:K % For each time step
             for i = 1:size(Xtmp{k,j},2)
                 if ~isempty(Xtmp{k,j}(i).w)
                     wGlob = wGlob*Xtmp{k,j}(i).w;
-                    wSum(jInd) = wSum(jInd) + Xtmp{k,j}(i).w;
+                    if Xtmp{k,j}(i).r > threshold
+                        wSum(jInd) = wSum(jInd) + Xtmp{k,j}(i).w;
+                    end
                 end
             end
-            if wGlob > 0.0005
+            if wGlob > 0.002 %0.0005
                 for i = 1:size(Xtmp{k,j},2)
                     Xtmp2{k,jInd}(i) = Xtmp{k,j}(i);
                 end

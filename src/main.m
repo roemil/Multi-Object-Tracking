@@ -6,7 +6,7 @@ Z2 = cell(1);
 GT = cell(1);
 for i = 1 : size(z,2)
     Z{i} = [z{i} meas2{i}];
-    Z2{i} = Z{i} + mvnrnd([0;0], 0.2*[1 0;0 1],2)';
+    Z2{i} = Z{i} + mvnrnd([0;0], 0.01*[1 0;0 1],2)';
 end
 
 for i = 1 : size(targets,2)
@@ -24,7 +24,7 @@ end
 %     end
 % end
 
-[pred,upd,est]=PMBM(GT);
+[pred,upd,est]=PMBM(Z2);
 
 %%
 figure
@@ -35,7 +35,7 @@ for k = 1:size(Z,2)
 %             isempty(est{k})
 %             est{k}
 %             est{k}{i}
-            est{k}{1}(3:4)
+            %est{k}{1}(3:4)
             plot(est{k}{i}(1),est{k}{i}(2),'-or')
             hold on
             plot(GT{k}(1,i),GT{k}(2,i),'-ok')
