@@ -1,4 +1,5 @@
-function [XpotNew, e] = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k,c)
+function [XpotNew, rho] = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k,c)
+    rho = zeros(nbrOfMeas);
     for z = 1:nbrOfMeas
         % TODO: Fixed?
         %w = zeros(1,size(Z{k},2));
@@ -29,8 +30,9 @@ function [XpotNew, e] = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R,
             XpotNew{k,z}.P = XpotNew{k,z}.P+w(1,i)*XmuUpd{k,z}(i).P; % (44)
         end
         
-        e(z) = Pd*generateGaussianMix(Z{k}(:,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
-        XpotNew{k,z}.w = e(z)+c; % rho (45) (44)
+        e = Pd*generateGaussianMix(Z{k}(:,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
+        rho(z) = e;
+        XpotNew{k,z}.w = e+c; % rho (45) (44)
         XpotNew{k,z}.r = e/XpotNew{k,z}.w; % (43) (44)
         XpotNew{k,z}.S = 0;
         %XmuUpd{k,z}.w = e+c; % rho
