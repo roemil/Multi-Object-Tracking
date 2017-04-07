@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [pred, Xupd, Xest] = PMBM(Z)
+function [pred, Xupd, Xest, Pest] = PMBM(Z)
 
 % Inititate
 sigmaQ = 2;         % Process (motion) noise
@@ -69,12 +69,12 @@ end
 %Xupd{1,1}.P = 0.5*eye(4);
 Xupd = cell(1);
 %Xtmp = cell(1);
-threshold = 0.1;
-wThresh = 0.005;
+threshold = 0.1; % CHANGED 0.1
+wThresh = 0.007; % CHANGED 0.005
 
 K =size(Z,2); % Length of sequence
-for k = 2:20 %K % For each time step
-    k
+for k = 2:K % For each time step
+    disp(['-------', num2str(k), '-------'])
     %%%%% Prediction %%%%%
     
     % TODO: Special case for k == 1?? 
@@ -153,7 +153,7 @@ for k = 2:20 %K % For each time step
             end
         end
     end
-    Xest{k} = est1(Xtmp2, threshold,k);
+    [Xest{k}, Pest{k}] = est1(Xtmp2, threshold,k);
     for j = 1:size(Xtmp2,2)
         iInd = 1;
         for i = 1:size(Xtmp2{k,j},2)
@@ -164,5 +164,6 @@ for k = 2:20 %K % For each time step
             end
         end
     end
-    jInd-1
+    disp(['Nbr of global hypo: ', num2str(jInd-1)])
+    disp(' ')
 end
