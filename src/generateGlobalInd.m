@@ -8,7 +8,7 @@
 %
 %
 
-function A = generateGlobalInd(m,nbrOldTargets)
+function [A, S, Amat] = generateGlobalInd(m,nbrOldTargets)
 
 %
 if nbrOldTargets >= m
@@ -66,3 +66,17 @@ if nbrOldTargets < m
 end
 
 A{end+1} = nbrOldTargets+1:nbrOldTargets+m;
+
+Amat = zeros(1,m,1);
+S = zeros(m, nbrOldTargets+m,1);
+ind = 1;
+for i = 1:size(A,2)
+    for row = 1:size(A{i},1)
+        S(:,:,ind) = zeros(m, nbrOldTargets+m);
+        for col = 1:m
+            S(col, A{i}(row,col),ind) = 1;
+        end
+        Amat(1,:,ind) = A{i}(row,:);
+        ind = ind+1;
+    end
+end

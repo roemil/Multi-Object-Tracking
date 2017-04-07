@@ -12,7 +12,7 @@
 %
 %
 
-function [newGlob, newInd] = generateGlobalHypo3(Xhypo, Xnew, Z, oldInd)
+function [newGlob, newInd, S] = generateGlobalHypo4(Xhypo, Xnew, Z, oldInd)
 
 % Number of measurements
 m = size(Z,2);
@@ -50,26 +50,28 @@ end
 % detections and that the global hypothesis does not consider the newly
 % detected potential target
 jInd = 1;
-for i = 1:size(Amat,3)
-    % Initiate
-    newGlob{jInd}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',1,'r',0,'S',0);
-    for col = 1:size(Amat,2)
-        % Find combination
-        newGlob{jInd}(Amat(1,col,i)) = Xtmp{col}(Amat(1,col,i));
-    end
-    for target = 1:size(newGlob{jInd},2)
-        if isempty(newGlob{jInd}(target).state)
-            if target <= nbrOldTargets
-                % Missed detection
-                newGlob{jInd}(target) = Xhypo{end}(target);
-            else
-                % Does not consider newly detected potential target
-                newGlob{jInd}(target).state = Xnew{target-nbrOldTargets}.state;
-                newGlob{jInd}(target).P = Xnew{target-nbrOldTargets}.P;
+for i = 1:size(A,2)
+    for row = 1:size(A{i},1)
+        % Initiate
+        newGlob{jInd}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',1,'r',0,'S',0);
+        for col = 1:size(A{i},2)
+            % Find combination
+            newGlob{jInd}(A{i}(row,col)) = Xtmp{col}(A{i}(row,col));
+        end
+        for target = 1:size(newGlob{jInd},2)
+            if isempty(newGlob{jInd}(target).state)
+                if target <= nbrOldTargets
+                    % Missed detection
+                    newGlob{jInd}(target) = Xhypo{end}(target);
+                else
+                    % Does not consider newly detected potential target
+                    newGlob{jInd}(target).state = Xnew{target-nbrOldTargets}.state;
+                    newGlob{jInd}(target).P = Xnew{target-nbrOldTargets}.P;
+                end
             end
         end
+        jInd = jInd+1;
     end
-    jInd = jInd+1;
 end
 
 % Update total number of global hypotheses
