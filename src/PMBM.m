@@ -70,7 +70,7 @@ end
 Xupd = cell(1);
 %Xtmp = cell(1);
 threshold = 0.1; % CHANGED 0.1
-wThresh = 0.0007; % CHANGED 0.005
+wThresh = 0.007; % CHANGED 0.005
 
 K =size(Z,2); % Length of sequence
 for k = 2:K % For each time step
