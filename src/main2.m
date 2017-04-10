@@ -1,13 +1,14 @@
 % Main for running the filter multiple times. Each filter-call uses whole
 % sequences
 
-load('case3')
+%load('case3')
 sigmaR = 0.01;
 R = sigmaR*eye(2);
+FOVsize = [20,30];
 clear Z
 
-K = 20; %size(X,2);
-T = 30;
+K = 50; %size(X,2)-1;
+T = 5;
 
 maxObj = 0;
 for k = 2:K
@@ -16,17 +17,14 @@ for k = 2:K
     end
 end
 
-PestVec = zeros(4,K,maxObj,T);
+PestVec = zeros(4,K,maxObj+1,T);
 squareError = zeros(4,K,maxObj,T);
 
 % Run the whole sequence T times to find averages
 for t = 1:T
-    for k = 1:K
-        Z{k} = [];
-        for i = 1:size(X{k},2)
-            Z{k} = [Z{k}, measGenerate(X{k}(:,i),R)];
-        end
-    end
+    disp(['--------------- t = ', num2str(t), ' ---------------'])
+    
+    Z = measGenerateCase2(X, R, FOVsize, K);
     
     [~, ~, est{t}, Pest{t}] = PMBM(Z);
     

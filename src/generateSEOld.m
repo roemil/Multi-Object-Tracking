@@ -1,4 +1,4 @@
-function [PestVec, squareError] = generateSE(Xtrue,Xest,Pest,K)
+function [PestVec, squareError] = generateSEOld(Xtrue,Xest,Pest,K)
 
 maxObj = 0;
 for k = 2:K
@@ -29,33 +29,35 @@ for k = 2:K
         end
     end
     
-    [asso, ~] = murty(dist',1);
+    [asso, ~] = murty(dist,1);
     
     % Display if the number of target and estimates are not the same and
     % create a figure for unassigned estimates
     if size(dist,1) < size(dist,2)
         % Problem with murty if nbr of est is one
-%         if size(dist,1) == 1
-%             if asso(1,1) == 2
-%                 asso(asso(1,1)) = 1;
-%                 asso(1,1) = NaN;
-%             else
-%                 asso(asso(1,1)) = 1;
-% %             end
-%         end
-%         for i = size(dist,1)+1:size(dist,2)
-%             asso(1,i) = NaN;
-%         end
+        if size(dist,1) == 1
+            if asso(1,1) == 2
+                asso(asso(1,1)) = 1;
+                asso(1,1) = NaN;
+            else
+                asso(asso(1,1)) = 1;
+            end
+        end
+        for i = size(dist,1)+1:size(dist,2)
+            asso(1,i) = NaN;
+        end
         disp(['Nbr of estimates < nbr of true targets, k = ', num2str(k)])
     elseif size(dist,1) > size(dist,2) 
         disp(['Nbr of estimates > nbr of true targets, k = ', num2str(k)])
     end
     
     for trueTarget = 1:size(asso,2)
-        if asso(1,trueTarget) ~= 0
-            squareError(:,k,trueTarget) = (Xest{k}{asso(1,trueTarget)}-Xtrue{k}(1:4,trueTarget)).^2;
-        else
-            squareError(:,k,trueTarget) = 10;
+        if sum(asso(:,trueTarget) ~= 0) ~= 0
+            if ~isnan(asso(1,trueTarget))
+                squareError(:,k,trueTarget) = (Xest{k}{asso(1,trueTarget)}-Xtrue{k}(1:4,trueTarget)).^2;
+            else
+                squareError(:,k,trueTarget) = 10;
+            end
         end
     end
     

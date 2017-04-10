@@ -47,7 +47,7 @@ Xupd = cell(1,1);
 H = generateMeasurementModel({},'linear');
  
 % TODO: Initial guess??
-for i = 1:20
+for i = 1:40
     XmuUpd{1}(i).w = 1;    % Pred weight
 %     XmuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
 %         unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
@@ -72,15 +72,14 @@ Xupd2 = cell(1);
 %Xtmp = cell(1);
 
 threshold = 0.1;    % CHANGED 0.1
-wThresh = 0.007;    % CHANGED 0.005
 
 K =size(Z,2); % Length of sequence
 for k = 2:K %K % For each time step
     disp(['-------', num2str(k), '-------'])
     Wold = 0;
     C = [];
-    Nh = 100*size(Z{k},2);    %Murty
-
+    Nh = 5*size(Z{k},2);    %Murty
+    startPred = tic;
     %%%%% Prediction %%%%%
     
     % TODO: Special case for k == 1?? 
@@ -113,6 +112,9 @@ for k = 2:K %K % For each time step
     Xpred = predictDetectedBernoulli(Xupd, F, Q, Ps, k);
     
     pred{k} = Xpred{k};
+    
+    timePred = toc(startPred);
+    startUpd = tic;
     %%%%% Update %%%%%
     % Update for potential targets detected for the first time
     nbrOfMeas = size(Z{k},2);
@@ -187,14 +189,14 @@ for k = 2:K %K % For each time step
             end
         end
         
-        K_hyp = max(1,ceil(Nh * wHyp));
+        K_hyp = max(2,ceil(Nh * wHyp));
 %         K_old = 1;
         trace_vec = zeros(1,size(S,3));
         for jnew = 1:size(S,3)
             trace_vec(jnew) = trace(S(:,:,jnew)'*C);
         end
     
-        [ass, cost] = murty(trace_vec,min(size(trace_vec,2),K_hyp));
+        [ass, ~] = murty(trace_vec,min(size(trace_vec,2),K_hyp));
         ind = find(ass==0);
         if ~isempty(ind)
             ass = ass(1:ind-1);
@@ -223,7 +225,7 @@ for k = 2:K %K % For each time step
             end
         end
     end
-
+    timeUpd = toc(startUpd);
     [Xest{k}, Pest{k}] = est1(Xtmp, threshold,k);
     
     [keepGlobs,~] = murty(wGlob,Nh);
@@ -240,16 +242,18 @@ for k = 2:K %K % For each time step
 %     end
     for j = 1:size(keepGlobs,1)
         iInd = 1;
-        Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
-%         for i = 1:size(Xtmp{k,keepGlobs(j)},2)
-%             if Xtmp{k,keepGlobs(j)}(i).r > threshold
-%                 Xupd{k,j}(iInd) = Xtmp{k,keepGlobs(j)}(i);
-%                 Xupd{k,j}(iInd).w = Xtmp{k,keepGlobs(j)}(i).w/wSum(keepGlobs(j));
-%                 iInd = iInd+1;
-%             end
-%         end
+        %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
+        for i = 1:size(Xtmp{k,keepGlobs(j)},2)
+            if Xtmp{k,keepGlobs(j)}(i).r > threshold
+                Xupd{k,j}(iInd) = Xtmp{k,keepGlobs(j)}(i);
+                Xupd{k,j}(iInd).w = Xtmp{k,keepGlobs(j)}(i).w/wSum(keepGlobs(j));
+                iInd = iInd+1;
+            end
+        end
     end
     %disp(['k_new: ', num2str(K_new)])
-    disp('Nbr global hypo pre murty: ', num2str(size(wGlob,2)))
+    disp(['Pred time: ', num2str(timePred), 's'])
+    disp(['Upd time: ', num2str(timeUpd), 's'])
+    disp(['Nbr global hypo pre murty: ', num2str(size(wGlob,2))])
     disp(['Nbr global hypo: ', num2str(size(Xupd,2))])
 end

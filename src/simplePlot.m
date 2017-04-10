@@ -19,8 +19,6 @@ midRoad = plot([-laneWidth/2 -laneWidth/2],[0 FOVsize(2)],'k--');
 plot([-FOVsize(1)/2, FOVsize(1)/2],[laneWidth+dToInter, laneWidth+dToInter],'k--')
 xlim([-FOVsize(1)/2,FOVsize(1)/2])
 ylim([0, FOVsize(2)])
-xlim([-FOVsize(1)/2,FOVsize(1)/2])
-ylim([0, FOVsize(2)])
 
 K = min(size(est,2), size(X,2));
 
@@ -33,13 +31,13 @@ for k = 2:K
         delete(estPlot)
     end
     for i = 1:size(X{k},2)
-        gtPlot = [gtPlot, plot(X{k}(1,i),X{k}(2,i),'k+')];
+        gtPlot = [gtPlot, plot(X{k}(1,i),X{k}(2,i),'k+','Markersize',10)];
     end
     for i = 1:size(est{k},2)
-        estPlot = [estPlot plot(est{k}{i}(1),est{k}{i}(2),'r*')];
+        estPlot = [estPlot plot(est{k}{i}(1),est{k}{i}(2),'r*','Markersize',10)];
     end
     if k == 2
         legend([gtPlot(1), estPlot(1)],'GT','Estimate')
     end
-    pause(0.05)
+    pause(0.1)
 end
