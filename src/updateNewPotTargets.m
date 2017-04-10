@@ -1,5 +1,5 @@
 function [XpotNew, rho] = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k,c)
-    rho = zeros(nbrOfMeas);
+    rho = zeros(nbrOfMeas,1);
     for z = 1:nbrOfMeas
         % TODO: Fixed?
         %w = zeros(1,size(Z{k},2));

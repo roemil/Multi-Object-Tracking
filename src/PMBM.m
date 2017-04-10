@@ -123,37 +123,7 @@ Nh = 1000;
     %%%% Update for previously potentially detected targets %%%%
     Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp,k, Pd, H, R, Z);
     
-    %%%% Murty
-    Wnew = diag(rho);
-    %wHyp(1) = 1;
-    
-    % TODO: Fix S matrix, use that as input to Global hyp 
-    trace_vec = [];
-    for j = 1 : size(Xhypo,2)
-        wHyp = 1;
-        wHypSum = 0;
-        for m = 1 : nbrOfMeas
-            for nj = 1 : size(Xhypo{k,j},2)-1;
-                % Normalize weights for cost matrix
-                Wold(m,nj) = Xhypo{k,j}(nj).w*Xhypo{k,j}(nj).r*Pd*mvnpdf(Z{k}(:,nj)...
-                    ,H*Xhypo{k,j}(nj).state,Xhypo{k,j}(nj).S)...
-                    /(Xhypo{k,j}(nj).w*(1-Xhypo{k,j}(nj).r+Xhypo{k,j}(nj).r*(1-Pd))); 
-                wHyp = wHyp * Xhypo{k,j}(nj).w;
-                wHypSum = wHypSum + Xhypo{k,j}(nj).w;
-            end
-        end
-        wHyp = wHyp / wHypSum; % shall I normalize?
-        if(Wold ~= 0) % We have previously detected targets
-            C = -[log(Wold), log(Wnew)];
-        else
-            C = -log(Wnew);
-        end
-        K_hyp = max(1,ceil(Nh * wHyp));
-%         K_old = 1;
-    %    trace_vec(j) = trace(S'*C);
-    end
-    %[ass, cost] = murty(trace_vec,K_hyp);
- 
+
 %     %min(length(index),size(Xtmp{k},1))
 %     for ind = 1 : min(length(index),size(Xtmp{k},1))
 %         for nbrOfTarg = 1 : size(Xtmp{k},2)
@@ -180,9 +150,49 @@ Nh = 1000;
         
         %%%%% MURTY HERE %%%%%%
         %hypoInd = murty();
+            %%%% Murty
+    Wnew = diag(rho);
+    %wHyp(1) = 1;
+    
+    % TODO: Fix S matrix, use that as input to Global hyp 
+    trace_vec = [];
+    for j = 1 : size(Xhypo,2)
+        wHyp = 1;
+        wHypSum = 0;
+        for m = 1 : nbrOfMeas
+            for nj = 1 : size(Xhypo{k,j},2);
+                % Normalize weights for cost matrix
+                Wold(m,nj) = Xhypo{k,j}(nj).w*Xhypo{k,j}(nj).r*Pd*mvnpdf(Z{k}(:,nj)...
+                    ,H*Xhypo{k,j}(nj).state,Xhypo{k,j}(nj).S)...
+                    /(Xhypo{k,j}(nj).w*(1-Xhypo{k,j}(nj).r+Xhypo{k,j}(nj).r*(1-Pd))); 
+                wHyp = wHyp * Xhypo{k,j}(nj).w;
+                wHypSum = wHypSum + Xhypo{k,j}(nj).w;
+            end
+        end
+        if(wHypSum == 0)
+            wHypSum = 1;
+        end
+        wHyp = wHyp / wHypSum; % shall I normalize?
+        if(Wold ~= 0)
+            C = -[log(Wold), log(Wnew)];
+        else
+            C = -log(Wnew);
+        end
+        
+        [rows,cols] = find(C == inf);
+        for i = 1 : size(rows,1)
+            C(rows(i),cols(i)) = 1e16;
+        end
+        
+        K_hyp = max(1,ceil(Nh * wHyp));
+%         K_old = 1;
+        trace_vec(j) = trace(S(:,:,j)'*C);
+    end
+    [ass, cost] = murty(trace_vec,K_hyp);
+ 
         %%%%% MURTY HERE %%%%%%
         
-        [newGlob, newInd] = generateGlobalHypo3(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd, Amat, indeces);
+        [newGlob, newInd] = generateGlobalHypo3(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd);
         for jnew = oldInd+1:newInd
             Xtmp{k,jnew} = newGlob{jnew-oldInd};
         end
@@ -225,5 +235,5 @@ Nh = 1000;
         end
     end
     %disp(['k_new: ', num2str(K_new)])
-
+    disp(num2str(size(Xupd,2)))
 end
