@@ -250,6 +250,6 @@ for k = 2:K %K % For each time step
 %         end
     end
     %disp(['k_new: ', num2str(K_new)])
-    disp('Nbr global hypo pre murty: ', num2str(size(wGlob,2)))
+    disp(['Nbr global hypo pre murty: ', num2str(size(wGlob,2))])
     disp(['Nbr global hypo: ', num2str(size(Xupd,2))])
 end
