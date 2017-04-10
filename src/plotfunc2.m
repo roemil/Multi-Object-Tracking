@@ -1,7 +1,7 @@
 function plotfunc2(Xest,Z,Xtrue,Xpred)
 
 % ONLY 2 targets
-N = 20; %size(Z,2);
+N = 50%size(Z,2);
 
 t1 = zeros(4,N);
 t2 = zeros(4,N);

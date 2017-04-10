@@ -240,7 +240,7 @@ for k = 2:K %K % For each time step
 %     end
     for j = 1:size(keepGlobs,1)
         iInd = 1;
-        Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs,threshold,wSum, k,j);
+        Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
 %         for i = 1:size(Xtmp{k,keepGlobs(j)},2)
 %             if Xtmp{k,keepGlobs(j)}(i).r > threshold
 %                 Xupd{k,j}(iInd) = Xtmp{k,keepGlobs(j)}(i);
