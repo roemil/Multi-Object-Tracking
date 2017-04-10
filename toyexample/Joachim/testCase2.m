@@ -11,7 +11,7 @@ veloRange = 5;
 colors = ['r','b','k','c','g','y','m'];
 maxNbrTargets = length(colors);
 Pb = 0.05;
-Pd = 0.9;
+Pd = 0.95;
 sigmaR = 0.01;
 R = sigmaR*[1 0;0 1];
 
@@ -266,11 +266,18 @@ for k = 2:nbrTimeSteps
         end
     end
     
+    if isempty(Z{k})
+        ind = randi(size(X{k},2));
+        Z{k} = measGenerate(X{k}(:,ind),R);
+    end
+    
     % Number of clutter measurements, 0,1,2
-    %nbrClutter = randi(3)-1;
-    %for i = 1:nbrClutter
-    %    Z{k} = [Z{k}, [unifrnd(1,20); unifrnd(-pi,pi)]];
-    %end
+    nbrClutter = randi(2)-1;
+    for i = 1:nbrClutter
+       %Z{k} = [Z{k}, [unifrnd(1,20); unifrnd(-pi,pi)]]; % For distance and
+       %angle
+       Z{k} = [Z{k}, [unifrnd(-FOVsize(1)/2, FOVsize(1)/2); unifrnd(0, FOVsize(2))]];
+    end
     
     %Rearrenge measurement order
     Z{k} = Z{k}(:,randperm(size(Z{k},2)));

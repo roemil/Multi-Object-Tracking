@@ -6,7 +6,7 @@
 %
 %
 
-function [PestVec, squareError] = plotStates(Z, Xtrue, Xest, Pest, plotSE)
+function [PestVec, squareError] = plotStatesOld(Z, Xtrue, Xest, Pest, plotSE)
 
 if nargin == 4
     plotSE = 'false';
@@ -48,51 +48,55 @@ for k = 2:N
         end
     end
     
-    [asso, ~] = murty(dist',1);
+    [asso, ~] = murty(dist,1);
     
     % Display if the number of target and estimates are not the same and
     % create a figure for unassigned estimates
     if size(dist,1) < size(dist,2)
-        %for i = size(dist,1)+1:size(dist,2)
-        %    asso(1,i) = NaN;
-        %end
+        for i = size(dist,1)+1:size(dist,2)
+           asso(1,i) = NaN;
+        end
         disp(['Nbr of estimates < nbr of true targets, k = ', num2str(k)])
     elseif size(dist,1) > size(dist,2) 
         disp(['Nbr of estimates > nbr of true targets, k = ', num2str(k)])
         if notAssignedFlag == 0
             estNotAssigned = figure(1000);
             notAssignedFlag = 1;
-            %asso(asso == 0) = find(asso == 1);
+            asso(asso == 0) = find(asso == 1);
         end
     end
     
     % Plot the result
     for trueTarget = 1:size(dist,2)
-        figure(Xtrue{k}(5,trueTarget));
-        hold on
-        for i = 1:min(4, size(Xtrue{k},1))
-            subplot(4,1,i)
-            hold on
-            plot(k, Xtrue{k}(i,trueTarget),'k+')
+        if k == 10
+            keyboard
         end
-        if asso(1,trueTarget) ~= 0
-            for i = 1:min(4, size(Xest{k}{asso(1,trueTarget)},1))
+        if sum(asso(:,trueTarget) ~= 0) ~= 0
+            figure(trueTarget);
+            hold on
+            for i = 1:min(4, size(Xtrue{k},1))
                 subplot(4,1,i)
                 hold on
-                plot(k, Xest{k}{asso(1,trueTarget)}(i),'r*')
+                plot(k, Xtrue{k}(i,trueTarget),'k*')
             end
-            squareError(:,k,trueTarget) = (Xest{k}{asso(1,trueTarget)}-Xtrue{k}(1:4,trueTarget)).^2;
-        else
-            disp('Missed estimation')
-        end
-        for estTarget = 1:size(Xest{k},2)
-            if sum(estTarget == asso) == 0
-                figure(estNotAssigned);
-                hold on
-                for i = 1:min(4, size(Xest{k}{estTarget},1))
+            if ~isnan(asso(1,trueTarget))
+                for i = 1:min(4, size(Xest{k}{asso(1,trueTarget)},1))
                     subplot(4,1,i)
                     hold on
-                    plot(k, Xest{k}{estTarget}(i),'r*')
+                    plot(k, Xest{k}{asso(1,trueTarget)}(i),'r*')
+                end
+                squareError(:,k,trueTarget) = (Xest{k}{asso(1,trueTarget)}-Xtrue{k}(1:4,trueTarget)).^2;
+            end
+        else
+            for estTarget = 1:size(Xest{k},2)
+                if sum(estTarget == asso) == 0
+                    figure(estNotAssigned);
+                    hold on
+                    for i = 1:min(4, size(Xest{k}{estTarget},1))
+                        subplot(4,1,i)
+                        hold on
+                        plot(k, Xest{k}{estTarget}(i),'r*')
+                    end
                 end
             end
         end
@@ -118,6 +122,10 @@ for fig = 1:size(findobj(0,'type','figure'),1)
             subplot(4,1,i)
             ylabel(labels{i},'Fontsize',15,'Interpreter','Latex')
             xlabel('$k$','Fontsize',15,'Interpreter','Latex')
+            if (i == 1)
+                leg = legend('Xtrue','Xest');
+                set(leg,'Fontsize',15,'Interpreter','Latex')
+            end
         end
         suptitle(['Target ', num2str(fig)])
     else
