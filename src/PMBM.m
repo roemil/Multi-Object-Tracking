@@ -1,11 +1,6 @@
 %%%%% PMBM %%%%%
-<<<<<<< HEAD
 function [pred, Xupd, Xest, Pest] = PMBM(Z)
 
-=======
-function [pred, Xupd, Xest] = PMBM(Z)
- 
->>>>>>> rmLowr
 % Inititate
 sigmaQ = 2;         % Process (motion) noise
 R = 0.1*[1 0;0 1];    % Measurement noise
@@ -74,24 +69,15 @@ end
 %Xupd{1,1}.P = 0.5*eye(4);
 Xupd = cell(1);
 %Xtmp = cell(1);
-<<<<<<< HEAD
-threshold = 0.1; % CHANGED 0.1
-wThresh = 0.007; % CHANGED 0.005
-
 K =size(Z,2); % Length of sequence
 for k = 2:K % For each time step
     disp(['-------', num2str(k), '-------'])
-=======
 threshold = 0.1;
-wThresh = 0.005;
+wThresh = 0.007;
 Wold = 0;
 C = [];
 Nh = 1000;
-minPenalty = 100;
-K =size(Z,2); % Length of sequence
-for k = 2:K %K % For each time step
-    k
->>>>>>> rmLowr
+
     %%%%% Prediction %%%%%
     
     % TODO: Special case for k == 1?? 
@@ -148,9 +134,10 @@ for k = 2:K %K % For each time step
         wHypSum = 0;
         for m = 1 : nbrOfMeas
             for nj = 1 : size(Xhypo{k,j},2)-1;
+                % Normalize weights for cost matrix
                 Wold(m,nj) = Xhypo{k,j}(nj).w*Xhypo{k,j}(nj).r*Pd*mvnpdf(Z{k}(:,nj)...
                     ,H*Xhypo{k,j}(nj).state,Xhypo{k,j}(nj).S)...
-                    /(Xhypo{k,j}(nj).w*(1-Xhypo{k,j}(nj).r+Xhypo{k,j}(nj).r*(1-Pd)));
+                    /(Xhypo{k,j}(nj).w*(1-Xhypo{k,j}(nj).r+Xhypo{k,j}(nj).r*(1-Pd))); 
                 wHyp = wHyp * Xhypo{k,j}(nj).w;
                 wHypSum = wHypSum + Xhypo{k,j}(nj).w;
             end
@@ -215,7 +202,17 @@ for k = 2:K %K % For each time step
  
     
     Xest{k} = est1(Xtmp2, threshold,k);
-    Xupd = removeLowProbExistence(Xtmp2,threshold,wSum, k);
+    %Xupd{k} = removeLowProbExistence(Xtmp2{k},threshold,wSum, k);
+    for j = 1:size(Xtmp2,2)
+        iInd = 1;
+        for i = 1:size(Xtmp2{k,j},2)
+            if Xtmp2{k,j}(i).r > threshold
+                Xupd{k,j}(iInd) = Xtmp2{k,j}(i);
+                Xupd{k,j}(iInd).w = Xtmp2{k,j}(i).w/wSum(j);
+                iInd = iInd+1;
+            end
+        end
+    end
     %disp(['k_new: ', num2str(K_new)])
 
 end
