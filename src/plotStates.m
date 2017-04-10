@@ -62,11 +62,12 @@ for k = 2:N
         if notAssignedFlag == 0
             estNotAssigned = figure(1000);
             notAssignedFlag = 1;
+            asso(asso == 0) = find(asso == 1);
         end
     end
     
     % Plot the result
-    for trueTarget = 1:size(asso,2)
+    for trueTarget = 1:size(dist,2)
         if sum(asso(:,trueTarget) ~= 0) ~= 0
             figure(trueTarget);
             hold on

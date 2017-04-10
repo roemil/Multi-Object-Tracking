@@ -69,14 +69,16 @@ end
 %Xupd{1,1}.P = 0.5*eye(4);
 Xupd = cell(1);
 %Xtmp = cell(1);
+
+threshold = 0.1;    % CHANGED 0.1
+wThresh = 0.007;    % CHANGED 0.005
+
 K =size(Z,2); % Length of sequence
-for k = 2:K % For each time step
+for k = 2:K %K % For each time step
     disp(['-------', num2str(k), '-------'])
-threshold = 0.1;
-wThresh = 0.007;
-Wold = 0;
-C = [];
-Nh = 1000;
+    Wold = 0;
+    C = [];
+    Nh = 170*size(Z{k},2);    %Murty
 
     %%%%% Prediction %%%%%
     
@@ -118,6 +120,7 @@ Nh = 1000;
     else
         nbrOfGlobHyp = 0;
     end
+    
     [XpotNew, rho] = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k, c);
     
     %%%% Update for previously potentially detected targets %%%%
@@ -136,6 +139,7 @@ Nh = 1000;
     % TODO: Generate new global hypo from Xhypo and XpotNew
     oldInd = 0;
     m = size(Z{k},2);
+    Wnew = diag(rho);
     for j = 1:max(1,nbrOfGlobHyp)
         if ~isempty(Xhypo{k,j})
             nbrOldTargets = size(Xhypo{k,j,1},2);
@@ -148,92 +152,92 @@ Nh = 1000;
             S(:,:,1) = eye(m);
         end
         
-        %%%%% MURTY HERE %%%%%%
-        %hypoInd = murty();
-            %%%% Murty
-    Wnew = diag(rho);
-    %wHyp(1) = 1;
-    
-    % TODO: Fix S matrix, use that as input to Global hyp 
-    trace_vec = [];
-    for j = 1 : size(Xhypo,2)
+        %%%%% MURTY %%%%%%
+        
+        % TODO: Fix S matrix, use that as input to Global hyp 
         wHyp = 1;
         wHypSum = 0;
+        Wold = zeros(nbrOfMeas,size(Xhypo{k,j},2));
         for m = 1 : nbrOfMeas
-            for nj = 1 : size(Xhypo{k,j},2);
+            for nj = 1 : size(Xhypo{k,j},2)
                 % Normalize weights for cost matrix
-                Wold(m,nj) = Xhypo{k,j}(nj).w*Xhypo{k,j}(nj).r*Pd*mvnpdf(Z{k}(:,nj)...
-                    ,H*Xhypo{k,j}(nj).state,Xhypo{k,j}(nj).S)...
-                    /(Xhypo{k,j}(nj).w*(1-Xhypo{k,j}(nj).r+Xhypo{k,j}(nj).r*(1-Pd))); 
-                wHyp = wHyp * Xhypo{k,j}(nj).w;
-                wHypSum = wHypSum + Xhypo{k,j}(nj).w;
+                Wold(m,nj) = Xhypo{k,j,m}(nj).w*Xhypo{k,j,m}(nj).r*Pd*mvnpdf(Z{k}(:,m)...
+                    ,H*Xpred{k,j}(nj).state,Xhypo{k,j,m}(nj).S)...
+                    /(Xhypo{k,j,m}(nj).w*(1-Xhypo{k,j,m}(nj).r+Xhypo{k,j,m}(nj).r*(1-Pd))); 
+                Wold(m,nj) = Xhypo{k,j,m}(nj).w; 
+                wHyp = wHyp * Xpred{k,j}(nj).w;
+                wHypSum = wHypSum + Xpred{k,j}(nj).w;
             end
         end
         if(wHypSum == 0)
             wHypSum = 1;
         end
         wHyp = wHyp / wHypSum; % shall I normalize?
-        if(Wold ~= 0)
+        if sum(sum(Wold)) ~= 0
             C = -[log(Wold), log(Wnew)];
         else
             C = -log(Wnew);
         end
         
         [rows,cols] = find(C == inf);
-        for i = 1 : size(rows,1)
-            C(rows(i),cols(i)) = 1e16;
+        if ~isempty(rows)
+            for i = 1 : size(rows,1)
+                C(rows(i),cols(i)) = 1e20;
+            end
         end
         
         K_hyp = max(1,ceil(Nh * wHyp));
 %         K_old = 1;
-        trace_vec(j) = trace(S(:,:,j)'*C);
-    end
-    [ass, cost] = murty(trace_vec,K_hyp);
- 
-        %%%%% MURTY HERE %%%%%%
+        trace_vec = zeros(1,size(S,3));
+        for jnew = 1:size(S,3)
+            trace_vec(jnew) = trace(S(:,:,jnew)'*C);
+        end
+    
+        [ass, cost] = murty(trace_vec,min(size(trace_vec,2),K_hyp));
+        ind = find(ass==0);
+        if ~isempty(ind)
+            ass = ass(1:ind-1);
+        end
         
-        [newGlob, newInd] = generateGlobalHypo3(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd);
+        [newGlob, newInd] = generateGlobalHypo5(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd, Amat, ass,nbrOldTargets);
+
         for jnew = oldInd+1:newInd
             Xtmp{k,jnew} = newGlob{jnew-oldInd};
         end
         oldInd = newInd;
     end
     
-    jInd = 1;
     %if(~isempty(Xtmp{1})) % TODO: Quick fix - Xtmp will depend on generateGlobalHyp
     for j = 1:size(Xtmp,2)
-        wGlob(jInd) = 1;
-        wSum(jInd) = 0;
+        wSum(j) = 0;
+        wGlob(j) = 1;
         if ~isempty(Xtmp{k,j})
             for i = 1:size(Xtmp{k,j},2)
                 if ~isempty(Xtmp{k,j}(i).w)
-                    wGlob(jInd) = wGlob(jInd)*Xtmp{k,j}(i).w;
+                    wGlob(j) = wGlob(j)*Xtmp{k,j}(i).w;
                     if Xtmp{k,j}(i).r > threshold
-                        wSum(jInd) = wSum(jInd) + Xtmp{k,j}(i).w;
+                        wSum(j) = wSum(j) + Xtmp{k,j}(i).w;
                     end
                 end
-            end
-            if wGlob(jInd) > wThresh %0.0005 % For 2 targets/meas 0.005
-                for i = 1:size(Xtmp{k,j},2)
-                    Xtmp2{k,jInd}(i) = Xtmp{k,j}(i);
-                end
-                jInd = jInd+1;
             end
         end
     end
 
-    Xest{k} = est1(Xtmp2, threshold,k);
+    [Xest{k}, Pest{k}] = est1(Xtmp, threshold,k);
+    
+    [keepGlobs,~] = murty(wGlob,Nh);
+    
     %Xupd{k} = removeLowProbExistence(Xtmp2{k},threshold,wSum, k);
-    for j = 1:size(Xtmp2,2)
+    for j = 1:size(keepGlobs,1)
         iInd = 1;
-        for i = 1:size(Xtmp2{k,j},2)
-            if Xtmp2{k,j}(i).r > threshold
-                Xupd{k,j}(iInd) = Xtmp2{k,j}(i);
-                Xupd{k,j}(iInd).w = Xtmp2{k,j}(i).w/wSum(j);
+        for i = 1:size(Xtmp{k,keepGlobs(j)},2)
+            if Xtmp{k,keepGlobs(j)}(i).r > threshold
+                Xupd{k,j}(iInd) = Xtmp{k,keepGlobs(j)}(i);
+                Xupd{k,j}(iInd).w = Xtmp{k,keepGlobs(j)}(i).w/wSum(keepGlobs(j));
                 iInd = iInd+1;
             end
         end
     end
     %disp(['k_new: ', num2str(K_new)])
-    disp(num2str(size(Xupd,2)))
+    disp(['Nbr global hypo: ', num2str(size(Xupd,2))])
 end

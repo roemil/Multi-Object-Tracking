@@ -12,7 +12,7 @@
 %
 %
 
-function [newGlob, newInd] = generateGlobalHypo5(Xhypo, Xnew, Z, oldInd, Amat, hypoInd)
+function [newGlob, newInd] = generateGlobalHypo5(Xhypo, Xnew, Z, oldInd, Amat, hypoInd,nbrOldTargets)
 
 % Number of measurements
 m = size(Z,2);
@@ -41,28 +41,25 @@ end
 % detected potential target
 
 for j = 1:size(hypoInd,1)
-    for i = 1:size(hypoInd,2)
-        % Initiate
-        newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',1,'r',0,'S',0);
-        for col = 1:size(Amat,2)
-            % Find combination
-            newGlob{jInd}(Amat(1,col,i)) = Xtmp{col}(Amat(1,col,i));
-        end
-        for target = 1:size(newGlob{jInd},2)
-            if isempty(newGlob{jInd}(target).state)
-                if target <= nbrOldTargets
-                    % Missed detection
-                    newGlob{jInd}(target) = Xhypo{end}(target);
-                else
-                    % Does not consider newly detected potential target
-                    newGlob{jInd}(target).state = Xnew{target-nbrOldTargets}.state;
-                    newGlob{jInd}(target).P = Xnew{target-nbrOldTargets}.P;
-                end
+    % Initiate
+    newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',1,'r',0,'S',0);
+    for col = 1:size(Amat,2)
+        % Find combination
+        newGlob{j}(Amat(1,col,hypoInd(j))) = Xtmp{col}(Amat(1,col,hypoInd(j)));
+    end
+    for target = 1:size(newGlob{j},2)
+        if isempty(newGlob{j}(target).state)
+            if target <= nbrOldTargets
+                % Missed detection
+                newGlob{j}(target) = Xhypo{end}(target);
+            else
+                % Does not consider newly detected potential target
+                newGlob{j}(target).state = Xnew{target-nbrOldTargets}.state;
+                newGlob{j}(target).P = Xnew{target-nbrOldTargets}.P;
             end
         end
-        jInd = jInd+1;
     end
 end
 
 % Update total number of global hypotheses
-newInd = oldInd+jInd-1;
+newInd = oldInd+j;
