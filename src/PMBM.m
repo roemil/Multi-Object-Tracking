@@ -1,11 +1,6 @@
 %%%%% PMBM %%%%%
-<<<<<<< HEAD
 function [pred, Xupd, Xest, Pest] = PMBM(Z)
 
-=======
-function [pred, Xupd, Xest] = PMBM(Z)
- 
->>>>>>> rmLowr
 % Inititate
 sigmaQ = 2;         % Process (motion) noise
 R = 0.1*[1 0;0 1];    % Measurement noise
@@ -74,24 +69,17 @@ end
 %Xupd{1,1}.P = 0.5*eye(4);
 Xupd = cell(1);
 %Xtmp = cell(1);
-<<<<<<< HEAD
+
 threshold = 0.1; % CHANGED 0.1
 wThresh = 0.007; % CHANGED 0.005
 
 K =size(Z,2); % Length of sequence
 for k = 2:K % For each time step
     disp(['-------', num2str(k), '-------'])
-=======
-threshold = 0.1;
-wThresh = 0.005;
-Wold = 0;
-C = [];
-Nh = 1000;
-minPenalty = 100;
-K =size(Z,2); % Length of sequence
-for k = 2:K %K % For each time step
-    k
->>>>>>> rmLowr
+    Wold = 0;
+    C = [];
+    Nh = 1000;
+    
     %%%%% Prediction %%%%%
     
     % TODO: Special case for k == 1?? 
@@ -195,7 +183,7 @@ for k = 2:K %K % For each time step
         %hypoInd = murty();
         %%%%% MURTY HERE %%%%%%
         
-        [newGlob, newInd] = generateGlobalHypo3(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd, Amat, indeces);
+        [newGlob, newInd] = generateGlobalHypo3(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd);%, Amat, hypoInd);
         for jnew = oldInd+1:newInd
             Xtmp{k,jnew} = newGlob{jnew-oldInd};
         end
@@ -226,6 +214,7 @@ for k = 2:K %K % For each time step
     end
 
     Xest{k} = est1(Xtmp2, threshold,k);
+    % TODO: Fix such that variables does not lose its history
     Xupd = removeLowProbExistence(Xtmp2,threshold,wSum, k);
     %disp(['k_new: ', num2str(K_new)])
 
