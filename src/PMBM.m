@@ -121,11 +121,24 @@ for k = 2:K % For each time step
     Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp,k, Pd, H, R, Z);
     % TODO: Generate new global hypo from Xhypo and XpotNew
     oldInd = 0;
+    m = size(Z{k},2);
     for j = 1:max(1,nbrOfGlobHyp)
-        % TODO: updated generateGlobalHypo to v2!
-        % TODOTODOTODO: Generate hypo is wrong. We have constraints on
-        % measurements on all X!!!
-        [newGlob, newInd] = generateGlobalHypo3(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd);
+        if ~isempty(Xhypo{k,j})
+            nbrOldTargets = size(Xhypo{k,j,1},2);
+            [A, S, Amat] = generateGlobalInd(m, nbrOldTargets);
+        else
+            nbrOldTargets = 0;
+            A{1} = 1:m;
+            Amat = 1:m;
+            S = zeros(m,m,1);
+            S(:,:,1) = eye(m);
+        end
+        
+        %%%%% MURTY HERE %%%%%%
+        %hypoInd = murty();
+        %%%%% MURTY HERE %%%%%%
+        
+        [newGlob, newInd] = generateGlobalHypo3(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd, Amat, indeces);
         for jnew = oldInd+1:newInd
             Xtmp{k,jnew} = newGlob{jnew-oldInd};
         end
