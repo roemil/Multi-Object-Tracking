@@ -9,7 +9,7 @@ FOVsize = [20,30]; % in m
  
 % Assume constant
 Pd = 0.9;   % Detection probability
-Ps = 0.9;   % Survival probability
+Ps = 0.95;   % Survival probability
 c = 0.2;    % clutter intensity
  
 % Initiate birth
@@ -47,7 +47,7 @@ Xupd = cell(1,1);
 H = generateMeasurementModel({},'linear');
  
 % TODO: Initial guess??
-for i = 1:40
+for i = 1:20
     XmuUpd{1}(i).w = 1;    % Pred weight
 %     XmuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
 %         unifrnd(0, FOVsize(2)), unifrnd(-2,2), unifrnd(-2,2)]';      % Pred state
@@ -79,7 +79,7 @@ for k = 2:K %K % For each time step
     disp(['-------', num2str(k), '-------'])
     Wold = 0;
     C = [];
-    Nh = 170*size(Z{k},2);    %Murty
+    Nh = 100*size(Z{k},2);    %Murty
 
     %%%%% Prediction %%%%%
     
@@ -250,5 +250,6 @@ for k = 2:K %K % For each time step
 %         end
     end
     %disp(['k_new: ', num2str(K_new)])
+    disp('Nbr global hypo pre murty: ', num2str(size(wGlob,2)))
     disp(['Nbr global hypo: ', num2str(size(Xupd,2))])
 end

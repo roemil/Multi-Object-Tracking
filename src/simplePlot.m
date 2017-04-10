@@ -41,5 +41,5 @@ for k = 2:K
     if k == 2
         legend([gtPlot(1), estPlot(1)],'GT','Estimate')
     end
-    pause(0.01)
+    pause(0.05)
 end
