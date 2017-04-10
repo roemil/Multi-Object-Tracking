@@ -176,8 +176,6 @@ for k = 2:K %K % For each time step
     end
     
     jInd = 1;
-    jInd2 = 1;
-    wGlob2(jInd2) = 1;
     %if(~isempty(Xtmp{1})) % TODO: Quick fix - Xtmp will depend on generateGlobalHyp
     for j = 1:size(Xtmp,2)
         wGlob(jInd) = 1;
@@ -202,17 +200,8 @@ for k = 2:K %K % For each time step
  
     
     Xest{k} = est1(Xtmp2, threshold,k);
-    
+    Xupd = removeLowProbExistence(Xtmp2,threshold,wSum, k);
     %disp(['k_new: ', num2str(K_new)])
-    for j = 1:size(Xtmp2,2)
-        iInd = 1;
-        for i = 1:size(Xtmp2{k,j},2)
-            if Xtmp2{k,j}(i).r > threshold
-                Xupd{k,j}(iInd) = Xtmp2{k,j}(i);
-                Xupd{k,j}(iInd).w = Xtmp2{k,j}(i).w/wSum(j);
-                iInd = iInd+1;
-            end
-        end
-    end
+
 end
 
