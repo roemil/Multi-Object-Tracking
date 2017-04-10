@@ -183,7 +183,7 @@ for k = 2:K % For each time step
         %hypoInd = murty();
         %%%%% MURTY HERE %%%%%%
         
-        [newGlob, newInd] = generateGlobalHypo3(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd);%, Amat, hypoInd);
+        [newGlob, newInd] = generateGlobalHypo5(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd, Amat, hypoInd);
         for jnew = oldInd+1:newInd
             Xtmp{k,jnew} = newGlob{jnew-oldInd};
         end
