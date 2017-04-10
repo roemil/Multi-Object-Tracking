@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [pred, Xupd, Xest, Pest] = PMBM(Z)
+function [pred, Xupd, Xest, Pest, Xupd2] = PMBM(Z)
 
 % Inititate
 sigmaQ = 2;         % Process (motion) noise
@@ -68,6 +68,7 @@ end
 %Xupd{1,1}.state = [Z{2}(1,1) Z{2}(2,1) 0 0]';
 %Xupd{1,1}.P = 0.5*eye(4);
 Xupd = cell(1);
+Xupd2 = cell(1);
 %Xtmp = cell(1);
 
 threshold = 0.1;    % CHANGED 0.1
@@ -227,16 +228,26 @@ for k = 2:K %K % For each time step
     
     [keepGlobs,~] = murty(wGlob,Nh);
     
-    %Xupd{k} = removeLowProbExistence(Xtmp2{k},threshold,wSum, k);
+%         for j = 1:size(keepGlobs,1)
+%         iInd = 1;
+%         for i = 1:size(Xtmp{k,keepGlobs(j)},2)
+%             if Xtmp{k,keepGlobs(j)}(i).r > threshold
+%                 Xupd{k,j}(iInd) = Xtmp{k,keepGlobs(j)}(i);
+%                 Xupd{k,j}(iInd).w = Xtmp{k,keepGlobs(j)}(i).w/wSum(keepGlobs(j));
+%                 iInd = iInd+1;
+%             end
+%         end
+%     end
     for j = 1:size(keepGlobs,1)
         iInd = 1;
-        for i = 1:size(Xtmp{k,keepGlobs(j)},2)
-            if Xtmp{k,keepGlobs(j)}(i).r > threshold
-                Xupd{k,j}(iInd) = Xtmp{k,keepGlobs(j)}(i);
-                Xupd{k,j}(iInd).w = Xtmp{k,keepGlobs(j)}(i).w/wSum(keepGlobs(j));
-                iInd = iInd+1;
-            end
-        end
+        Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs,threshold,wSum, k,j);
+%         for i = 1:size(Xtmp{k,keepGlobs(j)},2)
+%             if Xtmp{k,keepGlobs(j)}(i).r > threshold
+%                 Xupd{k,j}(iInd) = Xtmp{k,keepGlobs(j)}(i);
+%                 Xupd{k,j}(iInd).w = Xtmp{k,keepGlobs(j)}(i).w/wSum(keepGlobs(j));
+%                 iInd = iInd+1;
+%             end
+%         end
     end
     %disp(['k_new: ', num2str(K_new)])
     disp(['Nbr global hypo: ', num2str(size(Xupd,2))])
