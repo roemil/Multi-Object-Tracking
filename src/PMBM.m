@@ -225,8 +225,6 @@ for k = 2:K %K % For each time step
         end
     end
 
- 
-    
     Xest{k} = est1(Xtmp2, threshold,k);
     Xupd = removeLowProbExistence(Xtmp2,threshold,wSum, k);
     %disp(['k_new: ', num2str(K_new)])
