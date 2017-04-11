@@ -7,16 +7,16 @@
 %
 %
 %
-function Xpred = predictDetectedBernoulli(Xupd, F, Q, Ps, k)    
-    if(isempty(Xupd{k-1}))
-        Xpred{k} = [];
+function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)    
+    if(isempty(XupdPrev))
+        Xpred = [];
     else
-        for j = 1:size(Xupd,2)
-            for i = 1:size(Xupd{k-1,j},2)
+        for j = 1:size(XupdPrev,2)
+            for i = 1:size(XupdPrev{j},2)
                 % Bernoulli
-                Xpred{k,j}(i).w = Xupd{k-1,j}(i).w;      % Pred weight
-                [Xpred{k,j}(i).state, Xpred{k,j}(i).P] = KFPred(Xupd{k-1,j}(i).state, F, Xupd{k-1,j}(i).P ,Q);    % Pred state
-                Xpred{k,j}(i).r = Ps*Xupd{k-1,j}(i).r;   % Pred prob. of existence
+                Xpred{j}(i).w = XupdPrev{j}(i).w;      % Pred weight
+                [Xpred{j}(i).state, Xpred{j}(i).P] = KFPred(XupdPrev{j}(i).state, F, XupdPrev{j}(i).P ,Q);    % Pred state
+                Xpred{j}(i).r = Ps*XupdPrev{j}(i).r;   % Pred prob. of existence
             end
         end
     end

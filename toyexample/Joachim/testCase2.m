@@ -247,6 +247,7 @@ for k = 2:nbrTimeSteps
         end
         
         % Plot each target
+        
         if k > 2
             delete(objPlot)
         end

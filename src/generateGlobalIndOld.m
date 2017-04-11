@@ -8,7 +8,7 @@
 %
 %
 
-function [A, S, Amat] = generateGlobalInd(m,nbrOldTargets)
+function [A, S, Amat] = generateGlobalIndOld(m,nbrOldTargets)
 
 %
 if nbrOldTargets >= m
@@ -32,33 +32,26 @@ if nbrOldTargets >= m
         end
     end
 else
-    Amat = zeros(1,m,2^nbrOldTargets);
     A{1} = zeros(2^nbrOldTargets,m);
     for z = 1:nbrOldTargets
         old = repmat(pm(1,z),2^(z-1),1);
         new = repmat(z+nbrOldTargets,2^(z-1),1);
-        Amat(1,z,:) = reshape(repmat([old; new],2^nbrOldTargets/2^(z),1), 1, 1, []);
         A{1}(:,z) = repmat([old; new],2^nbrOldTargets/2^(z),1);
     end
     for z = nbrOldTargets+1:m
         A{1}(:,z) = z+nbrOldTargets;
-        Amat(1,z,:) = z+nbrOldTargets;
     end
 end
 
 for i = 1:size(A,2)
     A{i} = A{i}(1:end-1,:);
-    Amat = Amat(1,:,1:end-1);
 end
 
 if nbrOldTargets < m
     Atmp = A{1};
-    AmatTmp = Amat;
     idx = perms(1:size(Atmp,2));
-    idxmat = perms(1:size(AmatTmp,2));
     ind = 1;
     clear A
-    clear Amat
     for ii = idx'
         A{ind} = Atmp(:,ii);
         for z = 1:m
@@ -70,25 +63,11 @@ if nbrOldTargets < m
         end
         ind = ind+1;
     end
-    ind = 1;
-    for ii = idxmat'
-        indNew = ind+size(Atmp(:,ii),1)-1;
-        Amat(1,:,ind:indNew) = fliplr(reshape(Atmp(:,ii), m, size(Atmp(:,ii),1)));
-        for z = 1:m
-            for row = ind:indNew
-                if ((Amat(1,z,row) > nbrOldTargets) && (Amat(1,z,row) ~= z+nbrOldTargets))
-                    Amat(1,z,row) = z+nbrOldTargets;
-                end
-            end
-        end
-        ind = indNew+1;
-    end
 end
 
 A{end+1} = nbrOldTargets+1:nbrOldTargets+m;
-Amat(1,:,end+1) = nbrOldTargets+1:nbrOldTargets+m;
 
-Amat2 = zeros(1,m,1);
+Amat = zeros(1,m,1);
 S = zeros(m, nbrOldTargets+m,1);
 ind = 1;
 for i = 1:size(A,2)
@@ -97,8 +76,7 @@ for i = 1:size(A,2)
         for col = 1:m
             S(col, A{i}(row,col),ind) = 1;
         end
-        Amat2(1,:,ind) = A{i}(row,:);
+        Amat(1,:,ind) = A{i}(row,:);
         ind = ind+1;
     end
 end
-keyboard

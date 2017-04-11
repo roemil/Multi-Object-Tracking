@@ -10,17 +10,19 @@
 %
 
 
-function [Xest, Pest] = est1(Xupd, threshold,k)
+function [Xest, Pest] = est1(Xupd, threshold)
     M = -1;
     Xest = cell(1);
-    if(~isempty(Xupd{k}))
+    Pest = cell(1);
+    
+    if(~isempty(Xupd))
         for j = 1:size(Xupd,2)
             prod = 1;
-            if size(Xupd{k,j},2) == 0
+            if size(Xupd{j},2) == 0
                 prod = 0;
             else
-                for i = 1 : size(Xupd{k,j},2) % find index of which global hyp is 
-                    prod= prod*Xupd{k,j}(i).w;% most likely
+                for i = 1 : size(Xupd{j},2) % find index of which global hyp is 
+                    prod= prod*Xupd{j}(i).w;% most likely
                 end
             end
             if(prod >= M)
@@ -29,10 +31,10 @@ function [Xest, Pest] = est1(Xupd, threshold,k)
             end 
         end
         index = 1;
-        for i = 1 : size(Xupd{k,ind},2)
-            if(Xupd{k,ind}(i).r > threshold) % if prob. of existence great enough
-                Xest{index} = Xupd{k,ind}(i).state; % store mean (i.e states)
-                Pest{index} = Xupd{k,ind}(i).P;
+        for i = 1 : size(Xupd{ind},2)
+            if(Xupd{ind}(i).r > threshold) % if prob. of existence great enough
+                Xest{index} = Xupd{ind}(i).state; % store mean (i.e states)
+                Pest{index} = Xupd{ind}(i).P;
                 index = index + 1;
             %else
             %    Xest{index} = [];
