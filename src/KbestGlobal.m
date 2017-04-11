@@ -41,9 +41,9 @@ K_hyp = max(1,ceil(Nh * wHyp));
 bfTrace = permute(S,[2 1 3]);
 bfTracesTimesC = mtimesx(bfTrace,C);
 d=bfTracesTimesC(bsxfun(@plus,(0:size(bfTracesTimesC,3)-1)*size(S,1)*size(S,2),(1:size(S,2):size(S,1)*size(S,2)).'));
-%minTmp = min(size(trace_vec,2), maxKperGlobal);
+minTmp = min(size(bfTrace,2), maxKperGlobal);
 
-[ass, ~] = murty(d,min(size(bfTrace,3),K_hyp));
+[ass, ~] = murty(d,min(minTmp,K_hyp));
 ind = find(ass==0);
 if ~isempty(ind)
     ass = ass(1:ind-1);
