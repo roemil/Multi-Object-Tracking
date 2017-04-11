@@ -252,6 +252,7 @@ for k = 2:K %K % For each time step
         end
     end
     %disp(['k_new: ', num2str(K_new)])
+
     disp(['Pred time: ', num2str(timePred), 's'])
     disp(['Upd time: ', num2str(timeUpd), 's'])
     disp(['Nbr global hypo pre murty: ', num2str(size(wGlob,2))])
