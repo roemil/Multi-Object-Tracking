@@ -7,8 +7,8 @@ T = 0.1; % sampling time, 1/fps
 FOVsize = [20,30]; % in m
  
 % Assume constant
-Pd = 0.9;   % Detection probability
-Ps = 0.9;   % Survival probability
+Pd = 0.98;   % Detection probability
+Ps = 0.95;   % Survival probability
 c = 0.2;    % clutter intensity
  
 % Initiate undetected targets
@@ -53,8 +53,8 @@ threshold = 0.1;    % CHANGED 0.1
 poissThresh = 1e-3;
 Nhconst = 100;
 nbrOfBirths = 10;
-maxKperGlobal = 50;
-maxNbrGlobal = 200;
+maxKperGlobal = 20;
+maxNbrGlobal = 100;
 
 % Save everything in simVariables and load at the begining of the filter
 save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold','poissThresh');

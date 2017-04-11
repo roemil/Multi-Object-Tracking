@@ -14,6 +14,7 @@ for m = 1 : nbrOfMeas
         wHypSum = wHypSum + Xpred{j}(nj).w;
     end
 end
+
 if(wHypSum == 0)
     wHypSum = 1;
 end
