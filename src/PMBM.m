@@ -74,7 +74,7 @@ Xupd2 = cell(1);
 threshold = 0.1;    % CHANGED 0.1
 
 K =size(Z,2); % Length of sequence
-for k = 2:K %K % For each time step
+for k = 2:150 %K % For each time step
     disp(['-------', num2str(k), '-------'])
     Wold = 0;
     C = [];
@@ -124,11 +124,13 @@ for k = 2:K %K % For each time step
         nbrOfGlobHyp = 0;
     end
     
+    startPotNew = tic;
     [XpotNew, rho] = updateNewPotTargets(XmuPred,XmuUpd, nbrOfMeas, Pd, H, R, Z, k, c);
-    
+    timePotNew = toc(startPotNew);
     %%%% Update for previously potentially detected targets %%%%
+    startHypo = tic;
     Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp,k, Pd, H, R, Z);
-    
+    timeHypo = toc(startHypo);
 
 %     %min(length(index),size(Xtmp{k},1))
 %     for ind = 1 : min(length(index),size(Xtmp{k},1))
@@ -140,10 +142,17 @@ for k = 2:K %K % For each time step
     
     
     % TODO: Generate new global hypo from Xhypo and XpotNew
+    startMurty = tic;
     oldInd = 0;
     m = size(Z{k},2);
     Wnew = diag(rho);
+    timeWold  = 0;
+    timeGlob = 0;
+    timeInd = 0;
+    timeTrace = 0;
+    timeC = 0;
     for j = 1:max(1,nbrOfGlobHyp)
+        startTimeInd = tic;
         if ~isempty(Xhypo{k,j})
             nbrOldTargets = size(Xhypo{k,j,1},2);
             [A, S, Amat] = generateGlobalInd(m, nbrOldTargets);
@@ -154,6 +163,7 @@ for k = 2:K %K % For each time step
             S = zeros(m,m,1);
             S(:,:,1) = eye(m);
         end
+        timeInd = timeInd + toc(startTimeInd);
         
         %%%%% MURTY %%%%%%
         
@@ -161,6 +171,7 @@ for k = 2:K %K % For each time step
         wHyp = 1;
         wHypSum = 0;
         Wold = zeros(nbrOfMeas,size(Xhypo{k,j},2));
+        startWold = tic;
         for m = 1 : nbrOfMeas
             for nj = 1 : size(Xhypo{k,j},2)
                 % Normalize weights for cost matrix
@@ -172,6 +183,7 @@ for k = 2:K %K % For each time step
                 wHypSum = wHypSum + Xpred{k,j}(nj).w;
             end
         end
+        
         if(wHypSum == 0)
             wHypSum = 1;
         end
@@ -181,36 +193,50 @@ for k = 2:K %K % For each time step
         else
             C = -log(Wnew);
         end
-        
+        timeWold = timeWold + toc(startWold);
+        startC = tic;
         [rows,cols] = find(C == inf);
         if ~isempty(rows)
             for i = 1 : size(rows,1)
                 C(rows(i),cols(i)) = 1e20;
             end
         end
-        
+        timeC = timeC + toc(startC);
         K_hyp = max(1,ceil(Nh * wHyp));
 %         K_old = 1;
         trace_vec = zeros(1,size(S,3));
-        for jnew = 1:size(S,3)
-            trace_vec(jnew) = trace(S(:,:,jnew)'*C);
-        end
-    
-        [ass, ~] = murty(trace_vec,min(size(trace_vec,2),K_hyp));
+        startTrace = tic;
+        %for jnew = 1:size(S,3)
+            %trace_vec(jnew) = trace(S(:,:,jnew)'*C);
+        %end
+        %S_new = permute(S,[2 1 3]);
+
+        bfTrace = permute(S,[2 1 3]);
+        bfTracesTimesC = mtimesx(bfTrace,C);
+        %bfTrace(:,:,jnew) = bfTrace(:,:,jnew)*C;
+        %trace_vec(:,:,:) = trace();
+        d=bfTracesTimesC(bsxfun(@plus,(0:size(bfTracesTimesC,3)-1)*size(S,1)*size(S,2),(1:size(S,2):size(S,1)*size(S,2)).'));
+        timeTrace = timeTrace + toc(startTrace);
+        startMurty2 = tic;
+        [ass, ~] = murty(d,min(size(d,2),K_hyp));
+        timeMurty2 = toc(startMurty2);
         ind = find(ass==0);
         if ~isempty(ind)
             ass = ass(1:ind-1);
         end
-        
+        startGlob = tic;
         [newGlob, newInd] = generateGlobalHypo5(Xhypo(k,j,:), XpotNew(k,:), Z{k}, oldInd, Amat, ass,nbrOldTargets);
-
+        timeGlob = timeGlob + toc(startGlob);
+        startTmp = tic;
         for jnew = oldInd+1:newInd
             Xtmp{k,jnew} = newGlob{jnew-oldInd};
         end
+        timeTmp = toc(startTmp);
         oldInd = newInd;
     end
-    
+    timeMurty = toc(startMurty);
     %if(~isempty(Xtmp{1})) % TODO: Quick fix - Xtmp will depend on generateGlobalHyp
+    startwSum = tic;
     for j = 1:size(Xtmp,2)
         wSum(j) = 0;
         wGlob(j) = 1;
@@ -225,8 +251,9 @@ for k = 2:K %K % For each time step
             end
         end
     end
+    timewSum = toc(startwSum);
     timeUpd = toc(startUpd);
-    [Xest{k}, Pest{k}] = est1(Xtmp, threshold,k);
+    [Xest{k}] = est1(Xtmp, threshold,k);
     
     [keepGlobs,~] = murty(wGlob,Nh);
     
@@ -255,6 +282,17 @@ for k = 2:K %K % For each time step
 
     disp(['Pred time: ', num2str(timePred), 's'])
     disp(['Upd time: ', num2str(timeUpd), 's'])
+    %disp(['PotNew time: ', num2str(timePotNew), 's'])
+    %disp(['Hypo time: ', num2str(timeHypo), 's'])
+    disp(['Murty time: ', num2str(timeMurty), 's'])
+    disp(['Ind time: ', num2str(timeInd), 's'])
+    %disp(['Wold time: ', num2str(timeWold), 's'])
+    %disp(['C time: ', num2str(timeC), 's'])
+    disp(['Trace time: ', num2str(timeTrace), 's'])
+    %disp(['Murty2 time: ', num2str(timeMurty2), 's'])
+    %disp(['Glob time: ', num2str(timeGlob), 's'])
+    %disp(['Tmp time: ', num2str(timeTmp), 's'])
+    %disp(['wSum time: ', num2str(timewSum), 's'])
     disp(['Nbr global hypo pre murty: ', num2str(size(wGlob,2))])
     disp(['Nbr global hypo: ', num2str(size(Xupd,2))])
 end
