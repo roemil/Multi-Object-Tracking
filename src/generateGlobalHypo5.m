@@ -45,7 +45,7 @@ for j = 1:size(hypoInd,1)
     newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',1,'r',0,'S',0);
     for col = 1:size(Amat,2)
         % Find combination
-        newGlob{j}(Amat(1,col,hypoInd(j))) = Xtmp{col}(Amat(1,col,hypoInd(j)));
+        newGlob{j}(Amat(hypoInd(j),col)) = Xtmp{col}(Amat(hypoInd(j),col));
     end
     for target = 1:size(newGlob{j},2)
         if isempty(newGlob{j}(target).state)

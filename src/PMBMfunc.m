@@ -61,20 +61,20 @@ oldInd = 0;
 m = size(Z,2);
 Wnew = diag(rho);
 for j = 1:max(1,nbrOfGlobHyp)
+    findA(j) = tic;
     if ~isempty(Xhypo{j})
         nbrOldTargets = size(Xhypo{j,1},2);
         if nbrOldTargets ~= nbrOldTargetsPrev
-            [A, S, Amat] = generateGlobalIndOld(m, nbrOldTargets);
+            [S, Amat] = generateGlobalIndTest(m, nbrOldTargets); %TODO: THIS IS CURRENTLY THE BEST ONE
             nbrOldTargetsPrev = nbrOldTargets;
         end
     else
         nbrOldTargets = 0;
-        A{1} = 1:m;
         Amat = 1:m;
         S = zeros(m,m,1);
         S(:,:,1) = eye(m);
     end
-
+    timeA(j) = toc(findA(j));
     %%%%% MURTY %%%%%%
     ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, H, j, maxKperGlobal);
     
@@ -132,6 +132,7 @@ for i = 1:size(XuUpdTmp,2)
     end
 end
 
+disp(['Find A: ', num2str(mean(timeA)), 's'])
 disp(['Pred time: ', num2str(timePred), 's'])
 disp(['Upd time: ', num2str(timeUpd), 's'])
 disp(['Nbr global hypo pre murty: ', num2str(size(wGlob,2))])
