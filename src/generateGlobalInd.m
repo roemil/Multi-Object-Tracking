@@ -12,7 +12,7 @@
 % Test to find Amat and S instantly without A{}. TODO: solve m>=nbrTargets
 % and how to find S.
 
-function [A, S, AmatFinal] = generateGlobalIndTest2(m,nbrOldTargets)
+function [A, S, AmatFinal] = generateGlobalInd(m,nbrOldTargets)
 
 %
 if nbrOldTargets >= m

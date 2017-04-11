@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xpred, Xupd, Xest, Pest] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal)
+function [XuUpd, Xpred, Xupd, Xest, Pest, rest] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal)
 
 load('simVariables')
 Wold = 0;
@@ -60,13 +60,30 @@ Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z);
 oldInd = 0;
 m = size(Z,2);
 Wnew = diag(rho);
+nbrTargetInd = 1;
+nbrVec = 0;
 for j = 1:max(1,nbrOfGlobHyp)
+    clear Amat; clear S;
     findA(j) = tic;
     if ~isempty(Xhypo{j})
         nbrOldTargets = size(Xhypo{j,1},2);
-        if nbrOldTargets ~= nbrOldTargetsPrev
-            [S, Amat] = generateGlobalIndTest(m, nbrOldTargets); %TODO: THIS IS CURRENTLY THE BEST ONE
-            nbrOldTargetsPrev = nbrOldTargets;
+        if sum(nbrOldTargets == nbrVec) > 0
+           tInd = find(nbrOldTargets == nbrVec);
+           Amat = Atot{tInd};
+           for i = 1:size(Stot,2)
+               if isempty(Stot{tInd,i})
+                   break
+               end
+               S(:,:,i) = Stot{tInd,i};
+           end
+        else
+           [S, Amat] = generateGlobalIndTest(m, nbrOldTargets); %TODO: THIS IS CURRENTLY THE BEST ONE
+           Atot{nbrTargetInd} = Amat;
+           for i = 1:size(S,3)
+               Stot{nbrTargetInd,i} = S(:,:,i);
+           end
+           nbrVec(nbrTargetInd) = nbrOldTargets;
+           nbrTargetInd = nbrTargetInd+1;
         end
     else
         nbrOldTargets = 0;
@@ -74,6 +91,7 @@ for j = 1:max(1,nbrOfGlobHyp)
         S = zeros(m,m,1);
         S(:,:,1) = eye(m);
     end
+    
     timeA(j) = toc(findA(j));
     %%%%% MURTY %%%%%%
     startMurt(j) = tic;
@@ -109,7 +127,7 @@ end
 timeUpd = toc(startUpd);
 
 % Estimate states using Estimator 1
-[Xest, Pest] = est1(Xtmp, threshold);
+[Xest, Pest, rest] = est1(Xtmp, threshold);
 
 % Keep the Nh best global hypotheses
 [keepGlobs,~] = murty(wGlob,min(maxNbrGlobal,Nh));

@@ -8,7 +8,7 @@ FOVsize = [20,30]; % in m
  
 % Assume constant
 Pd = 0.9;   % Detection probability
-Ps = 0.95;   % Survival probability
+Ps = 0.9;   % Survival probability
 c = 0.2;    % clutter intensity
  
 % Initiate undetected targets
@@ -51,7 +51,7 @@ Xupd2 = cell(1);
 
 threshold = 0.1;    % CHANGED 0.1
 poissThresh = 1e-3;
-Nhconst = 200;
+Nhconst = 100;
 nbrOfBirths = 10;
 maxKperGlobal = 50;
 maxNbrGlobal = 200;
@@ -75,7 +75,7 @@ startTime = tic;
 for k = 2:K % For each time step
     disp(['--------------- k = ', num2str(k), ' ---------------'])
     Nh = Nhconst*size(Z{k},2);    %Murty
-    [XuUpd{k}, Xpred{k}, Xupd{k}, Xest{k}, Pest{k}] = PMBMfunc(Z{k}, XuUpd{k-1}, Xupd{k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
+    [XuUpd{k}, Xpred{k}, Xupd{k}, Xest{k}, Pest{k}, rest{k}] = PMBMfunc(Z{k}, XuUpd{k-1}, Xupd{k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
     disp(['Nbr targets: ', num2str(size(X{k},2))])
     disp(['Nbr estimates: ', num2str(size(Xest{k},2))])
 end
