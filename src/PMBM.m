@@ -78,7 +78,7 @@ for k = 2:K %K % For each time step
     disp(['-------', num2str(k), '-------'])
     Wold = 0;
     C = [];
-    Nh = 5*size(Z{k},2);    %Murty
+    Nh = 170*size(Z{k},2);    %Murty
     startPred = tic;
     %%%%% Prediction %%%%%
     
@@ -189,7 +189,7 @@ for k = 2:K %K % For each time step
             end
         end
         
-        K_hyp = max(2,ceil(Nh * wHyp));
+        K_hyp = ceil(Nh * wHyp);
 %         K_old = 1;
         trace_vec = zeros(1,size(S,3));
         for jnew = 1:size(S,3)
