@@ -10,7 +10,7 @@
 %
 
 
-function [Xest] = est1(Xupd, threshold,k)
+function [Xest, Pest] = est1(Xupd, threshold,k)
     M = -1;
     Xest = cell(1);
     if(~isempty(Xupd{k}))

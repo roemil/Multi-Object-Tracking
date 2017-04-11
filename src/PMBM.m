@@ -74,7 +74,7 @@ Xupd2 = cell(1);
 threshold = 0.1;    % CHANGED 0.1
 
 K =size(Z,2); % Length of sequence
-for k = 2:150 %K % For each time step
+for k = 2:K %K % For each time step
     disp(['-------', num2str(k), '-------'])
     Wold = 0;
     C = [];
@@ -253,7 +253,7 @@ for k = 2:150 %K % For each time step
     end
     timewSum = toc(startwSum);
     timeUpd = toc(startUpd);
-    [Xest{k}] = est1(Xtmp, threshold,k);
+    [Xest{k}, Pest{k}] = est1(Xtmp, threshold,k);
     
     [keepGlobs,~] = murty(wGlob,Nh);
     
