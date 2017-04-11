@@ -76,11 +76,15 @@ for j = 1:max(1,nbrOfGlobHyp)
     end
     timeA(j) = toc(findA(j));
     %%%%% MURTY %%%%%%
+    startMurt(j) = tic;
     ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, H, j, maxKperGlobal);
+    murtTime(j) = toc(startMurt(j));
     
     %%%%% Find new global hypotheses %%%%%
+    startGlob(j) = tic;
     [newGlob, newInd] = generateGlobalHypo5(Xhypo(j,:), XpotNew(:), Z, oldInd, Amat, ass, nbrOldTargets);
-
+    globTime(j) = toc(startGlob(j));
+    
     for jnew = oldInd+1:newInd
         Xtmp{jnew} = newGlob{jnew-oldInd};
     end
@@ -132,7 +136,9 @@ for i = 1:size(XuUpdTmp,2)
     end
 end
 
-disp(['Find A: ', num2str(mean(timeA)), 's'])
+disp(['Find A time: ', num2str(sum(timeA)), 's'])
+disp(['Murty time: ', num2str(sum(murtTime)), 's'])
+disp(['Glob time: ', num2str(sum(globTime)), 's'])
 disp(['Pred time: ', num2str(timePred), 's'])
 disp(['Upd time: ', num2str(timeUpd), 's'])
 disp(['Nbr global hypo pre murty: ', num2str(size(wGlob,2))])

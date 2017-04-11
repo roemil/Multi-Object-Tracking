@@ -51,8 +51,8 @@ Xupd2 = cell(1);
 
 threshold = 0.1;    % CHANGED 0.1
 poissThresh = 1e-3;
-Nhconst = 100;
-nbrOfBirths = 5;
+Nhconst = 200;
+nbrOfBirths = 10;
 maxKperGlobal = 50;
 maxNbrGlobal = 200;
 
@@ -70,15 +70,19 @@ save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',
 
 K =size(Z,2); % Length of sequence
 
-%Z = measGenerateCase2(X, R, FOVsize, K);
-
+Z = measGenerateCase2(X, zeros(2,2), FOVsize, K);
+startTime = tic;
 for k = 2:K % For each time step
     disp(['--------------- k = ', num2str(k), ' ---------------'])
     Nh = Nhconst*size(Z{k},2);    %Murty
     [XuUpd{k}, Xpred{k}, Xupd{k}, Xest{k}, Pest{k}] = PMBMfunc(Z{k}, XuUpd{k-1}, Xupd{k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
-    %XuUpd{k}
-    %keyboard
+    disp(['Nbr targets: ', num2str(size(X{k},2))])
+    disp(['Nbr estimates: ', num2str(size(Xest{k},2))])
 end
+simTime = toc(startTime);
+
+disp('--------------- Simulation Complete ---------------')
+disp(['Total simulation time: ', num2str(simTime)])
     
     
     
