@@ -20,21 +20,21 @@ plot([-FOVsize(1)/2, FOVsize(1)/2],[laneWidth+dToInter, laneWidth+dToInter],'k--
 xlim([-FOVsize(1)/2,FOVsize(1)/2])
 ylim([0, FOVsize(2)])
 
-for i = 1 : size(X,2)
-    if(~isempty(X{i}))
-        X2{ind} = X{i};
-        ind = ind + 1;
-    end
-end
-ind = 1;
-for i = 1 : size(X2,2)
-    if(~isempty(X2{i}))
-        X{ind} = X2{i};
-        ind = ind + 1;
-    end
-end
-%
-K = min(size(est,2), size(X,2));
+% for i = 1 : size(X,2)
+%     if(~isempty(X{i}))
+%         X2{ind} = X{i};
+%         ind = ind + 1;
+%     end
+% end
+% ind = 1;
+% for i = 1 : size(X2,2)
+%     if(~isempty(X2{i}))
+%         X{ind} = X2{i};
+%         ind = ind + 1;
+%     end
+% end
+% %
+K = min(size(Xest,2), size(X,2));
 
 gtPlot = {};
 estPlot = {};
@@ -49,8 +49,8 @@ for k = 2:150
         %plot(X{k}(1,i),X{k}(2,i),'k+','Markersize',10);
         hold on;
     end
-    for i = 1:size(est{k},2)
-        estPlot = [estPlot plot(est{k}{i}(1),est{k}{i}(2),'r*','Markersize',10)];
+    for i = 1:size(Xest{k},2)
+        estPlot = [estPlot plot(Xest{k}{i}(1),Xest{k}{i}(2),'r*','Markersize',10)];
          %plot(est{k}{i}(1),est{k}{i}(2),'r*','Markersize',10); hold on;
     end
     if k == 2

@@ -68,7 +68,7 @@ save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',
 %     end
 % end
 
-K =size(X,2); % Length of sequence
+K =size(Z,2); % Length of sequence
 
 %Z = measGenerateCase2(X, R, FOVsize, K);
 
