@@ -4,6 +4,7 @@ function [XuUpd, Xpred, Xupd, Xest, Pest] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh,
 load('simVariables')
 Wold = 0;
 C = [];
+nbrOldTargetsPrev = 1e4;
 startPred = tic;
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -62,7 +63,10 @@ Wnew = diag(rho);
 for j = 1:max(1,nbrOfGlobHyp)
     if ~isempty(Xhypo{j})
         nbrOldTargets = size(Xhypo{j,1},2);
-        [A, S, Amat] = generateGlobalInd(m, nbrOldTargets);
+        if nbrOldTargets ~= nbrOldTargetsPrev
+            [A, S, Amat] = generateGlobalIndOld(m, nbrOldTargets);
+            nbrOldTargetsPrev = nbrOldTargets;
+        end
     else
         nbrOldTargets = 0;
         A{1} = 1:m;

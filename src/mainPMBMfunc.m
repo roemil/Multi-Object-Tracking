@@ -11,11 +11,6 @@ Pd = 0.9;   % Detection probability
 Ps = 0.95;   % Survival probability
 c = 0.2;    % clutter intensity
  
-% Initiate birth
-Xb{1} = [Z{2}(:,1); unifrnd(-0.2,0.2); unifrnd(-0.2,0.2)];
-Pb{1} = 7*eye(4); %4*diag([2, 2, 1, 1]);
-wb{1} = 1;
- 
 % Initiate undetected targets
 XuPred = cell(1);
 XuUpd = cell(1);
@@ -64,7 +59,19 @@ maxNbrGlobal = 200;
 % Save everything in simVariables and load at the begining of the filter
 save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold','poissThresh');
 
-K =size(Z,2); % Length of sequence
+% For birth case
+% ind = 1;
+% for i = 1 : size(z,2)
+%     if(~isempty(z{i}))
+%         Z{ind} = z{i};
+%         ind = ind + 1;
+%     end
+% end
+
+K =size(X,2); % Length of sequence
+
+%Z = measGenerateCase2(X, R, FOVsize, K);
+
 for k = 2:K % For each time step
     disp(['--------------- k = ', num2str(k), ' ---------------'])
     Nh = Nhconst*size(Z{k},2);    %Murty

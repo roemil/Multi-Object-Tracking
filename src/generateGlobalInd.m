@@ -73,7 +73,8 @@ if nbrOldTargets < m
     ind = 1;
     for ii = idxmat'
         indNew = ind+size(Atmp(:,ii),1)-1;
-        Amat(1,:,ind:indNew) = fliplr(reshape(Atmp(:,ii), m, size(Atmp(:,ii),1)));
+        %Amat(1,:,ind:indNew) = fliplr(reshape(Atmp(:,ii), 1, m, size(Atmp(:,ii),1)));
+        Amat(1,:,ind:indNew) = reshape(Atmp(:,ii)', 1, m, size(Atmp(:,ii),1));
         for z = 1:m
             for row = ind:indNew
                 if ((Amat(1,z,row) > nbrOldTargets) && (Amat(1,z,row) ~= z+nbrOldTargets))
@@ -87,6 +88,18 @@ end
 
 A{end+1} = nbrOldTargets+1:nbrOldTargets+m;
 Amat(1,:,end+1) = nbrOldTargets+1:nbrOldTargets+m;
+ind = 1;
+
+%%%% REMOVE THE SAME ONE
+for i = 1:size(Amat,3)
+    for j = i:size(Amat,3)
+        if ((sum(Amat(1,:,i) == Amat(1,:,j)) == size(Amat,2)) && (i == j))
+            AmatFinal(1,:,ind) = Amat(1,:,j);
+            ind = ind+1;
+            break
+        end
+    end
+end
 
 Amat2 = zeros(1,m,1);
 S = zeros(m, nbrOldTargets+m,1);
