@@ -38,8 +38,9 @@ K_hyp = max(1,ceil(Nh * wHyp));
 %     trace_vec(jnew) = trace(S(:,:,jnew)'*C);
 % end
 
-bfTrace = permute(S,[2 1 3]);
-bfTracesTimesC = mtimesx(bfTrace,C);
+bfTrace = permute(S,[2 1 3]); %For each index in 3D, Transpose S 
+bfTracesTimesC = mtimesx(bfTrace,C); %For each index in 3D, multiply with C
+% Calculate trace of matrix bfTracesTimesC for each index in 3D
 d=bfTracesTimesC(bsxfun(@plus,(0:size(bfTracesTimesC,3)-1)*size(S,1)*size(S,2),(1:size(S,2):size(S,1)*size(S,2)).'));
 minTmp = min(size(bfTrace,2), maxKperGlobal);
 
