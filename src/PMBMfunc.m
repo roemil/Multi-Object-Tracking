@@ -130,8 +130,11 @@ timeUpd = toc(startUpd);
 [Xest, Pest, rest] = est1(Xtmp, threshold);
 
 % Keep the Nh best global hypotheses
-[keepGlobs,~] = murty(wGlob,min(maxNbrGlobal,Nh));
-
+[keepGlobs,~] = murty(1./wGlob,min(maxNbrGlobal,Nh));
+ind = find(keepGlobs==0);
+if ~isempty(ind)
+    keepGlobs = keepGlobs(1:ind-1);
+end
 % Remove bernoulli components with low probability of existence
 for j = 1:size(keepGlobs,1)
     iInd = 1;

@@ -9,7 +9,7 @@ FOVsize = [20,30]; % in m
 % Assume constant
 Pd = 0.9;   % Detection probability
 Ps = 0.9;   % Survival probability
-c = 0.2;    % clutter intensity
+c = 0.1;    % clutter intensity
  
 % Initiate undetected targets
 XuPred = cell(1);
@@ -71,10 +71,15 @@ save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',
 K =size(Z,2); % Length of sequence
 
 Z = measGenerateCase2(X, zeros(2,2), FOVsize, K);
+Z{1}(:,1) = [];
+Z{2}(:,2) = [];
 startTime = tic;
 for k = 2:K % For each time step
     disp(['--------------- k = ', num2str(k), ' ---------------'])
     Nh = Nhconst*size(Z{k},2);    %Murty
+    if k==249
+        keyboard;
+    end
     [XuUpd{k}, Xpred{k}, Xupd{k}, Xest{k}, Pest{k}, rest{k}] = PMBMfunc(Z{k}, XuUpd{k-1}, Xupd{k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
     disp(['Nbr targets: ', num2str(size(X{k},2))])
     disp(['Nbr estimates: ', num2str(size(Xest{k},2))])
