@@ -31,7 +31,7 @@ function [XpotNew, rho] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z,c)
         end
         
         e = Pd*generateGaussianMix(Z(:,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
-        rho(z) = e;
+        rho(z) = e+c;
         XpotNew{z}.w = e+c; % rho (45) (44)
         XpotNew{z}.r = e/XpotNew{z}.w; % (43) (44)
         XpotNew{z}.S = 0;

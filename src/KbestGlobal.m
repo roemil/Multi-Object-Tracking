@@ -3,15 +3,18 @@ function ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, H, j, ma
 wHyp = 1;
 wHypSum = 0;
 Wold = zeros(nbrOfMeas,size(Xhypo{j},2));
+whypo = zeros(nbrOfMeas,size(Xhypo{j},2));
 for m = 1 : nbrOfMeas
     for nj = 1 : size(Xhypo{j},2)
         % Normalize weights for cost matrix
-        Wold(m,nj) = Xhypo{j,m}(nj).w*Xhypo{j,m}(nj).r*Pd*mvnpdf(Z(:,m)...
-            ,H*Xpred{j}(nj).state,Xhypo{j,m}(nj).S)...
-            /(Xhypo{j,m}(nj).w*(1-Xhypo{j,m}(nj).r+Xhypo{j,m}(nj).r*(1-Pd))); 
-        Wold(m,nj) = Xhypo{j,m}(nj).w; 
+        %Wold(m,nj) = Xhypo{j,m}(nj).w*Xhypo{j,m}(nj).r*Pd*mvnpdf(Z(:,m)...
+        %    ,H*Xpred{j}(nj).state,Xhypo{j,m}(nj).S)...
+        %    /(Xhypo{j,m}(nj).w*(1-Xhypo{j,m}(nj).r+Xhypo{j,m}(nj).r*(1-Pd)));  % TODO: IS THIS CORRECT??
+        %Wold(m,nj) = min(1,Xhypo{j,m}(nj).w); % TODO: This is not proper
+        Wold(m,nj) = min(1,Xhypo{j,m}(nj).w/Xhypo{j,end}(nj).w); % TODO: SHOULDNT IT BE LIKE THIS?
         wHyp = wHyp * Xpred{j}(nj).w;
         wHypSum = wHypSum + Xpred{j}(nj).w;
+        whypo(m,nj) = Xhypo{j,m}(nj).w;
     end
 end
 
@@ -44,9 +47,11 @@ bfTracesTimesC = mtimesx(S,'T',C); %For each index in 3D, multiply with C
 %d = trace((bfTracesTimesC));
 % Calculate trace of matrix bfTracesTimesC for each index in 3D
 d=bfTracesTimesC(bsxfun(@plus,(0:size(bfTracesTimesC,3)-1)*size(bfTracesTimesC,1)*size(bfTracesTimesC,2),(1:size(bfTracesTimesC,2)+1:size(bfTracesTimesC,1)*size(bfTracesTimesC,2)).'));
+[rowNaN, colNaN] = find(isnan(d));
+d(rowNaN, colNaN) = 0;
 d = sum(d,1);
 minTmp = min(size(S,3), maxKperGlobal);
-[ass, ~] = murty(d,min(minTmp,K_hyp));
+[ass, cost] = murty(d,min(minTmp,K_hyp));
 ind = find(ass==0);
 if ~isempty(ind)
     ass = ass(1:ind-1);

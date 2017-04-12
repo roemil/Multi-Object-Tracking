@@ -10,11 +10,12 @@
 %
 
 
-function [Xest, Pest, rest] = est1(Xupd, threshold)
+function [Xest, Pest, rest, west] = est1(Xupd, threshold)
     M = -1;
     Xest = cell(1);
     Pest = cell(1);
     rest = [];
+    west = [];
     
     if(~isempty(Xupd))
         for j = 1:size(Xupd,2)
@@ -41,10 +42,12 @@ function [Xest, Pest, rest] = est1(Xupd, threshold)
             %    Xest{index} = [];
             end
             rest = [rest, Xupd{ind}(i).r];
+            west = [west, Xupd{ind}(i).w];
         end
     else
         Xest = [];
         Pest = [];
         rest = [];
+        west = [];
     end
 end
