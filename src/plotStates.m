@@ -38,74 +38,75 @@ PestVec = zeros(4,N,maxEst);
 
 % For each time instance
 for k = 2:N
-    % Find closest match of estimates and true states
-    dist = zeros(size(Xest{k},2), size(Xtrue{k},2));
-    for estTarget = 1:size(Xest{k},2)
-        for trueTarget = 1:size(Xtrue{k},2)
-            xdiff = Xest{k}{estTarget}(1)-Xtrue{k}(1,trueTarget);
-            ydiff = Xest{k}{estTarget}(2)-Xtrue{k}(2,trueTarget);
-            dist(estTarget,trueTarget) = sqrt(xdiff^2+ydiff^2);
+    if ~isempty(Xest{k}{1})
+        % Find closest match of estimates and true states
+        dist = zeros(size(Xest{k},2), size(Xtrue{k},2));
+        for estTarget = 1:size(Xest{k},2)
+            for trueTarget = 1:size(Xtrue{k},2)
+                xdiff = Xest{k}{estTarget}(1)-Xtrue{k}(1,trueTarget);
+                ydiff = Xest{k}{estTarget}(2)-Xtrue{k}(2,trueTarget);
+                dist(estTarget,trueTarget) = sqrt(xdiff^2+ydiff^2);
+            end
         end
-    end
-    
-    [asso, ~] = murty(dist',1);
-    
-    % Display if the number of target and estimates are not the same and
-    % create a figure for unassigned estimates
-    if size(dist,1) < size(dist,2)
-        %for i = size(dist,1)+1:size(dist,2)
-        %    asso(1,i) = NaN;
-        %end
-        disp(['Nbr of estimates < nbr of true targets, k = ', num2str(k)])
-    elseif size(dist,1) > size(dist,2) 
-        disp(['Nbr of estimates > nbr of true targets, k = ', num2str(k)])
-        if notAssignedFlag == 0
-            estNotAssigned = figure(1000);
-            notAssignedFlag = 1;
-            %asso(asso == 0) = find(asso == 1);
+
+        [asso, ~] = murty(dist',1);
+
+        % Display if the number of target and estimates are not the same and
+        % create a figure for unassigned estimates
+        if size(dist,1) < size(dist,2)
+            %for i = size(dist,1)+1:size(dist,2)
+            %    asso(1,i) = NaN;
+            %end
+            disp(['Nbr of estimates < nbr of true targets, k = ', num2str(k)])
+        elseif size(dist,1) > size(dist,2) 
+            disp(['Nbr of estimates > nbr of true targets, k = ', num2str(k)])
+            if notAssignedFlag == 0
+                estNotAssigned = figure(1000);
+                notAssignedFlag = 1;
+                %asso(asso == 0) = find(asso == 1);
+            end
         end
-    end
-    
-    % Plot the result
-    for trueTarget = 1:size(dist,2)
-        figure(Xtrue{k}(5,trueTarget));
-        hold on
-        for i = 1:min(4, size(Xtrue{k},1))
-            subplot(4,1,i)
+
+        % Plot the result
+        for trueTarget = 1:size(dist,2)
+            figure(Xtrue{k}(5,trueTarget));
             hold on
-            plot(k, Xtrue{k}(i,trueTarget),'k+')
-        end
-        if asso(1,trueTarget) ~= 0
-            for i = 1:min(4, size(Xest{k}{asso(1,trueTarget)},1))
+            for i = 1:min(4, size(Xtrue{k},1))
                 subplot(4,1,i)
                 hold on
-                plot(k, Xest{k}{asso(1,trueTarget)}(i),'r*')
+                plot(k, Xtrue{k}(i,trueTarget),'k+')
             end
-            squareError(:,k,trueTarget) = (Xest{k}{asso(1,trueTarget)}-Xtrue{k}(1:4,trueTarget)).^2;
-        else
-            disp('Missed estimation')
-        end
-        for estTarget = 1:size(Xest{k},2)
-            if sum(estTarget == asso) == 0
-                figure(estNotAssigned);
-                hold on
-                for i = 1:min(4, size(Xest{k}{estTarget},1))
+            if asso(1,trueTarget) ~= 0
+                for i = 1:min(4, size(Xest{k}{asso(1,trueTarget)},1))
                     subplot(4,1,i)
                     hold on
-                    plot(k, Xest{k}{estTarget}(i),'r*')
+                    plot(k, Xest{k}{asso(1,trueTarget)}(i),'r*')
+                end
+                squareError(:,k,trueTarget) = (Xest{k}{asso(1,trueTarget)}-Xtrue{k}(1:4,trueTarget)).^2;
+            else
+                disp(['Missed estimation, k = ', num2str(k)])
+            end
+            for estTarget = 1:size(Xest{k},2)
+                if sum(estTarget == asso) == 0
+                    figure(estNotAssigned);
+                    hold on
+                    for i = 1:min(4, size(Xest{k}{estTarget},1))
+                        subplot(4,1,i)
+                        hold on
+                        plot(k, Xest{k}{estTarget}(i),'r*')
+                    end
                 end
             end
         end
-    end
-    
-    if isempty(Pest{k})
-        PestVec(:,k,:) = 0;
-    else
-        for i = 1:size(Pest{k},2)
-            PestVec(:,k,i) = diag(Pest{k}{i});
+
+        if isempty(Pest{k})
+            PestVec(:,k,:) = 0;
+        else
+            for i = 1:size(Pest{k},2)
+                PestVec(:,k,i) = diag(Pest{k}{i});
+            end
         end
     end
-    
 end
 
 % Add labels and titles

@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xpred, Xupd, Xest, Pest, rest] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal)
+function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal)
 
 load('simVariables')
 Wold = 0;
@@ -24,9 +24,9 @@ end
 
 % Add hypotheses for births
 for i = 1:nbrOfBirths
-    XmuPred(end+1).w = 1;
+    XmuPred(end+1).w = 1/nbrOfBirths;
     XmuPred(end).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
-        unifrnd(0, FOVsize(2)), unifrnd(-0.2,0.2), unifrnd(-0.2,0.2)]';
+        unifrnd(0, FOVsize(2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';
     XmuPred(end).P = 7*eye(4);
 end
 
@@ -97,7 +97,6 @@ for j = 1:max(1,nbrOfGlobHyp)
     startMurt(j) = tic;
     ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, H, j, maxKperGlobal);
     murtTime(j) = toc(startMurt(j));
-    
     %%%%% Find new global hypotheses %%%%%
     startGlob(j) = tic;
     [newGlob, newInd] = generateGlobalHypo5(Xhypo(j,:), XpotNew(:), Z, oldInd, Amat, ass, nbrOldTargets);
@@ -127,14 +126,20 @@ end
 timeUpd = toc(startUpd);
 
 % Estimate states using Estimator 1
-[Xest, Pest, rest] = est1(Xtmp, threshold);
+[Xest, Pest, rest, west] = est1(Xtmp, thresholdEst);
 
 % Keep the Nh best global hypotheses
-[keepGlobs,~] = murty(1./wGlob,min(maxNbrGlobal,Nh));
-ind = find(keepGlobs==0);
+
+minTmp = min(size(wGlob,2), Nh);
+weights = 1./wGlob;
+weights = weights/max(weights);
+[keepGlobs,C] = murty(weights,min(maxNbrGlobal,minTmp));
+
+ind = find(diff(C) > 0.3);
 if ~isempty(ind)
-    keepGlobs = keepGlobs(1:ind-1);
+    keepGlobs = keepGlobs(1:ind(1));
 end
+
 % Remove bernoulli components with low probability of existence
 for j = 1:size(keepGlobs,1)
     iInd = 1;
