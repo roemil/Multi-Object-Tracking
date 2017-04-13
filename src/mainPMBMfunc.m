@@ -62,7 +62,7 @@ maxKperGlobal = 20;
 maxNbrGlobal = 100;
 
 % Save everything in simVariables and load at the begining of the filter
-save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold','poissThresh','vinit','thresholdEst');
+%save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold','poissThresh','vinit','thresholdEst');
 
 % For birth case
 % ind = 1;
@@ -85,7 +85,7 @@ for t = 1:T
     disp(['--------------- t = ', num2str(t), ' ---------------'])
     disp('-------------------------------------')
     
-    Z = measGenerateCase2(X, R, FOVsize, K);
+    %Z = measGenerateCase2(X, R, FOVsize, K);
     
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
