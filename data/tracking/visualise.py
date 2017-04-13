@@ -4,11 +4,11 @@ import glob
 import cv2
 import numpy as np
 
-data_path = '.'
+data_path = '../../../kittiTracking/'
 which_set = 'training'
 
 data_path = os.path.join(data_path, which_set)
-results_path = '/visualization'
+results_path = '../../../kittiTracking/tracking/training/'
 def visualise(seq_name, frame_no):
 	sequences = listdir(os.path.join(data_path, 'image_02'))
 	images = sorted(glob.glob(os.path.join(os.path.join(data_path, 'image_02'), seq_name) + '/*.png'))
