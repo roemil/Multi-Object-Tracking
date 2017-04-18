@@ -11,9 +11,9 @@ fclose(f);
 %detections = textread(filename); % frame, size_x, size_y, class, cx, cy, w, h, conf
 %Z = cell(size(detections,1),5);
 Z = cell(1);
-oldFrame = detections{1}(i)+1;
+oldFrame = detections{1}(1)+1;
 count = 1;
-Z{1}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1)]; % cx
 for i = 2 : size(detections{1},1)
     frame = detections{1}(i)+1;
     if(frame == oldFrame)
