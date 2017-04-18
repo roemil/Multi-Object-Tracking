@@ -25,9 +25,9 @@ end
 % Add hypotheses for births
 for i = 1:nbrOfBirths
     XmuPred(end+1).w = 1/nbrOfBirths;
-    XmuPred(end).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
-        unifrnd(0, FOVsize(2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';
-    XmuPred(end).P = 7*eye(4);
+    XmuPred(end).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
+        unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';
+    XmuPred(end).P = 20*eye(4);
 end
 
 % Update the poisson components

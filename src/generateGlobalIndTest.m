@@ -11,6 +11,7 @@
 function [S, Amat] = generateGlobalIndTest(m,nbrOldTargets)
 
 %
+
 if nbrOldTargets >= m
     targets = 1:nbrOldTargets;
     combs = nchoosek(targets,m);
