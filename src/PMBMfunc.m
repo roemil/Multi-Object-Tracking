@@ -24,7 +24,7 @@ end
 
 % Add hypotheses for births
 for i = 1:nbrOfBirths
-    XmuPred(end+1).w = 1/nbrOfBirths;
+    XmuPred(end+1).w = 0.5;%1/nbrOfBirths;
     XmuPred(end).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';
     XmuPred(end).P = covBirth*eye(4);
@@ -91,8 +91,11 @@ for j = 1:max(1,nbrOfGlobHyp)
         S = zeros(m,m,1);
         S(:,:,1) = eye(m);
     end
-    disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
-    disp(['Nbr measurements: ', num2str(m)])
+    
+    % Display nbr old targets and measurements 
+    %disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
+    %disp(['Nbr measurements: ', num2str(m)])
+    
     timeA(j) = toc(findA(j));
     %%%%% MURTY %%%%%%
     startMurt(j) = tic;

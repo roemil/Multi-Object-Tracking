@@ -68,7 +68,7 @@ Xupd = cell(1,1);
 H = generateMeasurementModel({},'linear');
 
 vinit = 1;
-nbrInitBirth = 200; % 600 ok1
+nbrInitBirth = 600; % 600 ok1
 covBirth = 20; % 20 ok1
  
 % TODO: Should the weights be 1/nbrInitBirth?
@@ -87,11 +87,11 @@ end
 Xupd = cell(1);
 
 %%%%%% INITIATE %%%%%%
-threshold = 0.01;    % 0.01 ok1
+threshold = 0.1;    % 0.01 ok1
 thresholdEst = 0.75; % 0.6 ok1
 poissThresh = 1e-3;
 Nhconst = 100;
-nbrOfBirths = 200; % 600 ok1
+nbrOfBirths = 600; % 600 ok1
 maxKperGlobal = 20;
 maxNbrGlobal = 100;
 
@@ -159,6 +159,6 @@ for k = 1:K
     frameNbr = sprintf('%06d',k-1);
     plotDetections(set, sequence, frameNbr, Xest{k})
     title(['k = ', num2str(k)])
-    pause(0.5)
+    pause(0.2)
 end
     
