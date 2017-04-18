@@ -67,7 +67,7 @@ Xupd = cell(1,1);
 [F, Q] = generateMotionModel(sigmaQ, T, 'cv');
 H = generateMeasurementModel({},'linear');
 
-vinit = 1;
+vinit = 10;
 nbrInitBirth = 600; % 600 ok1
 covBirth = 20; % 20 ok1
  
@@ -87,11 +87,11 @@ end
 Xupd = cell(1);
 
 %%%%%% INITIATE %%%%%%
-threshold = 0.1;    % 0.01 ok1
-thresholdEst = 0.75; % 0.6 ok1
-poissThresh = 1e-3;
+threshold = 0.01;    % 0.01 ok1
+thresholdEst = 0.6; % 0.6 ok1
+poissThresh = 1e-4;
 Nhconst = 100;
-nbrOfBirths = 600; % 600 ok1
+nbrOfBirths = 200; % 600 ok1
 maxKperGlobal = 20;
 maxNbrGlobal = 100;
 
@@ -152,7 +152,7 @@ simTime = toc(startTime);
 disp('--------------- Simulation Complete ---------------')
 disp(['Total simulation time: ', num2str(simTime)])
     
-%% Plot
+%% Plot estimates
 
 figure;
 for k = 1:K
@@ -160,5 +160,14 @@ for k = 1:K
     plotDetections(set, sequence, frameNbr, Xest{k})
     title(['k = ', num2str(k)])
     pause(0.2)
+end
+
+%% Plot pred and upd
+figure;
+for k = 2:15
+    frameNbr = sprintf('%06d',k-1);
+    plotPredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k})
+    title(['k = ', num2str(k)])
+    pause(2)
 end
     

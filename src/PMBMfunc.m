@@ -24,7 +24,7 @@ end
 
 % Add hypotheses for births
 for i = 1:nbrOfBirths
-    XmuPred(end+1).w = 0.5;%1/nbrOfBirths;
+    XmuPred(end+1).w = 1/nbrOfBirths;
     XmuPred(end).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';
     XmuPred(end).P = covBirth*eye(4);
@@ -141,7 +141,7 @@ weights = weights/max(weights);
 [keepGlobs,C] = murty(weights,min(maxNbrGlobal,minTmp));
 
 ind = find(diff(C) > 0.3);
-if ~isempty(ind) && size(Xtmp,2) >2
+if ~isempty(ind)
     keepGlobs = keepGlobs(1:ind(1));
 end
 
@@ -154,6 +154,9 @@ if keepGlobs ~= 0
             if Xtmp{keepGlobs(j)}(i).r > threshold
                 Xupd{j}(iInd) = Xtmp{keepGlobs(j)}(i);
                 Xupd{j}(iInd).w = Xtmp{keepGlobs(j)}(i).w/wSum(keepGlobs(j));
+                if isnan(Xupd{j}(iInd).w)
+                    keyboard
+                end
                 iInd = iInd+1;
             end
         end

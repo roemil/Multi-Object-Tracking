@@ -15,6 +15,8 @@ if ~isempty(Xpred{1})
        predBox = [Xpred{1}(i).state(1)-Xpred{1}(i).box(1)/2, Xpred{1}(i).state(2)-Xpred{1}(i).box(2)/2, Xpred{1}(i).box(1), Xpred{1}(i).box(2)];
        rectangle('Position',predBox,'EdgeColor','r','LineWidth',1)
     end
+else
+    disp('Pred empty')
 end
 
 if ~isempty(Xupd{1})
