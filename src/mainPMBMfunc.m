@@ -112,11 +112,14 @@ for t = 1:T
     disp('-------------------------------------')
     
     %Z = measGenerateCase2(X, R, FOVsize, K);
+    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}] = ...
+        PMBMinitFunc(Z{t,1}(1:2,:), XmuUpd{t,1}, XuUpd{t,1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
     
     for k = 2:20 % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
-        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = PMBMfunc(Z{t,k}(1:2,:), XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
+        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = ...
+            PMBMfunc(Z{t,k}(1:2,:), XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
         
         disp(['Nbr targets: ', num2str(size(X{t,k},2))])
         disp(['Nbr estimates: ', num2str(size(Xest{t,k},2))])

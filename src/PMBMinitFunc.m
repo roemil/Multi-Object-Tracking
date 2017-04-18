@@ -58,4 +58,3 @@ for i = 1:size(XuUpdTmp,2)
         ind = ind+1;
     %end
 end
-keyboard
