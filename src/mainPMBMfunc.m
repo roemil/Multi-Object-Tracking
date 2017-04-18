@@ -1,5 +1,36 @@
 clc
 
+%%%%%% Load Detections %%%%%%
+datapath = '../data/tracking/training/0000/';
+filename = [datapath,'inferResult.txt'];
+formatSpec = '%f%f%f%f%f%f%f%f%f';
+f = fopen(filename);
+detections = textscan(f,formatSpec);
+fclose(f);
+
+%detections = textread(filename); % frame, size_x, size_y, class, cx, cy, w, h, conf
+%Z = cell(size(detections,1),5);
+Z = cell(1);
+oldFrame = detections{1}(i)+1;
+count = 1;
+Z{1}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+for i = 2 : size(detections{1},1)
+    frame = detections{1}(i)+1;
+    if(frame == oldFrame)
+        Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+        count = count + 1;
+        oldFrame = frame;
+    else
+        Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+        count = 1;
+        oldFrame = frame;  
+    end
+%     Z{frame} = [Z{frame};detections(i,6)]; % cy
+%     Z{frame} = [Z{frame};detections(i,7)]; % w
+%     Z{frame} = [Z{frame};detections(i,8)]; % h
+%     Z{frame} = [Z{frame};detections(i,9)]; % conf
+end
+
 %%%%%% Inititate %%%%%%
 sigmaQ = 4;         % Process (motion) noise
 R = 0.01*[1 0;0 1];    % Measurement noise
@@ -87,10 +118,10 @@ for t = 1:T
     
     %Z = measGenerateCase2(X, R, FOVsize, K);
     
-    for k = 2:K % For each time step
+    for k = 2:20 % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
-        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
+        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = PMBMfunc(Z{t,k}(1:2,:), XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
         disp(['Nbr targets: ', num2str(size(X{t,k},2))])
         disp(['Nbr estimates: ', num2str(size(Xest{t,k},2))])
         disp(['Nbr prop targets: ', num2str(sum(rest{t,k} == 1))])
