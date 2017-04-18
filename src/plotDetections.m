@@ -11,17 +11,19 @@ function plotDetections(set, sequence, frameNbr)
 % width || Bounding height || Confidence
 
 % Path for textfile with detection data
+detectionPath = strcat('../data/tracking/',set,'/',sequence,'/inferResult.txt');
 % Joachim
-detectionPath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
-    ,'/Matlab/Git/Multi-Object-Tracking/data/tracking/',set,'/',sequence,'/inferResult.txt');
+% detectionPath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
+%    ,'/Matlab/Git/Multi-Object-Tracking/data/tracking/',set,'/',sequence,'/inferResult.txt');
 % Emil
 % detectionPath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
 %     ,'/Matlab/Git/Multi-Object-Tracking/data/tracking/',set,'/',sequence,'/inferResult.txt');
 
 % Path for image
+imagePath = strcat('../../kittiTracking/',set,'/image_02/',sequence,'/',frameNbr,'.png');
 % Joachim
-imagePath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
-    ,'/Matlab/Git/kittiTracking/',set,'/image_02/',sequence,'/',frameNbr,'.png');
+% imagePath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
+%    ,'/Matlab/Git/kittiTracking/',set,'/image_02/',sequence,'/',frameNbr,'.png');
 % Emil
 % imagePath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
 %     ,'/Matlab/Git/kittiTracking/',set,'/image_02/',sequence,'/',frameNbr,'.png');
