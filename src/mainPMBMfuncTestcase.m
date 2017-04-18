@@ -1,32 +1,5 @@
 clc
 
-%%%%%% Load Detections %%%%%%
-datapath = '../data/tracking/training/0000/';
-filename = [datapath,'inferResult.txt'];
-formatSpec = '%f%f%f%f%f%f%f%f%f';
-f = fopen(filename);
-detections = textscan(f,formatSpec);
-fclose(f);
-
-%detections = textread(filename); % frame, size_x, size_y, class, cx, cy, w, h, conf
-%Z = cell(size(detections,1),5);
-Z = cell(1);
-oldFrame = detections{1}(1)+1;
-count = 1;
-Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1)]; % cx
-for i = 2 : size(detections{1},1)
-    frame = detections{1}(i)+1;
-    if(frame == oldFrame)
-        Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
-        count = count + 1;
-        oldFrame = frame;
-    else
-        Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
-        count = 1;
-        oldFrame = frame;  
-    end
-end
-
 %%%%%% Inititate %%%%%%
 sigmaQ = 4;         % Process (motion) noise
 R = 0.01*[1 0;0 1];    % Measurement noise
@@ -63,19 +36,19 @@ H = generateMeasurementModel({},'linear');
 vinit = 1;
 nbrInitBirth = 40;
  
-% TODO: Should the weights be 1/nbrInitBirth?
+% TODO: Initial guess??
 for i = 1:nbrInitBirth
     XmuUpd{1}(i).w = 1/nbrInitBirth;    % Pred weight
     XmuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
         unifrnd(0, FOVsize(2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XmuUpd{1}(i).P = 7*eye(4);      % Pred cov
  
-    XuUpd{1}(i).w = 1;    % Pred weight
+    XuUpd{1}(i).w = 1/nbrInitBirth;    % Pred weight
     XuUpd{1}(i).state = [unifrnd(-FOVsize(1)/2, FOVsize(1)/2), ...
         unifrnd(0, FOVsize(2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XuUpd{1}(i).P = 7*eye(4);      % Pred cov
 end
-
+ 
 Xupd = cell(1);
 
 %%%%%% INITIATE %%%%%%
@@ -112,19 +85,23 @@ for t = 1:T
     disp('-------------------------------------')
     
     %Z = measGenerateCase2(X, R, FOVsize, K);
-    
+    Nh = Nhconst*size(Z{k},2);    %Murty
+    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}] = ...
+        PMBMinitFunc(Z{t,1}(1:2,:), XmuUpd{t,1}, XuUpd{t,1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
+
     for k = 2:20 % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
-        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = PMBMfunc(Z{t,k}(1:2,:), XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
+        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = ...
+            PMBMfunc(Z{t,k}(1:2,:), XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
         
         disp(['Nbr targets: ', num2str(size(X{t,k},2))])
         disp(['Nbr estimates: ', num2str(size(Xest{t,k},2))])
         disp(['Nbr prop targets: ', num2str(sum(rest{t,k} == 1))])
         disp(['Nbr clutter points: ', num2str(size(Z{k},2)-size(X{k},2))])
-        %if size(X{t,k},2) ~= size(Xest{t,k},2)
-        %    nbrMissmatch(t) = nbrMissmatch(t)+1;
-        %end
+        if size(X{t,k},2) ~= size(Xest{t,k},2)
+           nbrMissmatch(t) = nbrMissmatch(t)+1;
+        end
     end
     
 end

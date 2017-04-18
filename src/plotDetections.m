@@ -3,9 +3,11 @@
 % Input:    set:        Either training or testing
 %           sequence:   Which sequence in the set, e.g. 0000
 %           frameNbr:   The frame number in the sequence, e.g. 000000
+%           Xest:       Estimate in one time instance.
+%                       [x,y,vx,vy,width,height]^T
 %
 
-function plotDetections(set, sequence, frameNbr)
+function plotDetections(set, sequence, frameNbr, Xest)
 
 % Frame || Height || Width || Target id || center x || center y || Bounding
 % width || Bounding height || Confidence
@@ -65,3 +67,16 @@ for i = 1:size(ind,1)
     rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
 end
 
+maxWidth = max(boxes(:,3));
+maxHeight = max(boxes(:,4));
+
+if ~isempty(Xest)
+    for i = 1:size(Xest,2)
+        if size(Xest{i},1) == 4
+            Xest{i}(5) = maxWidth;
+            Xest{i}(6) = maxHeight;
+        end
+        estBox = [Xest{i}(1)-Xest{i}(5)/2, Xest{i}(2)-Xest{i}(6)/2, Xest{i}(5), Xest{i}(6)];
+        rectangle('Position',estBox,'EdgeColor','r','LineWidth',1)
+    end
+end
