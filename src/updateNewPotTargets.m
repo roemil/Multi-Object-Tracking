@@ -10,11 +10,11 @@ function [XpotNew, rho] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z,c)
         XpotNew{z}.P = zeros(4,4);
         for i = 1:size(XmuPred,2)
             % Pass through Kalman
-            [XmuUpd{z}(i).state, XmuUpd{z}(i).P, XmuUpd{z}(i).S] = KFUpd(XmuPred(i).state,H, XmuPred(i).P, R, Z(:,z));
+            [XmuUpd{z}(i).state, XmuUpd{z}(i).P, XmuUpd{z}(i).S] = KFUpd(XmuPred(i).state,H, XmuPred(i).P, R, Z(1:2,z));
             
             % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
             % Compute weight
-            w(1,i) = XmuPred(i).w*mvnpdf(Z(:,z), H*XmuPred(i).state, XmuUpd{z}(i).S);
+            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:2,z), H*XmuPred(i).state, XmuUpd{z}(i).S);
             
             % TODO: temp solution
             Xmutmp(1:4,i) = XmuPred(i).state;
@@ -30,11 +30,12 @@ function [XpotNew, rho] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z,c)
             XpotNew{z}.P = XpotNew{z}.P+w(1,i)*XmuUpd{z}(i).P; % (44)
         end
         
-        e = Pd*generateGaussianMix(Z(:,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
+        e = Pd*generateGaussianMix(Z(1:2,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
         rho(z) = e+c;
         XpotNew{z}.w = e+c; % rho (45) (44)
         XpotNew{z}.r = e/XpotNew{z}.w; % (43) (44)
         XpotNew{z}.S = 0;
+        XpotNew{z}.box = Z(3:4,z);
         %XmuUpd{k,z}.w = e+c; % rho
         %XmuUpd{k,z}.r = e/XmuUpd{k,z}.w;
     end

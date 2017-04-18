@@ -17,6 +17,7 @@ function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)
                 Xpred{j}(i).w = XupdPrev{j}(i).w;      % Pred weight
                 [Xpred{j}(i).state, Xpred{j}(i).P] = KFPred(XupdPrev{j}(i).state, F, XupdPrev{j}(i).P ,Q);    % Pred state
                 Xpred{j}(i).r = Ps*XupdPrev{j}(i).r;   % Pred prob. of existence
+                Xpred{j}(i).box = XupdPrev{j}(i).box;
             end
         end
     end
