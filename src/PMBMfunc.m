@@ -24,7 +24,7 @@ end
 
 % Add hypotheses for births
 for i = 1:nbrOfBirths
-    XmuPred(end+1).w = 0.5;%/nbrOfBirths;
+    XmuPred(end+1).w = 1/nbrOfBirths;
     XmuPred(end).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';
     XmuPred(end).P = covBirth*eye(4);
@@ -91,7 +91,8 @@ for j = 1:max(1,nbrOfGlobHyp)
         S = zeros(m,m,1);
         S(:,:,1) = eye(m);
     end
-    
+    disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
+    disp(['Nbr measurements: ', num2str(m)])
     timeA(j) = toc(findA(j));
     %%%%% MURTY %%%%%%
     startMurt(j) = tic;
@@ -99,6 +100,7 @@ for j = 1:max(1,nbrOfGlobHyp)
     murtTime(j) = toc(startMurt(j));
     %%%%% Find new global hypotheses %%%%%
     startGlob(j) = tic;
+    
     [newGlob, newInd] = generateGlobalHypo5(Xhypo(j,:), XpotNew(:), Z, oldInd, Amat, ass, nbrOldTargets);
     globTime(j) = toc(startGlob(j));
     
@@ -136,19 +138,33 @@ weights = weights/max(weights);
 [keepGlobs,C] = murty(weights,min(maxNbrGlobal,minTmp));
 
 ind = find(diff(C) > 0.3);
-if ~isempty(ind)
+if ~isempty(ind) && size(Xtmp,2) >2
     keepGlobs = keepGlobs(1:ind(1));
 end
 
 % Remove bernoulli components with low probability of existence
-for j = 1:size(keepGlobs,1)
-    iInd = 1;
-    %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
-    for i = 1:size(Xtmp{keepGlobs(j)},2)
-        if Xtmp{keepGlobs(j)}(i).r > threshold
-            Xupd{j}(iInd) = Xtmp{keepGlobs(j)}(i);
-            Xupd{j}(iInd).w = Xtmp{keepGlobs(j)}(i).w/wSum(keepGlobs(j));
-            iInd = iInd+1;
+if keepGlobs ~= 0
+    for j = 1:size(keepGlobs,1)
+        iInd = 1;
+        %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
+        for i = 1:size(Xtmp{keepGlobs(j)},2)
+            if Xtmp{keepGlobs(j)}(i).r > threshold
+                Xupd{j}(iInd) = Xtmp{keepGlobs(j)}(i);
+                Xupd{j}(iInd).w = Xtmp{keepGlobs(j)}(i).w/wSum(keepGlobs(j));
+                iInd = iInd+1;
+            end
+        end
+    end
+else % TODO: Do we wanna do this?!
+    for j = 1:size(Xtmp,2)
+        iInd = 1;
+        %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
+        for i = 1:size(Xtmp{j},2)
+            if Xtmp{j}(i).r > threshold
+                Xupd{j}(iInd) = Xtmp{j}(i);
+                Xupd{j}(iInd).w = Xtmp{j}(i).w/wSum(j);
+                iInd = iInd+1;
+            end
         end
     end
 end
@@ -162,10 +178,10 @@ for i = 1:size(XuUpdTmp,2)
     end
 end
 
-disp(['Find A time: ', num2str(sum(timeA)), 's'])
-disp(['Murty time: ', num2str(sum(murtTime)), 's'])
-disp(['Glob time: ', num2str(sum(globTime)), 's'])
-disp(['Pred time: ', num2str(timePred), 's'])
-disp(['Upd time: ', num2str(timeUpd), 's'])
-disp(['Nbr global hypo pre murty: ', num2str(size(wGlob,2))])
-disp(['Nbr global hypo: ', num2str(size(Xupd,2))])
+%disp(['Find A time: ', num2str(sum(timeA)), 's'])
+%disp(['Murty time: ', num2str(sum(murtTime)), 's'])
+%disp(['Glob time: ', num2str(sum(globTime)), 's'])
+%disp(['Pred time: ', num2str(timePred), 's'])
+%disp(['Upd time: ', num2str(timeUpd), 's'])
+%disp(['Nbr global hypo pre murty: ', num2str(size(wGlob,2))])
+%disp(['Nbr global hypo: ', num2str(size(Xupd,2))])

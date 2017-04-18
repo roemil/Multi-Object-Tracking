@@ -1,11 +1,12 @@
 clear Xest
 clear Pest
+close all
 clc
 
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
-set = 'training';
-sequence = '0000';
+set = 'testing';
+sequence = '0001';
 datapath = strcat('../data/tracking/',set,'/',sequence,'/');
 filename = [datapath,'inferResult.txt'];
 formatSpec = '%f%f%f%f%f%f%f%f%f';
@@ -33,16 +34,16 @@ for i = 2 : size(detections{1},1)
 end
 
 %%%%%% Inititate %%%%%%
-sigmaQ = 10;         % Process (motion) noise
-R = 0.01*[1 0;0 1];    % Measurement noise
+sigmaQ = 20;         % Process (motion) noise % 20 ok1
+R = 0.01*[1 0;0 1];    % Measurement noise % 0.01 ok1
 T = 0.1; % sampling time, 1/fps
 FOVsize = [0,0;
             detections{3}(1), detections{2}(1)]; % [xmin, ymin; xmax, ymax]
  
 % Assume constant
-Pd = 0.7;   % Detection probability
-Ps = 0.99;   % Survival probability
-c = 0.005;    % clutter intensity
+Pd = 0.7;   % Detection probability % 0.7 ok1
+Ps = 0.99;   % Survival probability % 0.98 ok1
+c = 0.001;    % clutter intensity % 0.001 ok1
  
 % Initiate undetected targets
 XuPred = cell(1);
@@ -67,8 +68,8 @@ Xupd = cell(1,1);
 H = generateMeasurementModel({},'linear');
 
 vinit = 1;
-nbrInitBirth = 400;
-covBirth = 20;
+nbrInitBirth = 200; % 600 ok1
+covBirth = 20; % 20 ok1
  
 % TODO: Should the weights be 1/nbrInitBirth?
 for i = 1:nbrInitBirth
@@ -77,7 +78,7 @@ for i = 1:nbrInitBirth
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
  
-    XuUpd{1}(i).w = 1;    % Pred weight
+    XuUpd{1}(i).w = 1/nbrInitBirth;    % Pred weight
     XuUpd{1}(i).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
@@ -86,11 +87,11 @@ end
 Xupd = cell(1);
 
 %%%%%% INITIATE %%%%%%
-threshold = 0.001;    % CHANGED 0.1
-thresholdEst = 0.3;
+threshold = 0.01;    % 0.01 ok1
+thresholdEst = 0.75; % 0.6 ok1
 poissThresh = 1e-3;
 Nhconst = 100;
-nbrOfBirths = 400;
+nbrOfBirths = 200; % 600 ok1
 maxKperGlobal = 20;
 maxNbrGlobal = 100;
 
@@ -123,7 +124,8 @@ for t = 1:T
         PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
     frameNbr = '000000';
     plotDetections(set, sequence, frameNbr, Xest{1})
-    pause(0.5)
+    title('k = 1')
+    pause(0.1)
     %keyboard
     
     for k = 2:K % For each time step
@@ -131,17 +133,17 @@ for t = 1:T
         Nh = Nhconst*size(Z{k},2);    %Murty
         [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = ...
             PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal,k);
-        
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
         disp(['Nbr estimates: ', num2str(size(Xest{t,k},2))])
-        disp(['Nbr prop targets: ', num2str(sum(rest{t,k} == 1))])
+        %disp(['Nbr prop targets: ', num2str(sum(rest{t,k} == 1))])
         %disp(['Nbr clutter points: ', num2str(size(Z{k},2)-size(X{k},2))])
         %if size(X{t,k},2) ~= size(Xest{t,k},2)
         %    nbrMissmatch(t) = nbrMissmatch(t)+1;
         %end
         frameNbr = sprintf('%06d',k-1);
         plotDetections(set, sequence, frameNbr, Xest{k})
-        pause(0.5)
+        title(['k = ', num2str(k)])
+        pause(0.1)
     end
     
 end
@@ -156,6 +158,7 @@ figure;
 for k = 1:K
     frameNbr = sprintf('%06d',k-1);
     plotDetections(set, sequence, frameNbr, Xest{k})
+    title(['k = ', num2str(k)])
     pause(0.5)
 end
     
