@@ -35,7 +35,7 @@ function [Xest, Pest, rest, west] = est1(Xupd, threshold)
         index = 1;
         for i = 1 : size(Xupd{ind},2)
             if(Xupd{ind}(i).r > threshold) % if prob. of existence great enough
-                Xest{index} = Xupd{ind}(i).state; % store mean (i.e states)
+                Xest{index} = [Xupd{ind}(i).state; Xupd{ind}(i).box]; % store mean (i.e states)
                 Pest{index} = Xupd{ind}(i).P;
                 index = index + 1;
             %else

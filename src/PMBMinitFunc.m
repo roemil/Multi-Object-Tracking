@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xupd, Xest, Pest, rest, west] = PMBMinitFunc(Z, XmuInit, XuInit, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal)
+function [XuUpd, Xupd, Xest, Pest, rest, west] = PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal)
 
 load('simVariables')
 Wold = 0;

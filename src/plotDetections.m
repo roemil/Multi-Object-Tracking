@@ -58,6 +58,7 @@ boxes = [xcoord-width/2, ycoord-height/2, width, height];
 
 % Read and plot image
 img = imread(imagePath);
+%figure;
 imagesc(img)
 axis('image')
 hold on
@@ -70,7 +71,7 @@ end
 maxWidth = max(boxes(:,3));
 maxHeight = max(boxes(:,4));
 
-if ~isempty(Xest)
+if ~isempty(Xest{1})
     for i = 1:size(Xest,2)
         if size(Xest{i},1) == 4
             Xest{i}(5) = maxWidth;

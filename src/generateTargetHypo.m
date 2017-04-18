@@ -11,6 +11,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
             Xhypo{j,nbrOfMeas+1}(i).r = Xpred{j}(i).r*(1-Pd)/(1-Xpred{j}(i).r+Xpred{j}(i).r*(1-Pd));
             Xhypo{j,nbrOfMeas+1}(i).state = Xpred{j}(i).state;
             Xhypo{j,nbrOfMeas+1}(i).P = Xpred{j}(i).P;
+            Xhypo{j,nbrOfMeas+1}(i).box = Xpred{j}(i).box;
             Xhypo{j,nbrOfMeas+1}(i).S = 0;
         end
     end
@@ -19,9 +20,10 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
     for z = 1:nbrOfMeas
         for j = 1:nbrOfGlobHyp
             for i = 1:size(Xpred{j},2)
-                [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(:,z));
-                Xhypo{j,z}(i).w = Xpred{j}(i).w*Xpred{j}(i).r*Pd*mvnpdf(Z(:,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S); 
+                [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:2,z));
+                Xhypo{j,z}(i).w = Xpred{j}(i).w*Xpred{j}(i).r*Pd*mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S); 
                 Xhypo{j,z}(i).r = 1;
+                Xhypo{j,z}(i).box = mean([Xpred{j}(i).box, Z(3:4,z)],2); % Take mean bounding box?
             end
         end
     end
