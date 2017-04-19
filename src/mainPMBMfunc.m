@@ -3,34 +3,61 @@ clear Pest
 close all
 dbstop error
 clc
-
+mode = 'linear';
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
-set = 'testing';
-sequence = '0001';
-datapath = strcat('../data/tracking/',set,'/',sequence,'/');
-filename = [datapath,'inferResult.txt'];
-formatSpec = '%f%f%f%f%f%f%f%f%f';
-f = fopen(filename);
-detections = textscan(f,formatSpec);
-fclose(f);
+if(strcmp(mode,'linear'))
+    set = 'training';
+    sequence = '0000';
+    datapath = strcat('../data/tracking/',set,'/',sequence,'/');
+    filename = [datapath,'inferResult.txt'];
+    formatSpec = '%f%f%f%f%f%f%f%f%f';
+    f = fopen(filename);
+    detections = textscan(f,formatSpec);
+    fclose(f);
+elseif(strcmp(mode,'nonlinear'))
+    set = 'training';
+    sequence = '0000';
+    datapath = strcat('../data/tracking_dist/',set,'/',sequence,'/');
+    filename = [datapath,'inferResult.txt'];
+    formatSpec = '%f%f%f%f%f%f%f%f%f';
+    f = fopen(filename);
+    detections = textscan(f,formatSpec);
+    fclose(f);
+end
 
 %detections = textread(filename); % frame, size_x, size_y, class, cx, cy, w, h, conf
 %Z = cell(size(detections,1),5);
 Z = cell(1);
 oldFrame = detections{1}(1)+1;
 count = 1;
-Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1)]; % cx
-for i = 2 : size(detections{1},1)
-    frame = detections{1}(i)+1;
-    if(frame == oldFrame)
-        Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
-        count = count + 1;
-        oldFrame = frame;
-    else
-        Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
-        count = 1;
-        oldFrame = frame;  
+if(strcmp(mode,'linear'))
+    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1)]; % cx
+    for i = 2 : size(detections{1},1)
+        frame = detections{1}(i)+1;
+        if(frame == oldFrame)
+            Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+            count = count + 1;
+            oldFrame = frame;
+        else
+            Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+            count = 1;
+            oldFrame = frame;  
+        end
+    end
+elseif(strcmp(mode,'nonlinear'))
+    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1);detections{end}(1)]; % cx
+    for i = 2 : size(detections{1},1)
+        frame = detections{1}(i)+1;
+        if(frame == oldFrame)
+            Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i);detections{end}(i)]; % cx
+            count = count + 1;
+            oldFrame = frame;
+        else
+            Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i);detections{end}(i)]; % cx
+            count = 1;
+            oldFrame = frame;  
+        end
     end
 end
 
@@ -66,7 +93,12 @@ Xupd = cell(1,1);
  
 % Generate motion and measurement models
 [F, Q] = generateMotionModel(sigmaQ, T, 'cv');
-H = generateMeasurementModel({},'linear');
+if(strcmp(mode,'nonlinear'))
+    h = {'distance','angle'};
+    H = generateMeasurementModel(h,'nonlinear');
+elseif(strcmp(mode,'linear'))
+    H = generateMeasurementModel({},'linear');
+end
 
 vinit = 0;
 nbrInitBirth = 1000; % 600 ok1
@@ -125,7 +157,7 @@ save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',
 %     end
 % end
 
-K = 20; %size(Z,2); % Length of sequence
+K = 20;%size(Z,2); % Length of sequence
 
 T = 1; % Nbr of simulations
 
