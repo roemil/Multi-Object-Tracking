@@ -144,6 +144,9 @@ end
 for j = 1:size(keepGlobs,1)
     iInd = 1;
     %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
+    if(isempty(keepGlobs) || isempty({Xtmp}))
+        keyboard
+    end
     for i = 1:size(Xtmp{keepGlobs(j)},2)
         if Xtmp{keepGlobs(j)}(i).r > threshold
             Xupd{j}(iInd) = Xtmp{keepGlobs(j)}(i);

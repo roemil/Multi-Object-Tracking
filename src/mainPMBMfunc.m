@@ -33,7 +33,7 @@ for i = 2 : size(detections{1},1)
 end
 
 %%%%%% Inititate %%%%%%
-sigmaQ = 50;         % Process (motion) noise
+sigmaQ = 70;         % Process (motion) noise
 R = 0.01*[1 0;0 1];    % Measurement noise
 T = 0.1; % sampling time, 1/fps
 FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
@@ -75,7 +75,7 @@ for i = 1:nbrInitBirth
     XmuUpd{1}(i).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
- 
+    
     XuUpd{1}(i).w = 1;    % Pred weight
     XuUpd{1}(i).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
@@ -87,7 +87,7 @@ Xupd = cell(1);
 %%%%%% INITIATE %%%%%%
 
 threshold = 0.01;    % CHANGED 0.1
-thresholdEst = 0.2;
+thresholdEst = 0.45;
 poissThresh = 1e-5;
 
 Nhconst = 100;
@@ -123,18 +123,17 @@ for t = 1:T
     %Z = measGenerateCase2(X, R, FOVsize, K);
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}] = ...
         PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
-    frameNbr = '000000';
-    plotDetections(set, sequence, frameNbr, Xest{1})
-    pause(0.5)
-    %keyboard
-    
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
+%         if k == 25
+%             keyboard
+%         end
         [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = ...
             PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal,k);
 
 %        disp(['Nbr targets: ', num2str(size(X{t,k},2))])
+        disp(['Nbr measurements: ', num2str(size(Z{k},2))])
         disp(['Nbr estimates: ', num2str(size(Xest{t,k},2))])
         disp(['Nbr prop targets: ', num2str(sum(rest{t,k} == 1))])
 %        disp(['Nbr clutter points: ', num2str(size(Z{k},2)-size(X{k},2))])
@@ -157,4 +156,6 @@ for k = 1:K
     plotDetections(set, sequence, frameNbr, Xest{k})
     pause(0.5)
 end
+
+
     
