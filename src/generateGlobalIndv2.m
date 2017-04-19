@@ -1,4 +1,6 @@
 function [S, Amat] = generateGlobalIndv2(m, nbrOldTargets)
+disp(['Nbr of meas: ', num2str(m)])
+disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
 
 vec = [1:nbrOldTargets, (nbrOldTargets+1)*ones(1,m)];
 t1 = nchoosek(vec, m);
@@ -12,10 +14,6 @@ for i = 1:size(t2,1)
     ind = find(tmp2 == (nbrOldTargets+1));
     if ~isempty(cols)
         tmp2(ind) = cols+nbrOldTargets;
-        %tmp2(sub2ind(size(tmp2),rows,cols)) = cols+nbrOldTargets;
-        %for j = 1:max(size(rows,1),size(rows,2))
-        %    tmp2(rows(j),cols(j)) = cols(j)+nbrOldTargets;
-        %end
     end
     Amat = [Amat; tmp2];
 end

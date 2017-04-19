@@ -29,6 +29,7 @@ end
 %         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';
 %     XmuPred(end).P = covBirth*eye(4);
 % end
+
 XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOVsize, boarder, pctWithinBoarder,...
     covBirth, vinit, weightBirth);
 

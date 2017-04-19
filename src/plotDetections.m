@@ -80,6 +80,6 @@ if ~isempty(Xest{1})
             Xest{i}(6) = maxHeight;
         end
         estBox = [Xest{i}(1)-Xest{i}(5)/2, Xest{i}(2)-Xest{i}(6)/2, Xest{i}(5), Xest{i}(6)];
-        rectangle('Position',estBox,'EdgeColor','r','LineWidth',1)
+        rectangle('Position',estBox,'EdgeColor','r','LineWidth',1,'LineStyle','--')
     end
 end

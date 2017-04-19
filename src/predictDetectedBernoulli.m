@@ -18,7 +18,8 @@ function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)
 %         for j = 1:size(XupdPrev,2)
 %             for i = 1:size(XupdPrev{j},2)
 %                 if sum([XupdPrev{j}(i).state(3) XupdPrev{j}(i).state(4)]) == 0
-%                     for ii = 1:4 % Add new velo hypotheses
+%                     disp('0 velo')
+%                     for ii = 1:1 % Add new velo hypotheses
 %                         XupdPrev{j}(end+1) = XupdPrev{j}(i);
 %                         XupdPrev{j}(end).state(3:4) = vGuess(:,ii);
 %                     end

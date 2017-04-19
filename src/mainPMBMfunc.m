@@ -35,7 +35,7 @@ for i = 2 : size(detections{1},1)
 end
 
 %%%%%% Inititate %%%%%%
-sigmaQ = 50;         % Process (motion) noise % 20 ok1
+sigmaQ = 80;         % Process (motion) noise % 20 ok1
 R = 0.001*[1 0;0 1];    % Measurement noise % 0.01 ok1
 
 T = 0.1; % sampling time, 1/fps
@@ -69,17 +69,18 @@ Xupd = cell(1,1);
 H = generateMeasurementModel({},'linear');
 
 vinit = 0;
-nbrInitBirth = 1000; % 600 ok1
+nbrInitBirth = 800; % 600 ok1
 covBirth = 20; % 20 ok1
+wInit = 0.2;
  
 % TODO: Should the weights be 1/nbrInitBirth?
 for i = 1:nbrInitBirth
-    XmuUpd{1}(i).w = 0.2;    % Pred weight
+    XmuUpd{1}(i).w = wInit;    % Pred weight
     XmuUpd{1}(i).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
  
-    XuUpd{1}(i).w = 0.2;    % Pred weight
+    XuUpd{1}(i).w = wInit;    % Pred weight
     XuUpd{1}(i).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
@@ -97,7 +98,7 @@ poissThresh = 1e-4;
 % Murty constant
 Nhconst = 100;
 % Number of births
-nbrOfBirths = 400; % 600 ok1
+nbrOfBirths = 100; % 600 ok1
 % Max nbr of globals for each old global
 maxKperGlobal = 20;
 % Max nbr globals to pass to next iteration
@@ -107,7 +108,7 @@ boarderWidth = 0.1*FOVsize(2,1);
 boarder = [0, FOVsize(2,1)-boarderWidth;
     boarderWidth, FOVsize(2,1)];
 % Percentage of births within boarders
-pctWithinBoarder = 0.8;
+pctWithinBoarder = 0.9;
 % Weight of the births
 weightBirth = 0.2;
 
@@ -179,11 +180,11 @@ disp(['Total simulation time: ', num2str(simTime)])
 %% Plot estimates
 
 figure;
-for k = 1:K
+for k = 1:size(Xest,2)
     frameNbr = sprintf('%06d',k-1);
     plotDetections(set, sequence, frameNbr, Xest{k})
     title(['k = ', num2str(k)])
-    pause(0.5)
+    pause(1.5)
 end
 
 %% Plot pred and upd
@@ -204,4 +205,14 @@ for k = 2:15
     title(['k = ', num2str(k)])
     pause(2)
 end
-    
+
+%% Estimated velocities
+
+veloEst = zeros(2,5,size(Xest,2));
+for k = 2:size(Xest,2)
+    for i = 1:size(Xest{1,k},2)
+        if ~isempty(Xest{1,k}{i})
+            veloEst(1:2,i,k) = Xest{1,k}{i}(3:4);
+        end
+    end
+end
