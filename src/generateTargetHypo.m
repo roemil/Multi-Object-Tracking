@@ -26,7 +26,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
                 %    keyboard
                 %end
                 Xhypo{j,z}(i).r = 1;
-                Xhypo{j,z}(i).box = mean([Xpred{j}(i).box, Z(3:4,z)],2); % Take mean bounding box?
+                Xhypo{j,z}(i).box = 0.2.*Xpred{j}(i).box + 0.8.*Z(3:4,z); % Take mean bounding box?
             end
         end
     end

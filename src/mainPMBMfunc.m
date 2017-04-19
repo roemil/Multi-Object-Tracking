@@ -87,16 +87,29 @@ end
 Xupd = cell(1);
 
 %%%%%% INITIATE %%%%%%
-threshold = 0.01;    % 0.01 ok1
+% Threshold existence probability keep for next iteration
+threshold = 0.1;    % 0.01 ok1
+% Threshold existence probability use estimate
 thresholdEst = 0.6; % 0.6 ok1
+% Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-4;
+% Murty constant
 Nhconst = 100;
-nbrOfBirths = 200; % 600 ok1
+% Number of births
+nbrOfBirths = 400; % 600 ok1
+% Max nbr of globals for each old global
 maxKperGlobal = 20;
+% Max nbr globals to pass to next iteration
 maxNbrGlobal = 100;
+% boarder width with higher probability of birth
+boarderWidth = 0.1*FOVsize(2,1);
+boarder = [0, FOVsize(2,1)-boarderWidth;
+    boarderWidth, FOVsize(2,1)];
+pctWithinBoarder = 0.8;
 
 % Save everything in simVariables and load at the begining of the filter
-save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold','poissThresh','vinit','thresholdEst','covBirth');
+save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',...
+    'poissThresh','vinit','thresholdEst','covBirth','boarder','pctWithinBoarder');
 
 % For birth case
 % ind = 1;
