@@ -1,6 +1,7 @@
 clear Xest
 clear Pest
 close all
+dbstop error
 clc
 
 %%%%%% Load Detections %%%%%%
@@ -34,8 +35,8 @@ for i = 2 : size(detections{1},1)
 end
 
 %%%%%% Inititate %%%%%%
-sigmaQ = 20;         % Process (motion) noise % 20 ok1
-R = 0.01*[1 0;0 1];    % Measurement noise % 0.01 ok1
+sigmaQ = 50;         % Process (motion) noise % 20 ok1
+R = 0.001*[1 0;0 1];    % Measurement noise % 0.01 ok1
 T = 0.1; % sampling time, 1/fps
 FOVsize = [0,0;
             detections{3}(1), detections{2}(1)]; % [xmin, ymin; xmax, ymax]
@@ -67,19 +68,19 @@ Xupd = cell(1,1);
 [F, Q] = generateMotionModel(sigmaQ, T, 'cv');
 H = generateMeasurementModel({},'linear');
 
-vinit = 10;
-nbrInitBirth = 600; % 600 ok1
+vinit = 0;
+nbrInitBirth = 1000; % 600 ok1
 covBirth = 20; % 20 ok1
  
 % TODO: Should the weights be 1/nbrInitBirth?
 for i = 1:nbrInitBirth
-    XmuUpd{1}(i).w = 1/nbrInitBirth;    % Pred weight
-    XmuUpd{1}(i).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
+    XmuUpd{1}(i).w = 0.2;    % Pred weight
+    XmuUpd{1}(i).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
  
     XuUpd{1}(i).w = 1/nbrInitBirth;    % Pred weight
-    XuUpd{1}(i).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
+    XuUpd{1}(i).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
 end
@@ -90,7 +91,7 @@ Xupd = cell(1);
 % Threshold existence probability keep for next iteration
 threshold = 0.1;    % 0.01 ok1
 % Threshold existence probability use estimate
-thresholdEst = 0.6; % 0.6 ok1
+thresholdEst = 0.5; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-4;
 % Murty constant
@@ -105,11 +106,15 @@ maxNbrGlobal = 100;
 boarderWidth = 0.1*FOVsize(2,1);
 boarder = [0, FOVsize(2,1)-boarderWidth;
     boarderWidth, FOVsize(2,1)];
+% Percentage of births within boarders
 pctWithinBoarder = 0.8;
+% Weight of the births
+weightBirth = 0.2;
 
 % Save everything in simVariables and load at the begining of the filter
 save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',...
-    'poissThresh','vinit','thresholdEst','covBirth','boarder','pctWithinBoarder');
+    'poissThresh','vinit','thresholdEst','covBirth','boarder','pctWithinBoarder',...
+    'weightBirth');
 
 % For birth case
 % ind = 1;
@@ -179,7 +184,17 @@ end
 figure;
 for k = 2:15
     frameNbr = sprintf('%06d',k-1);
-    plotPredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k})
+    plotPredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k-1})
+    title(['k = ', num2str(k)])
+    pause(2)
+end
+
+%% Plot single pred and upd
+i = 2;
+
+for k = 2:15
+    frameNbr = sprintf('%06d',k-1);
+    plotSinglePredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k-1},i)
     title(['k = ', num2str(k)])
     pause(2)
 end

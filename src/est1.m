@@ -33,9 +33,6 @@ function [Xest, Pest, rest, west] = est1(Xupd, threshold)
                 M = prod;
             end 
         end
-        if ind == -1
-            keyboard
-        end
         index = 1;
         for i = 1 : size(Xupd{ind},2)
             if(Xupd{ind}(i).r > threshold) % if prob. of existence great enough

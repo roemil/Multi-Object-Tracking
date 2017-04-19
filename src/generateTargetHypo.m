@@ -22,9 +22,9 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
             for i = 1:size(Xpred{j},2)
                 [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:2,z));
                 Xhypo{j,z}(i).w = Xpred{j}(i).w*Xpred{j}(i).r*Pd*mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S); 
-                %if Xhypo{j,z}(i).w == 0
-                %    keyboard
-                %end
+                if isnan(Xhypo{j,z}(i).w)
+                   keyboard
+                end
                 Xhypo{j,z}(i).r = 1;
                 Xhypo{j,z}(i).box = 0.2.*Xpred{j}(i).box + 0.8.*Z(3:4,z); % Take mean bounding box?
             end
