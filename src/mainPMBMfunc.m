@@ -1,11 +1,13 @@
 clear Xest
 clear Pest
+close all
+dbstop error
 clc
 
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
-set = 'training';
-sequence = '0000';
+set = 'testing';
+sequence = '0001';
 datapath = strcat('../data/tracking/',set,'/',sequence,'/');
 filename = [datapath,'inferResult.txt'];
 formatSpec = '%f%f%f%f%f%f%f%f%f';
@@ -33,15 +35,16 @@ for i = 2 : size(detections{1},1)
 end
 
 %%%%%% Inititate %%%%%%
-sigmaQ = 70;         % Process (motion) noise
-R = 0.01*[1 0;0 1];    % Measurement noise
+sigmaQ = 50;         % Process (motion) noise % 20 ok1
+R = 0.001*[1 0;0 1];    % Measurement noise % 0.01 ok1
+
 T = 0.1; % sampling time, 1/fps
 FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
  
 % Assume constant
-Pd = 0.7;   % Detection probability
-Ps = 0.99;   % Survival probability
-c = 0.005;    % clutter intensity
+Pd = 0.7;   % Detection probability % 0.7 ok1
+Ps = 0.99;   % Survival probability % 0.98 ok1
+c = 0.001;    % clutter intensity % 0.001 ok1
  
 % Initiate undetected targets
 XuPred = cell(1);
@@ -65,19 +68,19 @@ Xupd = cell(1,1);
 [F, Q] = generateMotionModel(sigmaQ, T, 'cv');
 H = generateMeasurementModel({},'linear');
 
-vinit = 1;
-nbrInitBirth = 400;
-covBirth = 20;
+vinit = 0;
+nbrInitBirth = 1000; % 600 ok1
+covBirth = 20; % 20 ok1
  
 % TODO: Should the weights be 1/nbrInitBirth?
 for i = 1:nbrInitBirth
-    XmuUpd{1}(i).w = 1/nbrInitBirth;    % Pred weight
-    XmuUpd{1}(i).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
+    XmuUpd{1}(i).w = 0.2;    % Pred weight
+    XmuUpd{1}(i).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
-    
-    XuUpd{1}(i).w = 1;    % Pred weight
-    XuUpd{1}(i).state = [unifrnd(-FOVsize(1,1), FOVsize(2,1)), ...
+ 
+    XuUpd{1}(i).w = 0.2;    % Pred weight
+    XuUpd{1}(i).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
 end
@@ -85,19 +88,33 @@ end
 Xupd = cell(1);
 
 %%%%%% INITIATE %%%%%%
-
-threshold = 0.01;    % CHANGED 0.1
-thresholdEst = 0.45;
-poissThresh = 1e-5;
-
+% Threshold existence probability keep for next iteration
+threshold = 0.1;    % 0.01 ok1
+% Threshold existence probability use estimate
+thresholdEst = 0.5; % 0.6 ok1
+% Threshold weight undetected targets keep for next iteration
+poissThresh = 1e-4;
+% Murty constant
 Nhconst = 100;
-nbrOfBirths = 400;
+% Number of births
+nbrOfBirths = 400; % 600 ok1
+% Max nbr of globals for each old global
 maxKperGlobal = 20;
+% Max nbr globals to pass to next iteration
 maxNbrGlobal = 100;
+% boarder width with higher probability of birth
+boarderWidth = 0.1*FOVsize(2,1);
+boarder = [0, FOVsize(2,1)-boarderWidth;
+    boarderWidth, FOVsize(2,1)];
+% Percentage of births within boarders
+pctWithinBoarder = 0.8;
+% Weight of the births
+weightBirth = 0.2;
 
 % Save everything in simVariables and load at the begining of the filter
-
-save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold','poissThresh','vinit','thresholdEst','covBirth');
+save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',...
+    'poissThresh','vinit','thresholdEst','covBirth','boarder','pctWithinBoarder',...
+    'weightBirth');
 
 % For birth case
 % ind = 1;
@@ -123,6 +140,13 @@ for t = 1:T
     %Z = measGenerateCase2(X, R, FOVsize, K);
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}] = ...
         PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
+
+    frameNbr = '000000';
+    plotDetections(set, sequence, frameNbr, Xest{1})
+    title('k = 1')
+    pause(0.1)
+    %keyboard
+    
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
@@ -132,14 +156,18 @@ for t = 1:T
         [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = ...
             PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal,k);
 
-%        disp(['Nbr targets: ', num2str(size(X{t,k},2))])
-        disp(['Nbr measurements: ', num2str(size(Z{k},2))])
+        %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
         disp(['Nbr estimates: ', num2str(size(Xest{t,k},2))])
-        disp(['Nbr prop targets: ', num2str(sum(rest{t,k} == 1))])
-%        disp(['Nbr clutter points: ', num2str(size(Z{k},2)-size(X{k},2))])
+        %disp(['Nbr prop targets: ', num2str(sum(rest{t,k} == 1))])
+        %disp(['Nbr clutter points: ', num2str(size(Z{k},2)-size(X{k},2))])
+        %if size(X{t,k},2) ~= size(Xest{t,k},2)
+        %    nbrMissmatch(t) = nbrMissmatch(t)+1;
+        %end
+
         frameNbr = sprintf('%06d',k-1);
         plotDetections(set, sequence, frameNbr, Xest{k})
-        pause(0.5)
+        title(['k = ', num2str(k)])
+        pause(0.1)
     end
     
 end
@@ -148,14 +176,32 @@ simTime = toc(startTime);
 disp('--------------- Simulation Complete ---------------')
 disp(['Total simulation time: ', num2str(simTime)])
     
-%% Plot
+%% Plot estimates
 
 figure;
 for k = 1:K
     frameNbr = sprintf('%06d',k-1);
     plotDetections(set, sequence, frameNbr, Xest{k})
+    title(['k = ', num2str(k)])
     pause(0.5)
 end
 
+%% Plot pred and upd
+figure;
+for k = 2:15
+    frameNbr = sprintf('%06d',k-1);
+    plotPredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k-1})
+    title(['k = ', num2str(k)])
+    pause(2)
+end
 
+%% Plot single pred and upd
+i = 2;
+
+for k = 2:15
+    frameNbr = sprintf('%06d',k-1);
+    plotSinglePredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k-1},i)
+    title(['k = ', num2str(k)])
+    pause(2)
+end
     

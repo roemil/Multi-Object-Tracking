@@ -44,6 +44,8 @@ dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter,  'ReturnOnError
 % Convert frameNbr to a number
 frameNum = str2num(frameNbr);
 
+fclose(fileID);
+
 % Find indeces for the frame number of interest
 ind = find(ismember(dataArray{1},frameNum,'rows') == 1);
 

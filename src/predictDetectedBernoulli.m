@@ -11,6 +11,20 @@ function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)
     if(isempty(XupdPrev))
         Xpred = [];
     else
+        % TODO: Temporary to solve initiate problems with velocity
+%         vSize = 10;
+%         vGuess = [vSize -vSize vSize -vSize;
+%             vSize vSize -vSize -vSize];
+%         for j = 1:size(XupdPrev,2)
+%             for i = 1:size(XupdPrev{j},2)
+%                 if sum([XupdPrev{j}(i).state(3) XupdPrev{j}(i).state(4)]) == 0
+%                     for ii = 1:4 % Add new velo hypotheses
+%                         XupdPrev{j}(end+1) = XupdPrev{j}(i);
+%                         XupdPrev{j}(end).state(3:4) = vGuess(:,ii);
+%                     end
+%                 end
+%             end
+%         end
         for j = 1:size(XupdPrev,2)
             for i = 1:size(XupdPrev{j},2)
                 % Bernoulli
