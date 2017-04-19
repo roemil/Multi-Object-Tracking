@@ -159,7 +159,7 @@ for k = 1:K
     frameNbr = sprintf('%06d',k-1);
     plotDetections(set, sequence, frameNbr, Xest{k})
     title(['k = ', num2str(k)])
-    pause(0.2)
+    pause(0.5)
 end
 
 %% Plot pred and upd

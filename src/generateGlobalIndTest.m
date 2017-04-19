@@ -9,7 +9,7 @@
 %
 
 function [S, Amat] = generateGlobalIndTest(m,nbrOldTargets)
-
+tic
 %
 if nbrOldTargets >= m
     targets = 1:nbrOldTargets;
@@ -73,7 +73,7 @@ for i = 1:size(A,2)
 end
 
 Amat = unique(Atmp,'rows');
-
+toc
 S = zeros(m, nbrOldTargets+m,1);
 for j = 1:size(Amat,1)
     S(:,:,j) = zeros(m, nbrOldTargets+m);
