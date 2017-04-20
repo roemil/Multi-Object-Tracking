@@ -22,7 +22,13 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
         for j = 1:nbrOfGlobHyp
             for i = 1:size(Xpred{j},2)
                 [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:2,z));
-                Xhypo{j,z}(i).w = Xpred{j}(i).w*Xpred{j}(i).r*Pd*mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S); 
+                Xhypo{j,z}(i).w = Xpred{j}(i).w*Xpred{j}(i).r*Pd*mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S);
+                Xhypo{j,z}(i).w = Xhypo{j,z}(i).w+0.2;
+                %tmp = H*Xpred{j}(i).state;
+                %figure;
+                %plot(Z(1,z),Z(2,z),'*r')
+                %hold on 
+                %plot(tmp(1), tmp(2),'*b')
                 if isnan(Xhypo{j,z}(i).w)
                    keyboard
                 end

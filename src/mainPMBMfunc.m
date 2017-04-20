@@ -35,14 +35,14 @@ for i = 2 : size(detections{1},1)
 end
 
 %%%%%% Inititate %%%%%%
-sigmaQ = 80;         % Process (motion) noise % 20 ok1
-R = 0.001*[1 0;0 1];    % Measurement noise % 0.01 ok1
+sigmaQ = 20;         % Process (motion) noise % 20 ok1
+R = 0.1*[1 0;0 1];    % Measurement noise % 0.01 ok1 || 0.001
 
 T = 0.1; % sampling time, 1/fps
 FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
  
 % Assume constant
-Pd = 0.7;   % Detection probability % 0.7 ok1
+Pd = 0.9;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
 c = 0.001;    % clutter intensity % 0.001 ok1
  
@@ -66,6 +66,7 @@ Xupd = cell(1,1);
  
 % Generate motion and measurement models
 [F, Q] = generateMotionModel(sigmaQ, T, 'cv');
+Q = Q + 2*diag([1 1 0 0]);
 H = generateMeasurementModel({},'linear');
 
 vinit = 0;
@@ -92,7 +93,7 @@ Xupd = cell(1);
 % Threshold existence probability keep for next iteration
 threshold = 0.1;    % 0.01 ok1
 % Threshold existence probability use estimate
-thresholdEst = 0.5; % 0.6 ok1
+thresholdEst = 0.8; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-4;
 % Murty constant
@@ -133,6 +134,8 @@ T = 1; % Nbr of simulations
 nbrMissmatch = zeros(1,T);
 newLabel = 1;
 
+jEst = zeros(1,K);
+
 startTime = tic;
 for t = 1:T
     disp('-------------------------------------')
@@ -140,11 +143,11 @@ for t = 1:T
     disp('-------------------------------------')
     
     %Z = measGenerateCase2(X, R, FOVsize, K);
-    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel] = ...
+    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
         PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel);
 
     frameNbr = '000000';
-    plotDetections(set, sequence, frameNbr, Xest{1})
+    plotDetections(set, sequence, frameNbr, Xest{1}, FOVsize)
     title('k = 1')
     pause(0.1)
     %keyboard
@@ -155,7 +158,7 @@ for t = 1:T
 %         if k == 25
 %             keyboard
 %         end
-        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel] = ...
+        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
             PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
 
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
@@ -167,7 +170,7 @@ for t = 1:T
         %end
 
         frameNbr = sprintf('%06d',k-1);
-        plotDetections(set, sequence, frameNbr, Xest{k})
+        plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
         title(['k = ', num2str(k)])
         pause(0.1)
     end
@@ -183,28 +186,29 @@ disp(['Total simulation time: ', num2str(simTime)])
 figure;
 for k = 1:size(Xest,2)
     frameNbr = sprintf('%06d',k-1);
-    plotDetections(set, sequence, frameNbr, Xest{k})
+    plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
     title(['k = ', num2str(k)])
-    pause(1.5)
+    waitforbuttonpress
+    %pause(1.5)
 end
 
 %% Plot pred and upd
 figure;
-for k = 2:15
+for k = 2:size(Xest,2)
     frameNbr = sprintf('%06d',k-1);
-    plotPredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k-1})
+    plotPredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k-1},FOVsize)
     title(['k = ', num2str(k)])
-    pause(2)
+    waitforbuttonpress
 end
 
 %% Plot single pred and upd
-i = 2;
+i = 1;
 
-for k = 2:15
+for k = 2:size(Xest,2)
     frameNbr = sprintf('%06d',k-1);
-    plotSinglePredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k-1},i)
+    plotSinglePredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k},i,FOVsize)
     title(['k = ', num2str(k)])
-    pause(2)
+    waitforbuttonpress
 end
 
 %% Estimated velocities
@@ -225,5 +229,16 @@ end
 rlabelsw = cell(1);
 for k = 1:size(Xest,2)
     rlabelsw{k} = [rest{1,k}; labelsEst{1,k}; west{1,k}];
+end
+
+%% Estimated pos and lables
+
+est = zeros(5,5,size(Xest,2));
+for k = 1:size(Xest,2)
+    for i = 1:size(Xest{1,k},2)
+        if ~isempty(Xest{1,k}{i})
+            est(:,i,k) = [Xest{1,k}{i}(1:4); Xest{1,k}{i}(7)];
+        end
+    end
 end
 

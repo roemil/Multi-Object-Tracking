@@ -10,8 +10,8 @@ for m = 1 : nbrOfMeas
         %Wold(m,nj) = Xhypo{j,m}(nj).w*Xhypo{j,m}(nj).r*Pd*mvnpdf(Z(:,m)...
         %    ,H*Xpred{j}(nj).state,Xhypo{j,m}(nj).S)...
         %    /(Xhypo{j,m}(nj).w*(1-Xhypo{j,m}(nj).r+Xhypo{j,m}(nj).r*(1-Pd)));  % TODO: IS THIS CORRECT??
-        %Wold(m,nj) = min(1,Xhypo{j,m}(nj).w); % TODO: This is not proper
-        Wold(m,nj) = min(1,Xhypo{j,m}(nj).w/Xhypo{j,end}(nj).w); % TODO: SHOULDNT IT BE LIKE THIS?
+        Wold(m,nj) = min(1,Xhypo{j,m}(nj).w); % TODO: This is not proper
+        %Wold(m,nj) = min(1,Xhypo{j,m}(nj).w/Xhypo{j,end}(nj).w); % TODO: SHOULDNT IT BE LIKE THIS?
         wHyp = wHyp * Xpred{j}(nj).w;
         wHypSum = wHypSum + Xpred{j}(nj).w;
         whypo(m,nj) = Xhypo{j,m}(nj).w;

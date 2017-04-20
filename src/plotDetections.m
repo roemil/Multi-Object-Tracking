@@ -7,7 +7,7 @@
 %                       [x,y,vx,vy,width,height]^T
 %
 
-function plotDetections(set, sequence, frameNbr, Xest)
+function plotDetections(set, sequence, frameNbr, Xest, FOVsize)
 
 % Frame || Height || Width || Target id || center x || center y || Bounding
 % width || Bounding height || Confidence
@@ -64,6 +64,8 @@ img = imread(imagePath);
 imagesc(img)
 axis('image')
 hold on
+xlim([FOVsize(1,1) FOVsize(2,1)])
+ylim([FOVsize(1,2) FOVsize(2,2)])
 
 % Plot bounding boxes
 for i = 1:size(ind,1)
