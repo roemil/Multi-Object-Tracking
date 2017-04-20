@@ -81,5 +81,6 @@ if ~isempty(Xest{1})
         end
         estBox = [Xest{i}(1)-Xest{i}(5)/2, Xest{i}(2)-Xest{i}(6)/2, Xest{i}(5), Xest{i}(6)];
         rectangle('Position',estBox,'EdgeColor','r','LineWidth',1,'LineStyle','--')
+        text(estBox(1), estBox(2), num2str(Xest{i}(7)),'Fontsize',15,'Color','red')
     end
 end

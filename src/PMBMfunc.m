@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal,k)
+function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, newLabel] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k)
 
 load('simVariables')
 Wold = 0;
@@ -58,7 +58,7 @@ end
 disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
-[XpotNew, rho] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c);
+[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel);
 
 %%%% Update for previously potentially detected targets %%%%
 Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z);    

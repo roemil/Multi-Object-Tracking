@@ -131,6 +131,7 @@ K = 20; %size(Z,2); % Length of sequence
 T = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,T);
+newLabel = 1;
 
 startTime = tic;
 for t = 1:T
@@ -139,8 +140,8 @@ for t = 1:T
     disp('-------------------------------------')
     
     %Z = measGenerateCase2(X, R, FOVsize, K);
-    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}] = ...
-        PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
+    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, newLabel] = ...
+        PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel);
 
     frameNbr = '000000';
     plotDetections(set, sequence, frameNbr, Xest{1})
@@ -154,8 +155,8 @@ for t = 1:T
 %         if k == 25
 %             keyboard
 %         end
-        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}] = ...
-            PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal,k);
+        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, newLabel] = ...
+            PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
 
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
         disp(['Nbr estimates: ', num2str(size(Xest{t,k},2))])
@@ -209,10 +210,12 @@ end
 %% Estimated velocities
 
 veloEst = zeros(2,5,size(Xest,2));
+labels = zeros(1,5,size(Xest,2));
 for k = 2:size(Xest,2)
     for i = 1:size(Xest{1,k},2)
         if ~isempty(Xest{1,k}{i})
             veloEst(1:2,i,k) = Xest{1,k}{i}(3:4);
+            labels(1,i,k) = Xest{1,k}{i}(7);
         end
     end
 end

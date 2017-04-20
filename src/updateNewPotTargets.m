@@ -1,4 +1,4 @@
-function [XpotNew, rho] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z,c)
+function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel)
     rho = zeros(nbrOfMeas,1);
     for z = 1:nbrOfMeas
         % TODO: Fixed?
@@ -36,6 +36,8 @@ function [XpotNew, rho] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z,c)
         XpotNew{z}.r = e/XpotNew{z}.w; % (43) (44)
         XpotNew{z}.S = 0;
         XpotNew{z}.box = Z(3:4,z);
+        XpotNew{z}.label = newLabel;
+        newLabel = newLabel+1;
         %XmuUpd{k,z}.w = e+c; % rho
         %XmuUpd{k,z}.r = e/XmuUpd{k,z}.w;
     end

@@ -42,7 +42,7 @@ end
 
 for j = 1:size(hypoInd,1)
     % Initiate
-    newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',1,'r',0,'S',0,'box',[]);
+    newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',1,'r',0,'S',0,'box',[],'label',0);
     for col = 1:size(Amat,2)
         % Find combination
         newGlob{j}(Amat(hypoInd(j),col)) = Xtmp{col}(Amat(hypoInd(j),col));
@@ -56,6 +56,7 @@ for j = 1:size(hypoInd,1)
                 % Does not consider newly detected potential target
                 newGlob{j}(target).state = Xnew{target-nbrOldTargets}.state;
                 newGlob{j}(target).P = Xnew{target-nbrOldTargets}.P;
+                newGlob{j}(target).label = Xnew{target-nbrOldTargets}.label;
             end
         end
     end
