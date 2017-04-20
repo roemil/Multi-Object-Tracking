@@ -140,7 +140,7 @@ for t = 1:T
     disp('-------------------------------------')
     
     %Z = measGenerateCase2(X, R, FOVsize, K);
-    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, newLabel] = ...
+    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel] = ...
         PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel);
 
     frameNbr = '000000';
@@ -155,7 +155,7 @@ for t = 1:T
 %         if k == 25
 %             keyboard
 %         end
-        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, newLabel] = ...
+        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel] = ...
             PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
 
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
@@ -219,3 +219,11 @@ for k = 2:size(Xest,2)
         end
     end
 end
+
+%% Stack rest and labels
+
+rlabels = cell(1);
+for k = 1:size(Xest,2)
+    rlabels{k} = [rest{1,k}; labelsEst{1,k}];
+end
+

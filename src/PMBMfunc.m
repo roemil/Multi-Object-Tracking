@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, newLabel] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k)
+function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k)
 
 load('simVariables')
 Wold = 0;
@@ -141,7 +141,7 @@ end
 timeUpd = toc(startUpd);
 %disp(['Error: ', num2str(6)])
 % Estimate states using Estimator 1
-[Xest, Pest, rest, west] = est1(Xtmp, thresholdEst);
+[Xest, Pest, rest, west, labelsEst] = est1(Xtmp, thresholdEst);
 %disp(['Error: ', num2str(7)])
 % Keep the Nh best global hypotheses
 

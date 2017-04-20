@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xupd, Xest, Pest, rest, west, newLabel] = PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel)
+function [XuUpd, Xupd, Xest, Pest, rest, west, labelsEst, newLabel] = PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel)
 
 load('simVariables')
 Wold = 0;
@@ -38,7 +38,7 @@ for i = 1:size(XpotNew,2)
 end
 
 % Estimate states using Estimator 1
-[Xest, Pest, rest, west] = est1(Xtmp, thresholdEst);
+[Xest, Pest, rest, west, labelsEst] = est1(Xtmp, thresholdEst);
 
 % Remove bernoulli components with low probability of existence
 iInd = 1;
