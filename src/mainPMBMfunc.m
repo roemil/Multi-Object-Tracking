@@ -220,10 +220,10 @@ for k = 2:size(Xest,2)
     end
 end
 
-%% Stack rest and labels
+%% Stack rest, labelsEst and west
 
-rlabels = cell(1);
+rlabelsw = cell(1);
 for k = 1:size(Xest,2)
-    rlabels{k} = [rest{1,k}; labelsEst{1,k}];
+    rlabelsw{k} = [rest{1,k}; labelsEst{1,k}; west{1,k}];
 end
 
