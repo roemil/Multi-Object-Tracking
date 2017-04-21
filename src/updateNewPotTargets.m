@@ -32,8 +32,8 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, 
         
         e = Pd*generateGaussianMix(Z(1:2,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
         rho(z) = e+c;
-        XpotNew{z}.w = e+c; % rho (45) (44)
-        XpotNew{z}.r = e/XpotNew{z}.w; % (43) (44)
+        XpotNew{z}.w = log(e+c); % rho (45) (44)
+        XpotNew{z}.r = e/rho(z); % (43) (44)
         XpotNew{z}.S = 0;
         XpotNew{z}.box = Z(3:4,z);
         XpotNew{z}.label = newLabel;

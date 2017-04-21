@@ -121,23 +121,24 @@ for j = 1:max(1,nbrOfGlobHyp)
 end
 %disp(['Error: ', num2str(5)])
 % Find global hypotheses weights and weight sum for normalization
+wSum = cell(size(Xtmp,2),1);
 for j = 1:size(Xtmp,2)
-    wSum(j) = 0;
-    wGlob(j) = 1;
+    wSum{j} = 0;
+    wGlob(j) = 0;
+    iInd = 1;
     if ~isempty(Xtmp{j})
         for i = 1:size(Xtmp{j},2)
             if ~isempty(Xtmp{j}(i).w)
-                wGlob(j) = wGlob(j)*Xtmp{j}(i).w;
+                wGlob(j) = wGlob(j)+Xtmp{j}(i).w;
                 if Xtmp{j}(i).r > threshold
-                    wSum(j) = wSum(j) + Xtmp{j}(i).w;
+                    wSum{j}(iInd) = Xtmp{j}(i).w;
+                    iInd = iInd + 1;
                 end
             end
         end
     end
 end
-if sum(wSum) == 0
-    keyboard
-end
+
 timeUpd = toc(startUpd);
 %disp(['Error: ', num2str(6)])
 % Estimate states using Estimator 1
@@ -146,17 +147,10 @@ timeUpd = toc(startUpd);
 % Keep the Nh best global hypotheses
 
 minTmp = min(size(wGlob,2), Nh);
-weights = 1./wGlob;
-if isnan(weights)
-    keyboard
-end
-weights2 = weights/max(weights);
-if isnan(weights2)
-    keyboard
-end
-[keepGlobs,C] = murty(weights2,min(maxNbrGlobal,minTmp));
+
+[keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
 %disp('Error: Murty')
-ind = find(diff(C) > 0.3);
+ind = find(diff(C) > 50);
 if ~isempty(ind)
     keepGlobs = keepGlobs(1:ind(1));
 end
@@ -169,11 +163,12 @@ if keepGlobs ~= 0
             jEst = j;
         end
         iInd = 1;
+        [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
         %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
         for i = 1:size(Xtmp{keepGlobs(j)},2)
             if Xtmp{keepGlobs(j)}(i).r > threshold
                 Xupd{j}(iInd) = Xtmp{keepGlobs(j)}(i);
-                Xupd{j}(iInd).w = Xtmp{keepGlobs(j)}(i).w/wSum(keepGlobs(j));
+                Xupd{j}(iInd).w = weights(iInd);
                 if isnan(Xupd{j}(iInd).w)
                     keyboard
                 end
@@ -185,14 +180,12 @@ else % TODO: Do we wanna do this?!
     disp('keepGlobs is 0')
     for j = 1:size(Xtmp,2)
         iInd = 1;
+        [weights, ~] = normalizeLogWeights(wSum{j});
         %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
         for i = 1:size(Xtmp{j},2)
             if Xtmp{j}(i).r > threshold
                 Xupd{j}(iInd) = Xtmp{j}(i);
-                Xupd{j}(iInd).w = Xtmp{j}(i).w/wSum(j);
-                if isnan(Xupd{j}(iInd).w)
-                    keyboard
-                end
+                Xupd{j}(iInd).w = weights(iInd);
                 iInd = iInd+1;
             end
         end

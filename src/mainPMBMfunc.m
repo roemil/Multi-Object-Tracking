@@ -7,7 +7,7 @@ mode = 'linear';
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
 if(strcmp(mode,'linear'))
-    set = 'training';
+    set = 'testing';
     sequence = '0000';
     datapath = strcat('../data/tracking/',set,'/',sequence,'/');
     filename = [datapath,'inferResult.txt'];
@@ -62,14 +62,14 @@ elseif(strcmp(mode,'nonlinear'))
 end
 
 %%%%%% Inititate %%%%%%
-sigmaQ = 4;         % Process (motion) noise % 20 ok1
+sigmaQ = 10;         % Process (motion) noise % 20 ok1
 R = 0.1*[1 0;0 1];    % Measurement noise % 0.01 ok1 || 0.001
 
 T = 0.1; % sampling time, 1/fps
 FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
  
 % Assume constant
-Pd = 0.7;   % Detection probability % 0.7 ok1
+Pd = 0.75;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
 c = 0.001;    % clutter intensity % 0.001 ok1
  
@@ -102,7 +102,7 @@ elseif(strcmp(mode,'linear'))
 end
 
 % Add cov on pos?? 
-Q = Q + diag([1 1 0 0]);
+Q = Q + 15*diag([1 1 0 0]);
 
 vinit = 0;
 nbrInitBirth = 800; % 600 ok1
@@ -186,7 +186,7 @@ for t = 1:T
     title('k = 1')
     pause(0.1)
     %keyboard
-    
+
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty

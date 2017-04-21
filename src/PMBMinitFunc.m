@@ -27,13 +27,11 @@ Amat = 1:m;
 S(:,:,1) = eye(m);
 
 % Find global hypotheses weights and weight sum for normalization
-wSum = 0;
-wGlob = 1;
+wGlob = zeros(1,size(XpotNew,2));
 for i = 1:size(XpotNew,2)
     Xtmp{1}(i) = XpotNew{i};
-    wGlob = wGlob*Xtmp{1}(i).w;
     if Xtmp{1}(i).r > threshold
-        wSum = wSum + Xtmp{1}(i).w;
+        wGlob(i) = Xtmp{1}(i).w;
     end
 end
 
@@ -42,19 +40,21 @@ end
 
 % Remove bernoulli components with low probability of existence
 iInd = 1;
+[norm_weights, ~] = normalizeLogWeights(wGlob);
 for i = 1:size(Xtmp{1},2)
     if Xtmp{1}(i).r > threshold
         Xupd{1}(iInd) = Xtmp{1}(i);
-        Xupd{1}(iInd).w = Xtmp{1}(i).w/wSum;
+        Xupd{1}(iInd).w = norm_weights(iInd);
         iInd = iInd+1;
     end
 end
 
+XuUpd = XuUpdTmp;
 % Prune poisson components with low weight
-ind = 1;
-for i = 1:size(XuUpdTmp,2)
+%ind = 1;
+%for i = 1:size(XuUpdTmp,2)
     %if XuUpdTmp(i).w > poissThresh
-        XuUpd(ind) = XuUpdTmp(i);
-        ind = ind+1;
+        %XuUpd(ind) = XuUpdTmp(i);
+        %ind = ind+1;
     %end
-end
+%end

@@ -30,7 +30,7 @@ if ~isempty(Xhypo{1})
         Xtmp{z}(end+z) = Xnew{z};
     end
 else
-    Xtmp{1} = struct('state',[],'P',[],'w',1,'r',0,'S',0,'box',[],'label',0);
+    Xtmp{1} = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0);
     for z = 1:m
         Xtmp{z}(z) = Xnew{z};
     end
@@ -42,7 +42,7 @@ end
 
 for j = 1:size(hypoInd,1)
     % Initiate
-    newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',1,'r',0,'S',0,'box',[],'label',0);
+    newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0);
     for col = 1:size(Amat,2)
         % Find combination
         newGlob{j}(Amat(hypoInd(j),col)) = Xtmp{col}(Amat(hypoInd(j),col));

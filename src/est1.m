@@ -11,7 +11,7 @@
 
 
 function [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xupd, threshold)
-    M = -1;
+    M = -1e3;
     Xest = cell(1);
     Pest = cell(1);
     rest = [];
@@ -21,17 +21,17 @@ function [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xupd, threshold)
     
     if(~isempty(Xupd))
         for j = 1:size(Xupd,2)
-            prod = 1;
+            wGlob = 0;
             if size(Xupd{j},2) == 0
-                prod = 0;
+                wGlob = 0;
             else
                 for i = 1 : size(Xupd{j},2) % find index of which global hyp is 
-                    prod = prod*Xupd{j}(i).w;% most likely
+                    wGlob = wGlob + Xupd{j}(i).w;% most likely
                 end
             end
-            if(prod >= M)
+            if(wGlob >= M)
                 ind = j;
-                M = prod;
+                M = wGlob;
             end 
         end
         index = 1;
