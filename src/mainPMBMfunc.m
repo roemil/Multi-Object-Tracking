@@ -66,8 +66,8 @@ sigmaQ = 50;         % Process (motion) noise % 20 ok1
 R = 0.001*[1 0;0 1];    % Measurement noise % 0.01 ok1
 
 T = 0.1; % sampling time, 1/fps
-FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
- 
+%FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
+FOVsize = [0,0;1242,375]; % in m
 % Assume constant
 Pd = 0.7;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
