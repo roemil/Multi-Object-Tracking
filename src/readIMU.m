@@ -65,7 +65,7 @@ ind = 1;
 cx = [];
 cy = [];
 for i = 2 : size(detections{1},1)
-    if((detections{4}(i) == 1) && (detections{5}(i)-detections{5}(i-1)) < 50)
+    if((detections{4}(i) == 1))% && (detections{5}(i)-detections{5}(i-1)) < 100)
         if(i > 100 && i < 115)
             cx(ind) = detections{5}(i);
             cy(ind) = detections{6}(i);
@@ -101,11 +101,11 @@ end
 %%
 t = 1:length(Xupd);
 figure;
-for t = 1 : length(Xupd)
+for t = 1 : length(Xpred)
     t
     h1 = plot(Xupd(1,t),Xupd(2,t),'r*');hold on;
     h2 = plot(cx(t),cy(t),'k*');
-    pause(0.1)
+    pause(1)
     xlabel('x')
     ylabel('y')
     if t == 1

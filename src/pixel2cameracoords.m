@@ -9,5 +9,5 @@
 %
 
 function X = pixel2cameracoords(x, K,distance)
-    X = K\[x;1]*distance;
+    X = K\[x(1:2);1]*distance;
 end

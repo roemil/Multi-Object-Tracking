@@ -4,9 +4,16 @@
 %
 function x = camera2pixelcoords(X,P)
   % project in image
-  x = P * [X; ones(1,size(pts_3D,2))];
-  % scale projected points
-  x(1,:) = x(1,:)./x(3,:);
-  x(2,:) = x(2,:)./x(3,:);
-  x(3,:) = [];
+  if(~isempty(X{1}))
+      for i = 1 : size(X,2)
+        x{i} = P * [X{i}(1:3); 1];
+      % scale projected points
+        x{i}(1,:) = x{i}(1,:)./x{i}(3,:);
+        x{i}(2,:) = x{i}(2,:)./x{i}(3,:);
+        %x{i}(3,:) = [];
+        x{i}(4:6) = X{i}(4:end);
+      end
+  else
+      x = cell(1);
+  end
 end
