@@ -86,8 +86,8 @@ for t = 1:T
     
     %Z = measGenerateCase2(X, R, FOVsize, K);
     Nh = Nhconst*size(Z{k},2);    %Murty
-    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}] = ...
-        PMBMinitFunc(Z{t,1}(1:2,:), XmuUpd{t,1}, XuUpd{t,1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
+    %[XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}] = ...
+    %    PMBMinitFunc(Z{t,1}(1:2,:), XmuUpd{t,1}, XuUpd{t,1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal);
 
     for k = 2:20 % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])

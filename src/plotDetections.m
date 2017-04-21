@@ -7,7 +7,7 @@
 %                       [x,y,vx,vy,width,height]^T
 %
 
-function plotDetections(set, sequence, frameNbr, Xest)
+function plotDetections(set, sequence, frameNbr, Xest, FOVsize)
 
 % Frame || Height || Width || Target id || center x || center y || Bounding
 % width || Bounding height || Confidence
@@ -64,6 +64,8 @@ img = imread(imagePath);
 imagesc(img)
 axis('image')
 hold on
+xlim([FOVsize(1,1) FOVsize(2,1)])
+ylim([FOVsize(1,2) FOVsize(2,2)])
 
 % Plot bounding boxes
 for i = 1:size(ind,1)
@@ -80,6 +82,7 @@ if ~isempty(Xest{1})
             Xest{i}(6) = maxHeight;
         end
         estBox = [Xest{i}(1)-Xest{i}(5)/2, Xest{i}(2)-Xest{i}(6)/2, Xest{i}(5), Xest{i}(6)];
-        rectangle('Position',estBox,'EdgeColor','r','LineWidth',1)
+        rectangle('Position',estBox,'EdgeColor','r','LineWidth',1,'LineStyle','--')
+        text(estBox(1), estBox(2), num2str(Xest{i}(7)),'Fontsize',15,'Color','red')
     end
 end

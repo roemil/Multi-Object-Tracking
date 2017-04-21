@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xupd, Xest, Pest, rest, west] = PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal)
+function [XuUpd, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel)
 
 load('simVariables')
 Wold = 0;
@@ -18,7 +18,7 @@ nbrOfMeas = size(Z,2);
 nbrOfGlobHyp = 0;
 
 % Find newly detected potential targets
-[XpotNew, rho] = updateNewPotTargets(XuUpdTmp, nbrOfMeas, Pd, H, R, Z, c);
+[XpotNew, rho, newLabel] = updateNewPotTargets(XuUpdTmp, nbrOfMeas, Pd, H, R, Z, c, newLabel);
  
 m = size(Z,2);
 
@@ -38,7 +38,7 @@ for i = 1:size(XpotNew,2)
 end
 
 % Estimate states using Estimator 1
-[Xest, Pest, rest, west] = est1(Xtmp, thresholdEst);
+[Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst);
 
 % Remove bernoulli components with low probability of existence
 iInd = 1;

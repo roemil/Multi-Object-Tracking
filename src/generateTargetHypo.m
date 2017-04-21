@@ -12,6 +12,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
             Xhypo{j,nbrOfMeas+1}(i).state = Xpred{j}(i).state;
             Xhypo{j,nbrOfMeas+1}(i).P = Xpred{j}(i).P;
             Xhypo{j,nbrOfMeas+1}(i).box = Xpred{j}(i).box;
+            Xhypo{j,nbrOfMeas+1}(i).label = Xpred{j}(i).label;
             Xhypo{j,nbrOfMeas+1}(i).S = 0;
         end
     end
@@ -21,12 +22,21 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
         for j = 1:nbrOfGlobHyp
             for i = 1:size(Xpred{j},2)
                 [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:2,z));
-                Xhypo{j,z}(i).w = Xpred{j}(i).w*Xpred{j}(i).r*Pd*mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S); 
+                Xhypo{j,z}(i).w = Xpred{j}(i).w*Xpred{j}(i).r*Pd*mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S);
+                %Xhypo{j,z}(i).w
+                %[Z(1:2,z), H*Xpred{j}(i).state]
+                %Xhypo{j,z}(i).w = Xhypo{j,z}(i).w+0.2;
+                %tmp = H*Xpred{j}(i).state;
+                %figure;
+                %plot(Z(1,z),Z(2,z),'*r')
+                %hold on 
+                %plot(tmp(1), tmp(2),'*b')
                 if isnan(Xhypo{j,z}(i).w)
                    keyboard
                 end
                 Xhypo{j,z}(i).r = 1;
                 Xhypo{j,z}(i).box = 0.2.*Xpred{j}(i).box + 0.8.*Z(3:4,z); % Take mean bounding box?
+                Xhypo{j,z}(i).label = Xpred{j}(i).label;
             end
         end
     end

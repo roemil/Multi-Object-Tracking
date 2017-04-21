@@ -10,12 +10,13 @@
 %
 
 
-function [Xest, Pest, rest, west] = est1(Xupd, threshold)
+function [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xupd, threshold)
     M = -1;
     Xest = cell(1);
     Pest = cell(1);
     rest = [];
     west = [];
+    labelsEst = [];
     ind = -1;
     
     if(~isempty(Xupd))
@@ -34,9 +35,10 @@ function [Xest, Pest, rest, west] = est1(Xupd, threshold)
             end 
         end
         index = 1;
+        jEst = ind;
         for i = 1 : size(Xupd{ind},2)
             if(Xupd{ind}(i).r > threshold) % if prob. of existence great enough
-                Xest{index} = [Xupd{ind}(i).state; Xupd{ind}(i).box]; % store mean (i.e states)
+                Xest{index} = [Xupd{ind}(i).state; Xupd{ind}(i).box; Xupd{ind}(i).label]; % store mean (i.e states)
                 Pest{index} = Xupd{ind}(i).P;
                 index = index + 1;
             %else
@@ -44,6 +46,7 @@ function [Xest, Pest, rest, west] = est1(Xupd, threshold)
             end
             rest = [rest, Xupd{ind}(i).r];
             west = [west, Xupd{ind}(i).w];
+            labelsEst = [labelsEst, Xupd{ind}(i).label];
         end
     else
         Xest = [];

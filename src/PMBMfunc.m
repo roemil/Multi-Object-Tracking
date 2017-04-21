@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal,k)
+function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k)
 
 load('simVariables')
 Wold = 0;
@@ -29,6 +29,7 @@ end
 %         unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';
 %     XmuPred(end).P = covBirth*eye(4);
 % end
+
 XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOVsize, boarder, pctWithinBoarder,...
     covBirth, vinit, weightBirth);
 
@@ -57,7 +58,7 @@ end
 disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
-[XpotNew, rho] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c);
+[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel);
 
 %%%% Update for previously potentially detected targets %%%%
 Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z);    
@@ -140,7 +141,7 @@ end
 timeUpd = toc(startUpd);
 %disp(['Error: ', num2str(6)])
 % Estimate states using Estimator 1
-[Xest, Pest, rest, west] = est1(Xtmp, thresholdEst);
+[Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst);
 %disp(['Error: ', num2str(7)])
 % Keep the Nh best global hypotheses
 
@@ -164,6 +165,9 @@ end
 if keepGlobs ~= 0
     disp(['Nbr of new globals: ', num2str(size(keepGlobs,1))])
     for j = 1:size(keepGlobs,1)
+        if j == keepGlobs(j)
+            jEst = j;
+        end
         iInd = 1;
         %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
         for i = 1:size(Xtmp{keepGlobs(j)},2)
