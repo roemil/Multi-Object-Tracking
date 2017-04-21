@@ -8,7 +8,7 @@ mode = 'linear';
 % Training 0016 and testing 0001
 if(strcmp(mode,'linear'))
     set = 'testing';
-    sequence = '0000';
+    sequence = '0001';
     datapath = strcat('../data/tracking/',set,'/',sequence,'/');
     filename = [datapath,'inferResult.txt'];
     formatSpec = '%f%f%f%f%f%f%f%f%f';
@@ -69,7 +69,7 @@ T = 0.1; % sampling time, 1/fps
 FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
  
 % Assume constant
-Pd = 0.75;   % Detection probability % 0.7 ok1
+Pd = 0.9;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
 c = 0.001;    % clutter intensity % 0.001 ok1
  
@@ -102,7 +102,7 @@ elseif(strcmp(mode,'linear'))
 end
 
 % Add cov on pos?? 
-Q = Q + 15*diag([1 1 0 0]);
+Q = Q + 1*diag([1 1 0 0]);
 
 vinit = 0;
 nbrInitBirth = 800; % 600 ok1

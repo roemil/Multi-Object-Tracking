@@ -24,8 +24,10 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
                 [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:2,z));
                 Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S);
                 Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:2,z), H*Xhypo{j}(i).state, Xhypo{j,z}(i).S);
-                %Xhypo{j,z}(i).w
+                Xhypo{j,z}(i).w
                 %[Z(1:2,z), H*Xpred{j}(i).state]
+                [Z(1:2,z), H*Xhypo{j,z}(i).state]
+                Xhypo{j,end}(i).w
                 %Xhypo{j,z}(i).w = Xhypo{j,z}(i).w+0.2;
                 %tmp = H*Xpred{j}(i).state;
                 %figure;
