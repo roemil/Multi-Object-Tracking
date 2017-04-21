@@ -37,7 +37,11 @@ AmatSize = size(Amat);
 %indNbr = reshape(1:prod(AmatSize),m,nbrHypo)';
 indNbr = reshape(1:numel(Amat),nbrHypo,m)'; % Numel faster?
 
-indVec = sub2ind(size(S(:,:,1)),repmat(measVec,1,nbrHypo),Amat(indNbr));
+if m ~= 1
+    indVec = sub2ind(size(S(:,:,1)),repmat(measVec,1,nbrHypo),Amat(indNbr));
+else
+    indVec = sub2ind(size(S(:,:,1)),repmat(measVec,1,nbrHypo),Amat(indNbr)');
+end
 nbrElementsS = m*(m+nbrOldTargets);
 addVec = 1:nbrHypo-1;
 indVec = [indVec(:,1), nbrElementsS*addVec+indVec(:,2:end)];

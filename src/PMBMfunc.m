@@ -165,6 +165,9 @@ end
 if keepGlobs ~= 0
     disp(['Nbr of new globals: ', num2str(size(keepGlobs,1))])
     for j = 1:size(keepGlobs,1)
+        if j == keepGlobs(j)
+            jEst = j;
+        end
         iInd = 1;
         %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
         for i = 1:size(Xtmp{keepGlobs(j)},2)

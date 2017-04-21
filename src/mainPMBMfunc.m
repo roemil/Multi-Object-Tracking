@@ -35,14 +35,14 @@ for i = 2 : size(detections{1},1)
 end
 
 %%%%%% Inititate %%%%%%
-sigmaQ = 20;         % Process (motion) noise % 20 ok1
+sigmaQ = 4;         % Process (motion) noise % 20 ok1
 R = 0.1*[1 0;0 1];    % Measurement noise % 0.01 ok1 || 0.001
 
 T = 0.1; % sampling time, 1/fps
 FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
  
 % Assume constant
-Pd = 0.9;   % Detection probability % 0.7 ok1
+Pd = 0.7;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
 c = 0.001;    % clutter intensity % 0.001 ok1
  
@@ -66,7 +66,7 @@ Xupd = cell(1,1);
  
 % Generate motion and measurement models
 [F, Q] = generateMotionModel(sigmaQ, T, 'cv');
-Q = Q + 2*diag([1 1 0 0]);
+Q = Q + diag([1 1 0 0]);
 H = generateMeasurementModel({},'linear');
 
 vinit = 0;
@@ -93,7 +93,7 @@ Xupd = cell(1);
 % Threshold existence probability keep for next iteration
 threshold = 0.1;    % 0.01 ok1
 % Threshold existence probability use estimate
-thresholdEst = 0.8; % 0.6 ok1
+thresholdEst = 0.6; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-4;
 % Murty constant
@@ -205,8 +205,9 @@ end
 i = 1;
 
 for k = 2:size(Xest,2)
+    k
     frameNbr = sprintf('%06d',k-1);
-    plotSinglePredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k},i,FOVsize)
+    plotSinglePredUpd(set, sequence, frameNbr, Xpred{1,k}{jEst(k-1)}, Xupd{1,k}{jEst(k)},i,FOVsize)
     title(['k = ', num2str(k)])
     waitforbuttonpress
 end
