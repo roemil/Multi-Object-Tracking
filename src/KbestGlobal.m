@@ -12,6 +12,7 @@ for m = 1 : nbrOfMeas
         %    /(Xhypo{j,m}(nj).w*(1-Xhypo{j,m}(nj).r+Xhypo{j,m}(nj).r*(1-Pd)));  % TODO: IS THIS CORRECT??
         %Wold(m,nj) = min(1,Xhypo{j,m}(nj).w); % TODO: This is not proper
         %Wold(m,nj) = min(1,Xhypo{j,m}(nj).w/Xhypo{j,end}(nj).w); % TODO: SHOULDNT IT BE LIKE THIS?
+        %[Xhypo{j,m}(nj).w Xhypo{j,end}(nj).w]
         Wold(m,nj) = Xhypo{j,m}(nj).w - Xhypo{j,end}(nj).w;
         wHyp = wHyp + Xpred{j}(nj).w;
         %wHypSum = wHypSum + Xpred{j}(nj).w;
