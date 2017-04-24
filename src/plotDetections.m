@@ -61,7 +61,7 @@ boxes = [xcoord-width/2, ycoord-height/2, width, height];
 % Read and plot image
 img = imread(imagePath);
 %figure;
-imagesc(img)
+imagesc(img);
 axis('image')
 hold on
 xlim([FOVsize(1,1) FOVsize(2,1)])

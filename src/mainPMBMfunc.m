@@ -36,7 +36,6 @@ Z = cell(1);
 if(strcmp(mode,'linear'))
 oldFrame = detections{1}(1)+1;
 count = 1;
-
     Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1)]; % cx
     for i = 2 : size(detections{1},1)
         frame = detections{1}(i)+1;
@@ -75,8 +74,12 @@ sigmaQ = 10;         % Process (motion) noise % 20 ok1
 R = 0.1*[1 0;0 1];    % Measurement noise % 0.01 ok1 || 0.001
 
 T = 0.1; % sampling time, 1/fps
-FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
-%FOVsize = [0,0;1242,375]; % in m
+
+if strcmp(mode,'GT')
+    FOVsize = [0,0;1242,375]; % in m
+else
+    FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
+end
 % Assume constant
 Pd = 0.9;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
@@ -116,20 +119,23 @@ end
 %Q = Q + 1*diag([1 1 0 0]);
 
 vinit = 0;
-nbrInitBirth = 1000; % 600 ok1
+nbrInitBirth = 2500; % 600 ok1
 covBirth = 20; % 20 ok1
-wInit = 1;%0.2;
+wInit = 0.5;%0.2;
+
+FOVinit = FOVsize+50*[-1 -1;
+                    1 1];
  
 % TODO: Should the weights be 1/nbrInitBirth?
 for i = 1:nbrInitBirth
     XmuUpd{1}(i).w = wInit;    % Pred weight
-    XmuUpd{1}(i).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
-        unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
+    XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+        unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
  
     XuUpd{1}(i).w = wInit;    % Pred weight
-    XuUpd{1}(i).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
-        unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
+    XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+        unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
     XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
 end
 
@@ -181,7 +187,7 @@ nbrMissmatch = zeros(1,T);
 newLabel = 1;
 
 jEst = zeros(1,K);
-Z = ZGT;
+
 startTime = tic;
 for t = 1:T
     disp('-------------------------------------')
@@ -194,6 +200,7 @@ for t = 1:T
 
     frameNbr = '000000';
     plotDetections(set, sequence, frameNbr, Xest{1}, FOVsize)
+    plotUndetected(XmuUpd{1,1}, figHandle)
     title('k = 1')
     pause(0.1)
     keyboard
