@@ -1,3 +1,4 @@
+clear all;close all;clc;
 set = 'training';
 sequence = '0000';
 datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
@@ -15,6 +16,7 @@ R = [9.999758e-01 -5.267463e-03 -4.552439e-03 0;
     5.251945e-03 9.999804e-01 -3.413835e-03 0;
     4.570332e-03 3.389843e-03 9.999838e-01 0;
     0 0 0 1];
+
 %P2=[7.215377000000e+02, 0.000000000000e+00, 6.095593000000e+02, 4.485728000000e+01;
 %0.000000000000e+00, 7.215377000000e+02, 1.728540000000e+02, 2.163791000000e-01;
 %0.000000000000e+00, 0.000000000000e+00, 1.000000000000e+00, 2.745884000000e-03];
@@ -23,29 +25,49 @@ R = [9.999758e-01 -5.267463e-03 -4.552439e-03 0;
 %7.402527000000e-03, 4.351614000000e-03, 9.999631000000e-01, 0;
 %0                       0                   0               1];
 
-P = P2*R;
-
+% P = P2*R;
+% Ry = @(x)[cos(GT{ryInd}(x)),  0, sin(GT{ryInd}(x));
+%      0,               1,              0;
+%      -sin(GT{ryInd}(x)), 0, cos(GT{ryInd}(x))];
 ZGT = cell(1);
 frameInd = 1;
 trackID = 2;
 xInd = 14;
 yInd = 15;
 zInd = 16;
+%ryInd = 17;
 bbsize = [GT{9}(3) - GT{7}(3),GT{10}(3)-GT{8}(3)];
-pxCoords = camera2pixelcoords([GT{xInd}(3);GT{yInd}(3);GT{zInd}(3)],P);
+%R1 = zeros(4,4);
+%R1 = R(1:3,1:3)*Ry(3);
+%R1 = Ry(3);
+%R1(4,4) = 1;
+%pxCoords = camera2pixelcoords([GT{xInd}(3);GT{yInd}(3);GT{zInd}(3)],P);
+cx(1) = mean([GT{7}(1),GT{9}(1)]);
+cy(1) = mean([GT{8}(1),GT{10}(1)]);
+pxCoords = [cx,cy];
 ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
 count = 1;
 oldFrame = GT{1}(3)+1;
 for i = 3 : size(GT{1},1)
     frame = GT{1}(i)+1;
     if(frame == oldFrame && (GT{trackID}(i) ~= -1))
-        pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(1);GT{zInd}(i)],P);
+        %R1(1:3,1:3) = Ry(i);
+        %P = P2*R1;
+        %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
+        cx = mean([GT{7}(i),GT{9}(i)]);
+        cy = mean([GT{8}(i),GT{10}(i)]);
+        pxCoords = [cx,cy];
         bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
-        ZGT{frame}(:,count+1) = [pxCoords(1);pxCoords(2)/2;bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
+        ZGT{frame}(:,count+1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
         count = count + 1;
         oldFrame = frame;
     elseif(GT{trackID}(i) ~= -1)
-        pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(1);GT{zInd}(i)],P);
+        %R1(1:3,1:3) = Ry(i);
+        %P = P2*R1;
+        %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
+        cx = mean([GT{7}(i),GT{9}(i)]);
+        cy = mean([GT{8}(i),GT{10}(i)]);
+        pxCoords = [cx,cy];
         bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
         ZGT{frame}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
         count = 1;

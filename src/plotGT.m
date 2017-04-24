@@ -7,7 +7,7 @@
 %                       [x,y,vx,vy,width,height]^T
 %
 
-function plotGT(set, sequence, frameNbr, P)
+function plotGT(set, sequence, frameNbr, GT)
 
 % Frame || Height || Width || Target id || center x || center y || Bounding
 % width || Bounding height || Confidence
@@ -45,12 +45,12 @@ zInd = 16;
 % Find bounding box data
 pixcoords = zeros(2,length(ind));
 for i = 1 : length(ind)
-    xcoord1 = dataArray{xInd}(ind(i));
-    ycoord1 = dataArray{yInd}(ind(i));
-    zcoord1 = dataArray{zInd}(ind(i));
-    pixcoords(:,i) = camera2pixelcoords([xcoord1;ycoord1;zcoord1],P);
-    xcoord(i) = pixcoords(1,i);
-    ycoord(i) = pixcoords(2,i);
+    %xcoord1 = dataArray{xInd}(ind(i));
+    %ycoord1 = dataArray{yInd}(ind(i));
+    %zcoord1 = dataArray{zInd}(ind(i));
+    %pixcoords(:,i) = camera2pixelcoords([xcoord1;ycoord1;zcoord1],P);
+    %xcoord(i) = pixcoords(1,i);
+    %ycoord(i) = pixcoords(2,i);
     width(i) = dataArray{9}(ind(i))-dataArray{7}(ind(i))+1;
     height(i) = dataArray{10}(ind(i))-dataArray{8}(ind(i))+1;
     %boxes(i,:) = [xcoord(i)-width(i)/2, ycoord(i)-height(i), width(i), height(i)]';
@@ -58,8 +58,10 @@ for i = 1 : length(ind)
 end
     % Store data in format for rectangle-function
 
-
-
+for i = 1 : size(GT,2)
+    xcoord(i) = GT(1,i);
+    ycoord(i) = GT(2,i);
+end
 % Read and plot image
 img = imread(imagePath);
 %figure;
