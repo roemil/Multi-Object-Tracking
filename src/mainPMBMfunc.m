@@ -3,7 +3,7 @@ clear Pest
 close all
 dbstop error
 clc
-mode = 'linear';
+mode = 'GT';
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
 if(strcmp(mode,'linear'))
@@ -24,14 +24,19 @@ elseif(strcmp(mode,'nonlinear'))
     f = fopen(filename);
     detections = textscan(f,formatSpec);
     fclose(f);
+elseif(strcmp(mode,'GT'))
+    set = 'training';
+    sequence = '0000';
+    datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
 end
 
 %detections = textread(filename); % frame, size_x, size_y, class, cx, cy, w, h, conf
 %Z = cell(size(detections,1),5);
 Z = cell(1);
+if(strcmp(mode,'linear'))
 oldFrame = detections{1}(1)+1;
 count = 1;
-if(strcmp(mode,'linear'))
+
     Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1)]; % cx
     for i = 2 : size(detections{1},1)
         frame = detections{1}(i)+1;
@@ -46,6 +51,8 @@ if(strcmp(mode,'linear'))
         end
     end
 elseif(strcmp(mode,'nonlinear'))
+    oldFrame = detections{1}(1)+1;
+    count = 1;
     Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1);detections{end}(1)]; % cx
     for i = 2 : size(detections{1},1)
         frame = detections{1}(i)+1;
@@ -59,6 +66,8 @@ elseif(strcmp(mode,'nonlinear'))
             oldFrame = frame;  
         end
     end
+elseif(strcmp(mode,'GT'))
+    Z = generateGT(set,sequence,datapath);
 end
 
 %%%%%% Inititate %%%%%%
@@ -98,6 +107,8 @@ if(strcmp(mode,'nonlinear'))
     h = {'distance','angle'};
     H = generateMeasurementModel(h,'nonlinear');
 elseif(strcmp(mode,'linear'))
+    H = generateMeasurementModel({},'linear');
+elseif(strcmp(mode,'GT'))
     H = generateMeasurementModel({},'linear');
 end
 

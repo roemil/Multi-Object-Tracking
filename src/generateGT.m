@@ -1,7 +1,8 @@
-clear all;close all;clc;
-set = 'training';
-sequence = '0000';
-datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
+
+function ZGT = generateGT(set,sequence,datapath)
+% set = 'training';
+% sequence = '0000';
+% datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
 filename = [datapath,'.txt'];
 formatSpec = '%f%f%s%f%f%f%f%f%f%f%f%f%f%f%f%f%f';
 f = fopen(filename);
@@ -42,13 +43,13 @@ bbsize = [GT{9}(3) - GT{7}(3),GT{10}(3)-GT{8}(3)];
 %R1 = Ry(3);
 %R1(4,4) = 1;
 %pxCoords = camera2pixelcoords([GT{xInd}(3);GT{yInd}(3);GT{zInd}(3)],P);
-cx(1) = mean([GT{7}(1),GT{9}(1)]);
-cy(1) = mean([GT{8}(1),GT{10}(1)]);
+cx(1) = mean([GT{7}(3),GT{9}(3)]);
+cy(1) = mean([GT{8}(3),GT{10}(3)]);
 pxCoords = [cx,cy];
 ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
 count = 1;
 oldFrame = GT{1}(3)+1;
-for i = 3 : size(GT{1},1)
+for i = 4 : size(GT{1},1)
     frame = GT{1}(i)+1;
     if(frame == oldFrame && (GT{trackID}(i) ~= -1))
         %R1(1:3,1:3) = Ry(i);
@@ -73,4 +74,5 @@ for i = 3 : size(GT{1},1)
         count = 1;
         oldFrame = frame;  
     end
+end
 end
