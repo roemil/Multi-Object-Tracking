@@ -1,6 +1,6 @@
 function [S, Amat] = generateGlobalIndv2(m, nbrOldTargets)
-disp(['Nbr of meas: ', num2str(m)])
-disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
+%disp(['Nbr of meas: ', num2str(m)])
+%disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
 
 vec = [1:nbrOldTargets, (nbrOldTargets+1)*ones(1,m)];
 t1 = nchoosek(vec, m);

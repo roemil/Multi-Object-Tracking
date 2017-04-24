@@ -55,7 +55,8 @@ c = 2;
                    keyboard
                 end
                 Xhypo{j,z}(i).r = 1;
-                Xhypo{j,z}(i).box = 0.2.*Xpred{j}(i).box + 0.8.*Z(3:4,z); % Take mean bounding box?
+                %Xhypo{j,z}(i).box = 0.2.*Xpred{j}(i).box + 0.8.*Z(3:4,z); % Take mean bounding box?
+                Xhypo{j,z}(i).box = Z(3:4,z);
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
                 c = c+1;
             end

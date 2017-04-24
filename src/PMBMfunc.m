@@ -36,7 +36,7 @@ XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOVsize, boarder, pctWithinBoa
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
 % Disp
-size(XuUpdTmp,2)
+%size(XuUpdTmp,2)
 % Predict states for old potential targets
 Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps);
 
@@ -55,7 +55,7 @@ else
     nbrOfGlobHyp = 0;
 end
 
-disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
+%disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
 [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel);
@@ -150,14 +150,14 @@ minTmp = min(size(wGlob,2), Nh);
 
 [keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
 %disp('Error: Murty')
-ind = find(diff(C) > 50);
-if ~isempty(ind)
-    keepGlobs = keepGlobs(1:ind(1));
-end
+%ind = find(diff(C) > 100);
+%if ~isempty(ind)
+%    keepGlobs = keepGlobs(1:ind(1));
+%end
 %disp(['Error: ', num2str(8)])
 % Remove bernoulli components with low probability of existence
 if keepGlobs ~= 0
-    disp(['Nbr of new globals: ', num2str(size(keepGlobs,1))])
+    %disp(['Nbr of new globals: ', num2str(size(keepGlobs,1))])
     for j = 1:size(keepGlobs,1)
         if j == keepGlobs(j)
             jEst = j;
@@ -202,9 +202,9 @@ for i = 1:size(XuUpdTmp,2)
 end
 
 % DISP
-size(XuUpd,2)
+%size(XuUpd,2)
 
-disp(['Find A time: ', num2str(sum(timeA)), 's'])
+%disp(['Find A time: ', num2str(sum(timeA)), 's'])
 %disp(['Murty time: ', num2str(sum(murtTime)), 's'])
 %disp(['Glob time: ', num2str(sum(globTime)), 's'])
 %disp(['Pred time: ', num2str(timePred), 's'])

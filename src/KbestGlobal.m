@@ -25,7 +25,7 @@ end
 %end
 if ~isempty(Xhypo{j})
     [~, wHypSum] = normalizeLogWeights(Wold);
-    wHyp = wHyp / wHypSum; % shall I normalize?
+    wHyp = exp(wHyp - wHypSum); % shall I normalize?
     C = -[Wold, log(Wnew)];
 else
     C = -log(Wnew);
@@ -38,7 +38,8 @@ if ~isempty(rows)
     end
 end
 
-K_hyp = max(2,ceil(Nh * wHyp));
+% TODO: max(2, ...)?? 
+K_hyp = max(1,ceil(Nh * wHyp));
 
 % trace_vec = zeros(1,size(S,3));
 % for jnew = 1:size(S,3)
