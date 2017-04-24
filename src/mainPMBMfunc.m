@@ -3,12 +3,12 @@ clear Pest
 close all
 dbstop error
 clc
-mode = 'GT';
+mode = 'linear';
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
 if(strcmp(mode,'linear'))
-    set = 'testing';
-    sequence = '0001';
+    set = 'training';
+    sequence = '0000';
     datapath = strcat('../data/tracking/',set,'/',sequence,'/');
     filename = [datapath,'inferResult.txt'];
     formatSpec = '%f%f%f%f%f%f%f%f%f';
@@ -117,10 +117,10 @@ elseif(strcmp(mode,'GT'))
 end
 
 % Add cov on pos?? 
-Q = Q + 10*diag([1 1 0 0]); %4 6 8!! 10!!!!
+Q = Q + 15*diag([1.2 1 0 0]); % 10
 
 vinit = 0;
-nbrInitBirth = 1300; % 600 ok1
+nbrInitBirth = 2000; % 600 ok1
 covBirth = 20; % 20 ok1
 wInit = 1;%0.2;
 
@@ -144,7 +144,7 @@ Xupd = cell(1);
 
 %%%%%% INITIATE %%%%%%
 % Threshold existence probability keep for next iteration
-threshold = 1e-5;    % 0.01 ok1
+threshold = 1e-4;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
@@ -225,9 +225,13 @@ for t = 1:nbrSim
 %         if k == 25
 %             keyboard
 %         end
-        [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-            PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
-
+        % TODO: Should perform prediction but not update!
+        tic;
+        if ~isempty(Z{k})
+            [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
+                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
+        end
+        disp(['Iteration time: ', num2str(toc)])
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
         %disp(['Nbr estimates: ', num2str(size(Xest{t,k},2))])
         %disp(['Nbr prop targets: ', num2str(sum(rest{t,k} == 1))])
@@ -254,7 +258,7 @@ simTime = toc(startTime);
 disp('--------------- Simulation Complete ---------------')
 disp(['Total simulation time: ', num2str(simTime)])
     
-% Plot estimates
+%% Plot estimates
 
 figure;
 for k = 1:size(Xest,2)

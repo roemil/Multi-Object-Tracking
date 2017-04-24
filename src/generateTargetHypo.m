@@ -1,5 +1,5 @@
 function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
-c = 2;
+
 % Create missdetection hypo in index size(Z{k},2)+1
     if(isempty(Xpred)) % If we have no predicted targets, we cannot 
                           % generate hypotheses
@@ -58,7 +58,6 @@ c = 2;
                 %Xhypo{j,z}(i).box = 0.2.*Xpred{j}(i).box + 0.8.*Z(3:4,z); % Take mean bounding box?
                 Xhypo{j,z}(i).box = Z(3:4,z);
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
-                c = c+1;
             end
         end
     end
