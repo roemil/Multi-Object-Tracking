@@ -7,8 +7,8 @@ mode = 'linear';
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
 if(strcmp(mode,'linear'))
-    set = 'testing';
-    sequence = '0001';
+    set = 'training';
+    sequence = '0000';
     datapath = strcat('../data/tracking/',set,'/',sequence,'/');
     filename = [datapath,'inferResult.txt'];
     formatSpec = '%f%f%f%f%f%f%f%f%f';
@@ -66,12 +66,12 @@ sigmaQ = 10;         % Process (motion) noise % 20 ok1
 R = 0.1*[1 0;0 1];    % Measurement noise % 0.01 ok1 || 0.001
 
 T = 0.1; % sampling time, 1/fps
-%FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
-FOVsize = [0,0;1242,375]; % in m
+FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
+%FOVsize = [0,0;1242,375]; % in m
 % Assume constant
 Pd = 0.9;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
-c = 0.01;    % clutter intensity % 0.001 ok1
+c = 0.001;    % clutter intensity % 0.001 ok1
  
 % Initiate undetected targets
 XuPred = cell(1);
@@ -107,7 +107,7 @@ end
 vinit = 0;
 nbrInitBirth = 1000; % 600 ok1
 covBirth = 20; % 20 ok1
-wInit = 0.2;
+wInit = 1;%0.2;
  
 % TODO: Should the weights be 1/nbrInitBirth?
 for i = 1:nbrInitBirth
@@ -126,11 +126,11 @@ Xupd = cell(1);
 
 %%%%%% INITIATE %%%%%%
 % Threshold existence probability keep for next iteration
-threshold = 0.001;    % 0.01 ok1
+threshold = 0.01;    % 0.01 ok1
 % Threshold existence probability use estimate
-thresholdEst = 0.6; % 0.6 ok1
+thresholdEst = 0.5; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
-poissThresh = 1e-4;
+poissThresh = 1e-5;
 % Murty constant
 Nhconst = 100;
 % Number of births
@@ -170,7 +170,7 @@ nbrMissmatch = zeros(1,T);
 newLabel = 1;
 
 jEst = zeros(1,K);
-
+Z = ZGT;
 startTime = tic;
 for t = 1:T
     disp('-------------------------------------')
@@ -185,7 +185,7 @@ for t = 1:T
     plotDetections(set, sequence, frameNbr, Xest{1}, FOVsize)
     title('k = 1')
     pause(0.1)
-    %keyboard
+    keyboard
 
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
