@@ -1,7 +1,8 @@
-clear all;close all;clc;
-set = 'training';
-sequence = '0000';
-datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
+
+function ZGT = generateGT(set,sequence,datapath)
+% set = 'training';
+% sequence = '0000';
+% datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
 filename = [datapath,'.txt'];
 formatSpec = '%f%f%s%f%f%f%f%f%f%f%f%f%f%f%f%f%f';
 f = fopen(filename);
@@ -73,4 +74,5 @@ for i = 3 : size(GT{1},1)
         count = 1;
         oldFrame = frame;  
     end
+end
 end
