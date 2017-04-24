@@ -66,11 +66,11 @@ cx = [];
 cy = [];
 for i = 2 : size(detections{1},1)
     if((detections{4}(i) == 1))% && (detections{5}(i)-detections{5}(i-1)) < 100)
-        if(i > 100 && i < 115)
+        %if(i > 100 && i < 115)
             cx(ind) = detections{5}(i);
             cy(ind) = detections{6}(i);
             ind = ind + 1;
-        end
+        %end
     end
 end
 % ind = 1;
@@ -105,7 +105,7 @@ for t = 1 : length(Xpred)
     t
     h1 = plot(Xupd(1,t),Xupd(2,t),'r*');hold on;
     h2 = plot(cx(t),cy(t),'k*');
-    pause(1)
+    pause(0.5)
     xlabel('x')
     ylabel('y')
     if t == 1
