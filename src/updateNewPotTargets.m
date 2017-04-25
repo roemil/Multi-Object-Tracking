@@ -1,15 +1,6 @@
-function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel,motionModel)
+function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel,motionModel,posStates,nbrStates,nbrMeas)
     rho = zeros(nbrOfMeas,1);
-    if strcmp(motionModel,'cv')
-        posStates = 4;
-        nbrStates = 4;
-        nbrMeas = 2;
-        
-    elseif strcmp(motionModel,'cvBB')
-        posStates = 4;
-        nbrStates = 6;
-        nbrMeas = 2;
-    end
+    
     for z = 1:nbrOfMeas
         % TODO: Fixed?
         %w = zeros(1,size(Z{k},2));

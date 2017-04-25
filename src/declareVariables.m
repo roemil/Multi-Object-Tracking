@@ -1,4 +1,5 @@
-function [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal, maxNbrGlobal, Nhconst] ...
+function [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, ...
+    maxKperGlobal, maxNbrGlobal, Nhconst, XmuUpd, XuUpd] ...
     = declareVariables(mode, set, sequence, motionModel)
 
 %%%%%% Load Detections %%%%%%
@@ -59,6 +60,17 @@ elseif(strcmp(mode,'nonlinear'))
 elseif(strcmp(mode,'GT'))
     Z = generateGT(set,sequence,datapath);
 end
+
+if strcmp(motionModel,'cv')
+        posStates = 4;
+        nbrStates = 4;
+        nbrMeas = 2;
+        
+    elseif strcmp(motionModel,'cvBB')
+        posStates = 4;
+        nbrStates = 6;
+        nbrMeas = 2;
+    end
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% Inititate %%%%%%
@@ -132,7 +144,7 @@ FOVinit = FOVsize;%+50*[-1 -1;
                    
                    %%%%%% INITIATE %%%%%%
 % Threshold existence probability keep for next iteration
-threshold = 1e-3;    % 0.01 ok1
+threshold = 1e-2;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
@@ -150,11 +162,41 @@ boarderWidth = 0.1*FOVsize(2,1);
 boarder = [0, FOVsize(2,1)-boarderWidth;
     boarderWidth, FOVsize(2,1)];
 % Percentage of births within boarders
-pctWithinBoarder = 0.3;
+pctWithinBoarder = 0.2;
 % Weight of the births
 weightBirth = 1;
+
+XmuUpd = cell(1);
+XuUpd = cell(1);
+% TODO: Should the weights be 1/nbrInitBirth?
+if strcmp(motionModel,'cv')
+    for i = 1:nbrInitBirth
+        XmuUpd{1}(i).w = wInit;    % Pred weight
+        XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
+        XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
+
+        XuUpd{1}(i).w = wInit;    % Pred weight
+        XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
+        XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
+    end
+elseif strcmp(motionModel,'cvBB')
+    for i = 1:nbrInitBirth
+        XmuUpd{1}(i).w = wInit;    % Pred weight
+        XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit), 0, 0]';      % Pred state
+        XmuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
+
+        XuUpd{1}(i).w = wInit;    % Pred weight
+        XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit), 0, 0]';      % Pred state
+        XuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
+    end
+end
+
 
 % Save everything in simVariables and load at the begining of the filter
 save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',...
     'poissThresh','vinit','thresholdEst','covBirth','boarder','pctWithinBoarder',...
-    'weightBirth','motionModel');
+    'weightBirth','motionModel','posStates','nbrStates','nbrMeas');

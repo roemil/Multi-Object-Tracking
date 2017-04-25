@@ -23,7 +23,8 @@ nbrOfMeas = size(Z,2);
 nbrOfGlobHyp = 0;
 
 % Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel, motionModel);
+[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R,...
+    Z, c, newLabel, motionModel,posStates,nbrStates,nbrMeas);
  
 m = size(Z,2);
 

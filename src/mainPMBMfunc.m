@@ -8,49 +8,15 @@ set = 'training';
 sequence = '0000';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 
-[nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal, maxNbrGlobal, Nhconst] ...
+XmuUpd = cell(1,1);
+XuUpd = cell(1,1);
+
+[nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
+    maxNbrGlobal, Nhconst, XmuUpd, XuUpd] ...
     = declareVariables(mode,set,sequence,motionModel);
-
-% TODO: Should the weights be 1/nbrInitBirth?
-if strcmp(motionModel,'cv')
-    for i = 1:nbrInitBirth
-        XmuUpd{1}(i).w = wInit;    % Pred weight
-        XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
-            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
-        XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
-
-        XuUpd{1}(i).w = wInit;    % Pred weight
-        XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
-            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
-        XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
-    end
-elseif strcmp(motionModel,'cvBB')
-    for i = 1:nbrInitBirth
-        XmuUpd{1}(i).w = wInit;    % Pred weight
-        XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
-            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit), 0, 0]';      % Pred state
-        XmuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
-
-        XuUpd{1}(i).w = wInit;    % Pred weight
-        XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
-            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit), 0, 0]';      % Pred state
-        XuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
-    end
-end
-
 Xupd = cell(1);
 
-% For birth case
-% ind = 1;
-% for i = 1 : size(z,2)
-%     if(~isempty(z{i}))
-%         Z{ind} = z{i};
-%         ind = ind + 1;
-%     end
-% end
-
 K = 100; %size(Z,2); % Length of sequence
-
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -65,10 +31,13 @@ for t = 1:nbrSim
     disp(['--------------- t = ', num2str(t), ' ---------------'])
     disp('-------------------------------------')
     
+    disp(['--------------- k = ', num2str(1), ' ---------------'])
+    tic
     %Z = measGenerateCase2(X, R, FOVsize, K);
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
         PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel);
-
+    disp(['Iteration time: ', num2str(toc)])
+    
     if strcmp(plotOn,'true')
         frameNbr = '000000';
         if ~strcmp(mode,'GT')
@@ -107,9 +76,6 @@ for t = 1:nbrSim
         %disp(['Nbr estimates: ', num2str(size(Xest{t,k},2))])
         %disp(['Nbr prop targets: ', num2str(sum(rest{t,k} == 1))])
         %disp(['Nbr clutter points: ', num2str(size(Z{k},2)-size(X{k},2))])
-        %if size(X{t,k},2) ~= size(Xest{t,k},2)
-        %    nbrMissmatch(t) = nbrMissmatch(t)+1;
-        %end
 
         if strcmp(plotOn, 'true')
             frameNbr = sprintf('%06d',k-1);
@@ -145,6 +111,11 @@ for k = 1:size(Xest,2)
     %pause(1.5)
 end
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% Post Processing %%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot estimates
 
 figure;

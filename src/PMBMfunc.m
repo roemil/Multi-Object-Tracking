@@ -58,7 +58,8 @@ end
 %disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel, motionModel);
+[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R,...
+    Z, c, newLabel, motionModel,posStates,nbrStates,nbrMeas);
 
 %%%% Update for previously potentially detected targets %%%%
 Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel);    
@@ -156,41 +157,46 @@ minTmp = min(size(wGlob,2), Nh);
 %end
 %disp(['Error: ', num2str(8)])
 % Remove bernoulli components with low probability of existence
+jInd = 1;
 if keepGlobs ~= 0
     %disp(['Nbr of new globals: ', num2str(size(keepGlobs,1))])
     for j = 1:size(keepGlobs,1)
         if j == keepGlobs(j)
             jEst = j;
         end
-        iInd = 1;
-        [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
-        %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
-        for i = 1:size(Xtmp{keepGlobs(j)},2)
-            if Xtmp{keepGlobs(j)}(i).r > threshold
-                Xupd{j}(iInd) = Xtmp{keepGlobs(j)}(i);
-                Xupd{j}(iInd).w = weights(iInd);
-                if isnan(Xupd{j}(iInd).w)
-                    keyboard
+        if ~isempty(wSum{keepGlobs(j)})
+            iInd = 1;
+            [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
+            %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
+            for i = 1:size(Xtmp{keepGlobs(j)},2)
+                if Xtmp{keepGlobs(j)}(i).r > threshold
+                    Xupd{jInd}(iInd) = Xtmp{keepGlobs(j)}(i);
+                    Xupd{jInd}(iInd).w = weights(iInd);
+                    iInd = iInd+1;
                 end
-                iInd = iInd+1;
             end
+            jInd = jInd+1;
         end
     end
 else % TODO: Do we wanna do this?!
     disp('keepGlobs is 0')
     for j = 1:size(Xtmp,2)
-        iInd = 1;
-        [weights, ~] = normalizeLogWeights(wSum{j});
-        %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
-        for i = 1:size(Xtmp{j},2)
-            if Xtmp{j}(i).r > threshold
-                Xupd{j}(iInd) = Xtmp{j}(i);
-                Xupd{j}(iInd).w = weights(iInd);
-                iInd = iInd+1;
+        if ~isempty(wSum{j})
+            iInd = 1;
+            [weights, ~] = normalizeLogWeights(wSum{j});
+            %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
+            for i = 1:size(Xtmp{j},2)
+                if Xtmp{j}(i).r > threshold
+                    Xupd{jInd}(iInd) = Xtmp{j}(i);
+                    Xupd{jInd}(iInd).w = weights(iInd);
+                    iInd = iInd+1;
+                end
             end
+            jInd = jInd+1;
         end
     end
 end
+
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight
 ind = 1;
