@@ -2,11 +2,16 @@
 % Input:    measModels:     Cell with strings of wanted measurement models
 %           mode:           Linear or nonlinear measurement model
 % Output:   H:              Measurement models
-function H = generateMeasurementModel(measModels,mode)
+function H = generateMeasurementModel(measModels, mode, motionModel)
 
 if strcmp(mode,'linear')
-    % Measure position
-    H = kron([1 0],eye(2));
+    if strcmp(motionModel, 'cv')
+        % Measure position
+        H = kron([1 0],eye(2));
+    elseif strcmp(motionModel, 'cvBB')
+        H = kron([1 0],eye(2));
+        H(3:4,1:6) = [zeros(2,4) eye(2)];
+    end
 elseif strcmp(mode,'nonlinear')
     % Initiate nonlinear measurement model
     H = @(x,y) [];

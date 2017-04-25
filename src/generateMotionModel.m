@@ -9,13 +9,20 @@
 %       F:      Motion model
 %       Q:      Motion covariance matrix
 
-function [F, Q] = generateMotionModel(sigmaQ, T, model)
+function [F, Q] = generateMotionModel(sigmaQ, T, model, sigmaBB)
 
 % Constant velocity
 if strcmp(model,'cv')
     % x = [x,y,vx,vy]^T
     F = kron([1 T; 0 1],eye(2));
     Q = sigmaQ^2*kron([T^3/3 T^2/2;T^2/2,T],eye(2));
+    
+elseif strcmp(model,'cvBB')
+    % x = [x, y, vx, vy, bwidth, bheight]
+    F = kron([1 T; 0 1],eye(2));
+    F(5:6,1:6) = [zeros(2,4), eye(2)];
+    Q = sigmaQ^2*kron([T^3/3 T^2/2;T^2/2,T],eye(2));
+    Q(5:6,1:6) = [zeros(2,4), sigmaBB*eye(2)];
 
 % Constant acceleration
 elseif strcmp(model,'ca')

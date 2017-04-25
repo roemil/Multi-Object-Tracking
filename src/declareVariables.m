@@ -1,5 +1,5 @@
 function [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal, maxNbrGlobal, Nhconst] ...
-    = declareVariables(mode, set, sequence)
+    = declareVariables(mode, set, sequence, motionModel)
 
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
@@ -63,7 +63,12 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% Inititate %%%%%%
 sigmaQ = 25;         % Process (motion) noise % 20 ok1 || 24 apr 10
-R = 0.1*[1 0;0 1];    % Measurement noise % 0.01 ok1 || 0.001
+
+if strcmp(motionModel,'cv')
+    R = 0.1*eye(2);
+elseif strcmp(motionModel,'cvBB')
+    R = 0.1*eye(4);    % Measurement noise % 0.01 ok1 || 0.001
+end
 
 T = 0.1; % sampling time, 1/fps
 
@@ -96,20 +101,26 @@ Xupd = cell(1,1);
 % x = [w, state, P, r, z]'
  
 % Generate motion and measurement models
-[F, Q] = generateMotionModel(sigmaQ, T, 'cv');
+sigmaBB = 5;
+[F, Q] = generateMotionModel(sigmaQ, T, motionModel, sigmaBB);
 
 if(strcmp(mode,'nonlinear'))
     h = {'distance','angle'};
-    H = generateMeasurementModel(h,'nonlinear');
+    H = generateMeasurementModel(h,'nonlinear',motionModel);
 elseif(strcmp(mode,'linear'))
-    H = generateMeasurementModel({},'linear');
+    H = generateMeasurementModel({},'linear',motionModel);
 elseif(strcmp(mode,'GT'))
-    H = generateMeasurementModel({},'linear');
+    H = generateMeasurementModel({},'linear',motionModel);
 end
 
 % Add cov on pos?? 
-%Q = Q + 25*diag([1.2 1 0 0]); % 10
-Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0, 0]);
+if strcmp(motionModel,'cv')
+    %Q = Q + 25*diag([1.2 1 0 0]); % 10
+    Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0, 0]);
+elseif strcmp(motionModel, 'cvBB')
+    %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
+    Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0, 0 0 0]);
+end
 
 vinit = 0;
 nbrInitBirth = 2000; % 600 ok1
@@ -146,4 +157,4 @@ weightBirth = 1;
 % Save everything in simVariables and load at the begining of the filter
 save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',...
     'poissThresh','vinit','thresholdEst','covBirth','boarder','pctWithinBoarder',...
-    'weightBirth');
+    'weightBirth','motionModel');

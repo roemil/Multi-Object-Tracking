@@ -3,24 +3,39 @@ clear Pest
 close all
 dbstop error
 clc
-mode = 'GT';
+mode = 'linear';
 set = 'training';
-sequence = '0010';
+sequence = '0000';
+motionModel = 'cv'; % Choose 'cv' or 'cvBB'
 
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal, maxNbrGlobal, Nhconst] ...
-    = declareVariables(mode,set,sequence);
+    = declareVariables(mode,set,sequence,motionModel);
 
 % TODO: Should the weights be 1/nbrInitBirth?
-for i = 1:nbrInitBirth
-    XmuUpd{1}(i).w = wInit;    % Pred weight
-    XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
-        unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
-    XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
- 
-    XuUpd{1}(i).w = wInit;    % Pred weight
-    XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
-        unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
-    XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
+if strcmp(motionModel,'cv')
+    for i = 1:nbrInitBirth
+        XmuUpd{1}(i).w = wInit;    % Pred weight
+        XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
+        XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
+
+        XuUpd{1}(i).w = wInit;    % Pred weight
+        XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
+        XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
+    end
+elseif strcmp(motionModel,'cvBB')
+    for i = 1:nbrInitBirth
+        XmuUpd{1}(i).w = wInit;    % Pred weight
+        XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit), 0, 0]';      % Pred state
+        XmuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
+
+        XuUpd{1}(i).w = wInit;    % Pred weight
+        XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit), 0, 0]';      % Pred state
+        XuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
+    end
 end
 
 Xupd = cell(1);
@@ -71,7 +86,6 @@ for t = 1:nbrSim
     tmp = XuUpd;
     clear XuUpd;
     XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
-    
     
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])

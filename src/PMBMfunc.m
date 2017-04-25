@@ -31,7 +31,7 @@ end
 % end
 
 XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOVsize, boarder, pctWithinBoarder,...
-    covBirth, vinit, weightBirth);
+    covBirth, vinit, weightBirth, motionModel);
 
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
@@ -58,10 +58,10 @@ end
 %disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel);
+[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel, motionModel);
 
 %%%% Update for previously potentially detected targets %%%%
-Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z);    
+Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel);    
 
 oldInd = 0;
 m = size(Z,2);
@@ -142,7 +142,7 @@ end
 timeUpd = toc(startUpd);
 %disp(['Error: ', num2str(6)])
 % Estimate states using Estimator 1
-[Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst);
+[Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst, motionModel);
 %disp(['Error: ', num2str(7)])
 % Keep the Nh best global hypotheses
 

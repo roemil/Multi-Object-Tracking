@@ -1,23 +1,33 @@
-function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel)
+function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R, Z, c, newLabel,motionModel)
     rho = zeros(nbrOfMeas,1);
+    if strcmp(motionModel,'cv')
+        posStates = 4;
+        nbrStates = 4;
+        nbrMeas = 2;
+        
+    elseif strcmp(motionModel,'cvBB')
+        posStates = 4;
+        nbrStates = 6;
+        nbrMeas = 2;
+    end
     for z = 1:nbrOfMeas
         % TODO: Fixed?
         %w = zeros(1,size(Z{k},2));
         w = zeros(1,size(XmuPred,2));
         %Xmutmp = zeros(4,size(XmuPred{k,2},2));
         %Stmp = cell(size(XmuPred{k,2},2));
-        XpotNew{z}.state = zeros(4,1);
-        XpotNew{z}.P = zeros(4,4);
+        XpotNew{z}.state = zeros(nbrStates,1);
+        XpotNew{z}.P = zeros(nbrStates,nbrStates);
         for i = 1:size(XmuPred,2)
             % Pass through Kalman
-            [XmuUpd{z}(i).state, XmuUpd{z}(i).P, XmuUpd{z}(i).S] = KFUpd(XmuPred(i).state,H, XmuPred(i).P, R, Z(1:2,z));
-            
+            [XmuUpd{z}(i).state(1:posStates,1), XmuUpd{z}(i).P(1:posStates,1:posStates), XmuUpd{z}(i).S(1:nbrMeas,1:nbrMeas)]...
+                = KFUpd(XmuPred(i).state(1:posStates),H(1:nbrMeas,1:posStates), XmuPred(i).P(1:posStates,1:posStates), R(1:nbrMeas,1:nbrMeas), Z(1:nbrMeas,z));
             % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
             % Compute weight
-            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:2,z), H*XmuPred(i).state, XmuUpd{z}(i).S);
+            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:nbrMeas,z), H(1:nbrMeas,1:posStates)*XmuPred(i).state(1:posStates), XmuUpd{z}(i).S(1:nbrMeas,1:nbrMeas));
             
             % TODO: temp solution
-            Xmutmp(1:4,i) = XmuPred(i).state;
+            Xmutmp(:,i) = XmuPred(i).state;
             Stmp{i} = XmuUpd{z}(i).S;
         end
         % Normalize weight
@@ -26,11 +36,11 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, 
         % Find posterior
         for i = 1:size(w,2)
             % TODO: Is the moment matching correct? 
-            XpotNew{z}.state = XpotNew{z}.state+w(1,i)*XmuUpd{z}(i).state; % (44)
-            XpotNew{z}.P = XpotNew{z}.P+w(1,i)*XmuUpd{z}(i).P; % (44)
+            XpotNew{z}.state(1:posStates) = XpotNew{z}.state(1:posStates)+w(1,i)*XmuUpd{z}(i).state(1:posStates); % (44)
+            XpotNew{z}.P(1:posStates,1:posStates) = XpotNew{z}.P(1:posStates,1:posStates)+w(1,i)*XmuUpd{z}(i).P(1:posStates,1:posStates); % (44)
         end
         
-        e = Pd*generateGaussianMix(Z(1:2,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
+        e = Pd*generateGaussianMix(Z(1:nbrMeas,z), ones(1,size(Xmutmp,2)), H(1:nbrMeas,1:posStates)*Xmutmp(1:posStates,:), Stmp);
         rho(z) = e+c;
         XpotNew{z}.w = log(e+c); % rho (45) (44)
         XpotNew{z}.r = e/rho(z); % (43) (44)
@@ -38,6 +48,9 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, 
         XpotNew{z}.box = Z(3:4,z);
         XpotNew{z}.label = newLabel;
         newLabel = newLabel+1;
+        if strcmp(motionModel,'cvBB')
+            XpotNew{z}.state(5:6) = Z(3:4,z);
+        end
         %XmuUpd{k,z}.w = e+c; % rho
         %XmuUpd{k,z}.r = e/XmuUpd{k,z}.w;
     end
