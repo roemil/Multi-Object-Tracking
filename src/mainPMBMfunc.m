@@ -3,12 +3,12 @@ clear Pest
 close all
 dbstop error
 clc
-mode = 'linear';
+mode = 'GT';
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
 if(strcmp(mode,'linear'))
     set = 'training';
-    sequence = '0000';
+    sequence = '0010';
     datapath = strcat('../data/tracking/',set,'/',sequence,'/');
     filename = [datapath,'inferResult.txt'];
     formatSpec = '%f%f%f%f%f%f%f%f%f';
@@ -26,7 +26,7 @@ elseif(strcmp(mode,'nonlinear'))
     fclose(f);
 elseif(strcmp(mode,'GT'))
     set = 'training';
-    sequence = '0000';
+    sequence = '0008';
     datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
 end
 
@@ -71,7 +71,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% Inititate %%%%%%
-sigmaQ = 40;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 25;         % Process (motion) noise % 20 ok1 || 24 apr 10
 R = 0.1*[1 0;0 1];    % Measurement noise % 0.01 ok1 || 0.001
 
 T = 0.1; % sampling time, 1/fps
@@ -117,7 +117,8 @@ elseif(strcmp(mode,'GT'))
 end
 
 % Add cov on pos?? 
-Q = Q + 15*diag([1.2 1 0 0]); % 10
+%Q = Q + 25*diag([1.2 1 0 0]); % 10
+Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0, 0]);
 
 vinit = 0;
 nbrInitBirth = 2000; % 600 ok1
@@ -144,7 +145,7 @@ Xupd = cell(1);
 
 %%%%%% INITIATE %%%%%%
 % Threshold existence probability keep for next iteration
-threshold = 1e-4;    % 0.01 ok1
+threshold = 1e-3;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
@@ -180,7 +181,7 @@ save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',
 %     end
 % end
 
-K = 100; %size(Z,2); % Length of sequence
+K = 50; %size(Z,2); % Length of sequence
 
 nbrSim = 1; % Nbr of simulations
 
@@ -230,6 +231,9 @@ for t = 1:nbrSim
         if ~isempty(Z{k})
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
                 PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
+        else
+            [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
+                PMBMpredFunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
         end
         disp(['Iteration time: ', num2str(toc)])
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
@@ -258,6 +262,22 @@ simTime = toc(startTime);
 disp('--------------- Simulation Complete ---------------')
 disp(['Total simulation time: ', num2str(simTime)])
     
+
+% Plot estimates
+
+figure;
+for k = 1:size(Xest,2)
+    frameNbr = sprintf('%06d',k-1);
+    if ~strcmp(mode,'GT')
+        plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
+    else
+        plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize, Z{k})
+    end
+    title(['k = ', num2str(k)])
+    waitforbuttonpress
+    %pause(1.5)
+end
+
 %% Plot estimates
 
 figure;
