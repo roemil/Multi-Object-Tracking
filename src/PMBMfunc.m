@@ -5,7 +5,7 @@ load('simVariables')
 Wold = 0;
 C = [];
 nbrOldTargetsPrev = 1e4;
-startPred = tic;
+%startPred = tic;
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%%%% Prediction %%%%%
@@ -40,8 +40,8 @@ XuUpdTmp = updatePoisson(XmuPred,Pd);
 % Predict states for old potential targets
 Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps);
 
-timePred = toc(startPred);
-startUpd = tic;
+%timePred = toc(startPred);
+%startUpd = tic;
 
 %%%%%%%%%%%%%%%%%%
 %%%%% Update %%%%%
@@ -72,7 +72,7 @@ nbrVec = 0;
 for j = 1:max(1,nbrOfGlobHyp)
     clear Amat; clear S;
     %disp(['Error: ', num2str(1)])
-    findA(j) = tic;
+    %findA(j) = tic;
     if ~isempty(Xhypo{j})
         nbrOldTargets = size(Xhypo{j,1},2);
         if sum(nbrOldTargets == nbrVec) > 0
@@ -104,16 +104,16 @@ for j = 1:max(1,nbrOfGlobHyp)
     %disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
     %disp(['Nbr measurements: ', num2str(m)])
     
-    timeA(j) = toc(findA(j));
+    %timeA(j) = toc(findA(j));
     %%%%% MURTY %%%%%%
-    startMurt(j) = tic;
+    %startMurt(j) = tic;
     ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, H, j, maxKperGlobal);
-    murtTime(j) = toc(startMurt(j));
+    %murtTime(j) = toc(startMurt(j));
     %%%%% Find new global hypotheses %%%%%
-    startGlob(j) = tic;
+    %startGlob(j) = tic;
     %disp(['Error: ', num2str(3)])
     [newGlob, newInd] = generateGlobalHypo5(Xhypo(j,:), XpotNew(:), Z, oldInd, Amat, ass, nbrOldTargets);
-    globTime(j) = toc(startGlob(j));
+    %globTime(j) = toc(startGlob(j));
     %disp(['Error: ', num2str(4)])
     for jnew = oldInd+1:newInd
         Xtmp{jnew} = newGlob{jnew-oldInd};
@@ -140,7 +140,7 @@ for j = 1:size(Xtmp,2)
     end
 end
 
-timeUpd = toc(startUpd);
+%timeUpd = toc(startUpd);
 %disp(['Error: ', num2str(6)])
 % Estimate states using Estimator 1
 [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst, motionModel);

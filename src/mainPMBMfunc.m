@@ -3,7 +3,7 @@ clear Pest
 close all
 dbstop error
 clc
-mode = 'linear';
+mode = 'GT';
 set = 'training';
 sequence = '0000';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
@@ -59,10 +59,6 @@ for t = 1:nbrSim
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
-%         if k == 25
-%             keyboard
-%         end
-        % TODO: Should perform prediction but not update!
         tic;
         if ~isempty(Z{k})
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
@@ -113,9 +109,9 @@ end
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%% Post Processing %%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot estimates
 
 figure;

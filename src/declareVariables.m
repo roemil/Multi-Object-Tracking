@@ -2,7 +2,10 @@ function [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, ...
     maxKperGlobal, maxNbrGlobal, Nhconst, XmuUpd, XuUpd] ...
     = declareVariables(mode, set, sequence, motionModel)
 
-%%%%%% Load Detections %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% Load Detections %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Training 0016 and testing 0001
 if(strcmp(mode,'linear'))
     datapath = strcat('../data/tracking/',set,'/',sequence,'/');
@@ -61,39 +64,10 @@ elseif(strcmp(mode,'GT'))
     Z = generateGT(set,sequence,datapath);
 end
 
-if strcmp(motionModel,'cv')
-        posStates = 4;
-        nbrStates = 4;
-        nbrMeas = 2;
-        
-    elseif strcmp(motionModel,'cvBB')
-        posStates = 4;
-        nbrStates = 6;
-        nbrMeas = 2;
-    end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% Initiate cells %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%% Inititate %%%%%%
-sigmaQ = 25;         % Process (motion) noise % 20 ok1 || 24 apr 10
-
-if strcmp(motionModel,'cv')
-    R = 0.1*eye(2);
-elseif strcmp(motionModel,'cvBB')
-    R = 0.1*eye(4);    % Measurement noise % 0.01 ok1 || 0.001
-end
-
-T = 0.1; % sampling time, 1/fps
-
-if strcmp(mode,'GT')
-    FOVsize = [0,0;1242,375]; % in m
-else
-    FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
-end
-% Assume constant
-Pd = 0.9;   % Detection probability % 0.7 ok1
-Ps = 0.99;   % Survival probability % 0.98 ok1
-c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
- 
 % Initiate undetected targets
 XuPred = cell(1);
 XuUpd = cell(1);
@@ -111,11 +85,17 @@ XpotNew = cell(1,1); % XpotNew{t,z}(i)
 Xpred = cell(1,1);
 Xupd = cell(1,1);
 % x = [w, state, P, r, z]'
- 
-% Generate motion and measurement models
-sigmaBB = 5;
-[F, Q] = generateMotionModel(sigmaQ, T, motionModel, sigmaBB);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% Measurement model and covariance matrix %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+T = 0.1; % sampling time, 1 fps
+if strcmp(motionModel,'cv')
+    R = 0.1*eye(2);
+elseif strcmp(motionModel,'cvBB')
+    R = 0.1*eye(4);    % Measurement noise % 0.01 ok1 || 0.001
+end
 if(strcmp(mode,'nonlinear'))
     h = {'distance','angle'};
     H = generateMeasurementModel(h,'nonlinear',motionModel);
@@ -125,38 +105,63 @@ elseif(strcmp(mode,'GT'))
     H = generateMeasurementModel({},'linear',motionModel);
 end
 
-% Add cov on pos?? 
+if strcmp(mode,'GT')
+    FOVsize = [0,0;1242,375]; % in m
+else
+    FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
+end
+
+Pd = 0.9;   % Detection probability % 0.7 ok1
+Ps = 0.99;   % Survival probability % 0.98 ok1
+c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% Motion model and covariance matrix %%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+sigmaQ = 30;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaBB = 2;
+[F, Q] = generateMotionModel(sigmaQ, T, motionModel, sigmaBB);
 if strcmp(motionModel,'cv')
     %Q = Q + 25*diag([1.2 1 0 0]); % 10
     Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0, 0]);
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
-    Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0, 0 0 0]);
+    Q = Q + 0.07*diag([FOVsize(2,1), FOVsize(2,2), 0, 0 0 0]);
 end
 
-vinit = 0;
-nbrInitBirth = 2000; % 600 ok1
-covBirth = 20; % 20 ok1
-wInit = 1;%0.2;
+if strcmp(motionModel,'cv')
+        posStates = 4; % Nbr of position states, pos and velo
+        nbrStates = 4; % Total number of states
+        nbrMeas = 2; % Number of measurements used for weighting
+        
+    elseif strcmp(motionModel,'cvBB')
+        posStates = 4;
+        nbrStates = 6;
+        nbrMeas = 2;
+end
 
-FOVinit = FOVsize;%+50*[-1 -1;
-                   % 1 1];
-                   
-                   %%%%%% INITIATE %%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% Thresholds and Murty %%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Threshold existence probability keep for next iteration
-threshold = 1e-2;    % 0.01 ok1
+threshold = 5e-1;    % 0.01 ok1
 % Threshold existence probability use estimate
-thresholdEst = 0.4; % 0.6 ok1
+thresholdEst = 0.5; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
 Nhconst = 100;
-% Number of births
-nbrOfBirths = 200; % 600 ok1
 % Max nbr of globals for each old global
 maxKperGlobal = 20;
 % Max nbr globals to pass to next iteration
 maxNbrGlobal = 50;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%% Births %%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % boarder width with higher probability of birth
 boarderWidth = 0.1*FOVsize(2,1);
 boarder = [0, FOVsize(2,1)-boarderWidth;
@@ -165,7 +170,20 @@ boarder = [0, FOVsize(2,1)-boarderWidth;
 pctWithinBoarder = 0.2;
 % Weight of the births
 weightBirth = 1;
+% Number of births
+nbrOfBirths = 200; % 600 ok1
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+vinit = 0;
+nbrInitBirth = 2500; % 600 ok1
+covBirth = 20; % 20 ok1
+wInit = 1;%0.2;
+
+FOVinit = FOVsize;%+50*[-1 -1;
+                   % 1 1];
 XmuUpd = cell(1);
 XuUpd = cell(1);
 % TODO: Should the weights be 1/nbrInitBirth?
@@ -195,8 +213,10 @@ elseif strcmp(motionModel,'cvBB')
     end
 end
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Save everything in simVariables and load at the begining of the filter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',...
     'poissThresh','vinit','thresholdEst','covBirth','boarder','pctWithinBoarder',...
     'weightBirth','motionModel','posStates','nbrStates','nbrMeas');

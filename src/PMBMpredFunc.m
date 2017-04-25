@@ -5,7 +5,7 @@ load('simVariables')
 Wold = 0;
 C = [];
 nbrOldTargetsPrev = 1e4;
-startPred = tic;
+%startPred = tic;
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%%%% Prediction %%%%%
@@ -40,8 +40,8 @@ XuUpdTmp = updatePoisson(XmuPred,Pd);
 % Predict states for old potential targets
 Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps);
 
-timePred = toc(startPred);
-startUpd = tic;
+%timePred = toc(startPred);
+%startUpd = tic;
 
 %disp(['Error: ', num2str(5)])
 % Find global hypotheses weights and weight sum for normalization
@@ -64,7 +64,7 @@ for j = 1:size(Xtmp,2)
     end
 end
 
-timeUpd = toc(startUpd);
+%timeUpd = toc(startUpd);
 
 %disp(['Error: ', num2str(6)])
 % Estimate states using Estimator 1
