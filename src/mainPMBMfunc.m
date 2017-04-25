@@ -3,7 +3,11 @@ clear Pest
 close all
 dbstop error
 clc
-mode = 'GT';
+mode = 'linear';
+global nbrOfStates;
+nbrOfStates = 6;
+global nbrOfMeasStates;
+nbrOfMeasStates = 3;
 %%%%%% Load Detections %%%%%%
 % Training 0016 and testing 0001
 if(strcmp(mode,'linear'))
@@ -32,47 +36,52 @@ end
 
 %detections = textread(filename); % frame, size_x, size_y, class, cx, cy, w, h, conf
 %Z = cell(size(detections,1),5);
-Z = cell(1);
-if(strcmp(mode,'linear'))
-oldFrame = detections{1}(1)+1;
-count = 1;
-    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1)]; % cx
-    for i = 2 : size(detections{1},1)
-        frame = detections{1}(i)+1;
-        if(frame == oldFrame)
-            Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
-            count = count + 1;
-            oldFrame = frame;
-        else
-            Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
-            count = 1;
-            oldFrame = frame;  
-        end
-    end
-elseif(strcmp(mode,'nonlinear'))
-    oldFrame = detections{1}(1)+1;
-    count = 1;
-    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1);detections{end}(1)]; % cx
-    for i = 2 : size(detections{1},1)
-        frame = detections{1}(i)+1;
-        if(frame == oldFrame)
-            Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i);detections{end}(i)]; % cx
-            count = count + 1;
-            oldFrame = frame;
-        else
-            Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i);detections{end}(i)]; % cx
-            count = 1;
-            oldFrame = frame;  
-        end
-    end
-elseif(strcmp(mode,'GT'))
-    Z = generateGT(set,sequence,datapath);
-end
+% Z = cell(1);
+% if(strcmp(mode,'linear'))
+% oldFrame = detections{1}(1)+1;
+% count = 1;
+%     Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1)]; % cx
+%     for i = 2 : size(detections{1},1)
+%         frame = detections{1}(i)+1;
+%         if(frame == oldFrame)
+%             Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+%             count = count + 1;
+%             oldFrame = frame;
+%         else
+%             Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+%             count = 1;
+%             oldFrame = frame;  
+%         end
+%     end
+% elseif(strcmp(mode,'nonlinear'))
+%     oldFrame = detections{1}(1)+1;
+%     count = 1;
+%     Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1);detections{end}(1)]; % cx
+%     for i = 2 : size(detections{1},1)
+%         frame = detections{1}(i)+1;
+%         if(frame == oldFrame)
+%             Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i);detections{end}(i)]; % cx
+%             count = count + 1;
+%             oldFrame = frame;
+%         else
+%             Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i);detections{end}(i)]; % cx
+%             count = 1;
+%             oldFrame = frame;  
+%         end
+%     end
+% elseif(strcmp(mode,'GT'))
+%     Z = generateGT(set,sequence,datapath,nbrOfStates);
+% end
 
+Z = generateMeasurements(set,sequence,datapath,'linear');
 %%%%%% Inititate %%%%%%
 sigmaQ = 10;         % Process (motion) noise % 20 ok1
-R = 0.1*[1 0;0 1];    % Measurement noise % 0.01 ok1 || 0.001
-
+if(nbrOfStates == 6)
+    R = 0.1*[1 0 0;0 1 0;0 0 1];    % Measurement noise % 0.01 ok1 || 0.001
+elseif(nbrOfStates == 4)
+    R = 0.1*[1 0;0 1];
+end
+    %R = @(d) 0.1*[1 0 0;0 1 0;0 0 (0.161*d/1.959964)^2/0.1];
 T = 0.1; % sampling time, 1/fps
 
 if strcmp(mode,'GT')
@@ -81,7 +90,7 @@ else
     FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
 end
 % Assume constant
-Pd = 0.9;   % Detection probability % 0.7 ok1
+Pd = 0.8;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
 c = 0.001;    % clutter intensity % 0.001 ok1
  
@@ -104,22 +113,27 @@ Xupd = cell(1,1);
 % x = [w, state, P, r, z]'
  
 % Generate motion and measurement models
-[F, Q] = generateMotionModel(sigmaQ, T, 'cv');
+[F, Q] = generateMotionModel(sigmaQ, T, 'cv',nbrOfStates);
 
-if(strcmp(mode,'nonlinear'))
-    h = {'distance','angle'};
-    H = generateMeasurementModel(h,'nonlinear');
-elseif(strcmp(mode,'linear'))
-    H = generateMeasurementModel({},'linear');
-elseif(strcmp(mode,'GT'))
-    H = generateMeasurementModel({},'linear');
-end
+% if(strcmp(mode,'nonlinear'))
+%     h = {'distance','angle'};
+%     H = generateMeasurementModel(h,'nonlinear');
+% elseif(strcmp(mode,'linear'))
+%     H = generateMeasurementModel({},'linear');
+% elseif(strcmp(mode,'GT'))
+%     H = generateMeasurementModel({},'linear');
+% end
+H = generateMeasurementModel({},nbrOfStates);
 
 % Add cov on pos?? 
-%Q = Q + 1*diag([1 1 0 0]);
+if(nbrOfStates == 6)
+    Q = Q + 10*diag([1.1 1.1 0.1 0.2 0.2 0.2]);
+elseif(nbrOfStates == 4)
+    Q = Q + 10*diag([1 1 0 0]);
+end
 
 vinit = 0;
-nbrInitBirth = 2500; % 600 ok1
+nbrInitBirth = 4000; % 600 ok1
 covBirth = 20; % 20 ok1
 wInit = 0.5;%0.2;
 
@@ -129,14 +143,25 @@ FOVinit = FOVsize+50*[-1 -1;
 % TODO: Should the weights be 1/nbrInitBirth?
 for i = 1:nbrInitBirth
     XmuUpd{1}(i).w = wInit;    % Pred weight
-    XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
-        unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
-    XmuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
- 
+    if(nbrOfStates == 6)
+        XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)),unifrnd(0,20), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit)]';      % Pred state
+        XmuUpd{1}(i).P = covBirth*eye(nbrOfStates);      % Pred cov
+    elseif(nbrOfStates == 4)
+        XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
+        XmuUpd{1}(i).P = covBirth*eye(nbrOfStates);      % Pred cov
+    end
     XuUpd{1}(i).w = wInit;    % Pred weight
-    XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
-        unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
-    XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
+    if(nbrOfStates == 6)
+        XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)),unifrnd(0,20), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit)]';      % Pred state
+        XuUpd{1}(i).P = covBirth*eye(nbrOfStates);      % Pred cov
+    elseif(nbrOfStates == 4)
+        XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
+        XuUpd{1}(i).P = covBirth*eye(nbrOfStates);      % Pred cov
+    end
 end
 
 Xupd = cell(1);
@@ -145,13 +170,13 @@ Xupd = cell(1);
 % Threshold existence probability keep for next iteration
 threshold = 0.01;    % 0.01 ok1
 % Threshold existence probability use estimate
-thresholdEst = 0.5; % 0.6 ok1
+thresholdEst = 0.3; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
 Nhconst = 100;
 % Number of births
-nbrOfBirths = 50; % 600 ok1
+nbrOfBirths = 200; % 600 ok1
 % Max nbr of globals for each old global
 maxKperGlobal = 20;
 % Max nbr globals to pass to next iteration
@@ -163,7 +188,7 @@ boarder = [0, FOVsize(2,1)-boarderWidth;
 % Percentage of births within boarders
 pctWithinBoarder = 0.9;
 % Weight of the births
-weightBirth = 0.2;
+weightBirth = 1;
 
 % Save everything in simVariables and load at the begining of the filter
 save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',...
@@ -179,7 +204,7 @@ save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',
 %     end
 % end
 
-K = 20;%size(Z,2); % Length of sequence
+K = size(Z,2); % Length of sequence
 
 T = 1; % Nbr of simulations
 
@@ -199,18 +224,15 @@ for t = 1:T
         PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel);
 
     frameNbr = '000000';
-    plotDetections(set, sequence, frameNbr, Xest{1}, FOVsize)
-    plotUndetected(XmuUpd{1,1}, figHandle)
-    title('k = 1')
-    pause(0.1)
-    keyboard
+    %plotDetections(set, sequence, frameNbr, Xest{1}, FOVsize)
+    %plotUndetected(XmuUpd{1,1}, figHandle)
+    %title('k = 1')
+    %pause(0.1)
+    %keyboard
 
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
-%         if k == 25
-%             keyboard
-%         end
         [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
             PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
 
@@ -222,10 +244,10 @@ for t = 1:T
         %    nbrMissmatch(t) = nbrMissmatch(t)+1;
         %end
 
-        frameNbr = sprintf('%06d',k-1);
-        plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
-        title(['k = ', num2str(k)])
-        pause(0.1)
+        %frameNbr = sprintf('%06d',k-1);
+        %plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
+        %title(['k = ', num2str(k)])
+        %pause(0.1)
     end
     
 end
@@ -233,25 +255,56 @@ simTime = toc(startTime);
 
 disp('--------------- Simulation Complete ---------------')
 disp(['Total simulation time: ', num2str(simTime)])
+
     
 %% Plot estimates
 
 figure;
-for k = 1:size(Xest,2)
+%for k = 1:size(Xest,2)
+k = 1;
+while 1
     frameNbr = sprintf('%06d',k-1);
-    plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
+    %plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize)
+    plotDetectionsGT(set, sequence, frameNbr, Z{k}, Xest{k})
     title(['k = ', num2str(k)])
-    waitforbuttonpress
+    try
+        waitforbuttonpress; 
+    catch
+        fprintf('Window closed. Exiting...\n');
+        break
+    end
+    key = get(gcf,'CurrentCharacter');
+    switch lower(key)  
+        case 'a'
+            k = k - 1;
+        case 'l'
+            k = k + 1;
+    end
     %pause(1.5)
+%end
 end
-
 %% Plot pred and upd
 figure;
-for k = 2:size(Xest,2)
+%for k = 2:size(Xest,2)
+k = 2;
+while 1
     frameNbr = sprintf('%06d',k-1);
     plotPredUpd(set, sequence, frameNbr, Xpred{1,k}, Xupd{1,k-1},FOVsize)
     title(['k = ', num2str(k)])
-    waitforbuttonpress
+    %waitforbuttonpress
+    try
+        waitforbuttonpress; 
+    catch
+        fprintf('Window closed. Exiting...\n');
+        break
+    end
+    key = get(gcf,'CurrentCharacter');
+    switch lower(key)  
+        case 'a'
+            k = k - 1;
+        case 'l'
+            k = k + 1;
+    end
 end
 
 %% Plot single pred and upd

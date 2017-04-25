@@ -7,13 +7,13 @@
 %                       [x,y,vx,vy,width,height]^T
 %
 
-function plotDetections(set, sequence, frameNbr, Xest, FOVsize)
+function plotDetectionsGT(set, sequence, frameNbr, GT, Xest)
 
 % Frame || Height || Width || Target id || center x || center y || Bounding
 % width || Bounding height || Confidence
 
 % Path for textfile with detection data
-detectionPath = strcat('../data/tracking/',set,'/',sequence,'/inferResult.txt');
+detectionPath = strcat('../../kittiTracking/',set,'/label_02/',sequence,'.txt');
 % Joachim
 % detectionPath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
 %    ,'/Matlab/Git/Multi-Object-Tracking/data/tracking/',set,'/',sequence,'/inferResult.txt');
@@ -30,50 +30,44 @@ imagePath = strcat('../../kittiTracking/',set,'/image_02/',sequence,'/',frameNbr
 % imagePath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
 %     ,'/Matlab/Git/kittiTracking/',set,'/image_02/',sequence,'/',frameNbr,'.png');
 
-delimiter = ',';
-
-% Format
-formatSpec = '%f%f%f%f%f%f%f%f%f';
-
-% Find file ID
-fileID = fopen(detectionPath,'r');
-
-% Fetch data
-dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter,  'ReturnOnError', false);
-
-% Convert frameNbr to a number
+formatSpec = '%f%f%s%f%f%f%f%f%f%f%f%f%f%f%f%f%f';
+f = fopen(detectionPath);
+dataArray = textscan(f,formatSpec);
 frameNum = str2num(frameNbr);
+fclose(f);
 
-fclose(fileID);
+% Find indices for the frame number of interest
+ind = find(ismember(dataArray{1},frameNum,'rows') == 1 & ismember(dataArray{2},-1,'rows') == 0);
 
-% Find indeces for the frame number of interest
-ind = find(ismember(dataArray{1},frameNum,'rows') == 1);
 
 % Find bounding box data
-xcoord = dataArray{5}(ind);
-ycoord = dataArray{6}(ind);
-width = dataArray{7}(ind);
-height = dataArray{8}(ind);
-
-% Store data in format for rectangle-function
-boxes = [xcoord-width/2, ycoord-height/2, width, height];
-
+width = zeros(1,length(ind));
+height = zeros(1,length(ind));
+boxes = zeros(length(ind),4);
+for i = 1 : length(ind)
+    width(i) = dataArray{9}(ind(i))-dataArray{7}(ind(i))+1;
+    height(i) = dataArray{10}(ind(i))-dataArray{8}(ind(i))+1;
+    boxes(i,:) = [dataArray{7}(ind(i)),dataArray{8}(ind(i)), width(i), height(i)]';
+end
+    % Store data in format for rectangle-function
+xcoord = zeros(1,size(GT,2));
+ycoord = zeros(1,size(GT,2));
+for i = 1 : size(GT,2)
+    xcoord(i) = GT(1,i);
+    ycoord(i) = GT(2,i);
+end
 % Read and plot image
 img = imread(imagePath);
 %figure;
-imagesc(img);
+imagesc(img)
 axis('image')
 hold on
-xlim([FOVsize(1,1) FOVsize(2,1)])
-ylim([FOVsize(1,2) FOVsize(2,2)])
 
 % Plot bounding boxes
 for i = 1:size(ind,1)
     rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
 end
-
-maxWidth = max(boxes(:,3));
-maxHeight = max(boxes(:,4));
+plot(xcoord,ycoord,'rx')
 
 if ~isempty(Xest{1})
     for i = 1:size(Xest,2)

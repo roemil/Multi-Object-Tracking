@@ -1,5 +1,6 @@
 function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z)
 c = 2;
+global nbrOfMeasStates;
 % Create missdetection hypo in index size(Z{k},2)+1
     if(isempty(Xpred)) % If we have no predicted targets, we cannot 
                           % generate hypotheses
@@ -22,8 +23,8 @@ c = 2;
     for z = 1:nbrOfMeas
         for j = 1:nbrOfGlobHyp
             for i = 1:size(Xpred{j},2)
-                [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:2,z));
-                Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S);
+                [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:nbrOfMeasStates,z));
+                Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:nbrOfMeasStates,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S);
                 %Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:2,z), H*Xhypo{j,z}(i).state, Xhypo{j,z}(i).S);
                 %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H*Xhypo{j,z}(i).state, Xhypo{j,z}(i).S)]
                 %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S)]
@@ -55,7 +56,7 @@ c = 2;
                    keyboard
                 end
                 Xhypo{j,z}(i).r = 1;
-                Xhypo{j,z}(i).box = 0.2.*Xpred{j}(i).box + 0.8.*Z(3:4,z); % Take mean bounding box?
+                Xhypo{j,z}(i).box = 0.2.*Xpred{j}(i).box + 0.8.*Z(nbrOfMeasStates+1:nbrOfMeasStates+2,z); % Take mean bounding box?
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
                 c = c+1;
             end

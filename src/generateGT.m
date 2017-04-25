@@ -1,5 +1,5 @@
 
-function ZGT = generateGT(set,sequence,datapath)
+function ZGT = generateGT(set,sequence,datapath,nbrOfStates)
 % set = 'training';
 % sequence = '0000';
 % datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
@@ -38,41 +38,72 @@ yInd = 15;
 zInd = 16;
 %ryInd = 17;
 bbsize = [GT{9}(3) - GT{7}(3),GT{10}(3)-GT{8}(3)];
-%R1 = zeros(4,4);
-%R1 = R(1:3,1:3)*Ry(3);
-%R1 = Ry(3);
-%R1(4,4) = 1;
-%pxCoords = camera2pixelcoords([GT{xInd}(3);GT{yInd}(3);GT{zInd}(3)],P);
-cx(1) = mean([GT{7}(3),GT{9}(3)]);
-cy(1) = mean([GT{8}(3),GT{10}(3)]);
-pxCoords = [cx,cy];
-ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
-count = 1;
-oldFrame = GT{1}(3)+1;
-for i = 4 : size(GT{1},1)
-    frame = GT{1}(i)+1;
-    if(frame == oldFrame && (GT{trackID}(i) ~= -1))
-        %R1(1:3,1:3) = Ry(i);
-        %P = P2*R1;
-        %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
-        cx = mean([GT{7}(i),GT{9}(i)]);
-        cy = mean([GT{8}(i),GT{10}(i)]);
-        pxCoords = [cx,cy];
-        bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
-        ZGT{frame}(:,count+1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
-        count = count + 1;
-        oldFrame = frame;
-    elseif(GT{trackID}(i) ~= -1)
-        %R1(1:3,1:3) = Ry(i);
-        %P = P2*R1;
-        %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
-        cx = mean([GT{7}(i),GT{9}(i)]);
-        cy = mean([GT{8}(i),GT{10}(i)]);
-        pxCoords = [cx,cy];
-        bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
-        ZGT{frame}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
-        count = 1;
-        oldFrame = frame;  
+
+if(nbrOfStates == 4)
+
+    cx(1) = mean([GT{7}(3),GT{9}(3)]);
+    cy(1) = mean([GT{8}(3),GT{10}(3)]);
+    pxCoords = [cx,cy];
+    ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
+    count = 1;
+    oldFrame = GT{1}(3)+1;
+    for i = 4 : size(GT{1},1)
+        frame = GT{1}(i)+1;
+        if(frame == oldFrame && (GT{trackID}(i) ~= -1))
+            %R1(1:3,1:3) = Ry(i);
+            %P = P2*R1;
+            %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
+            cx = mean([GT{7}(i),GT{9}(i)]);
+            cy = mean([GT{8}(i),GT{10}(i)]);
+            pxCoords = [cx,cy];
+            bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
+            ZGT{frame}(:,count+1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
+            count = count + 1;
+            oldFrame = frame;
+        elseif(GT{trackID}(i) ~= -1)
+            %R1(1:3,1:3) = Ry(i);
+            %P = P2*R1;
+            %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
+            cx = mean([GT{7}(i),GT{9}(i)]);
+            cy = mean([GT{8}(i),GT{10}(i)]);
+            pxCoords = [cx,cy];
+            bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
+            ZGT{frame}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
+            count = 1;
+            oldFrame = frame;  
+        end
     end
-end
+elseif(nbrOfStates == 6)
+    cx(1) = mean([GT{7}(3),GT{9}(3)]);
+    cy(1) = mean([GT{8}(3),GT{10}(3)]);
+    pxCoords = [cx,cy];
+    ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);GT{zInd}(3);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
+    count = 1;
+    oldFrame = GT{1}(3)+1;
+    for i = 4 : size(GT{1},1)
+        frame = GT{1}(i)+1;
+        if(frame == oldFrame && (GT{trackID}(i) ~= -1))
+            %R1(1:3,1:3) = Ry(i);
+            %P = P2*R1;
+            %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
+            cx = mean([GT{7}(i),GT{9}(i)]);
+            cy = mean([GT{8}(i),GT{10}(i)]);
+            pxCoords = [cx,cy];
+            bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
+            ZGT{frame}(:,count+1) = [pxCoords(1);pxCoords(2);GT{zInd}(i);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
+            count = count + 1;
+            oldFrame = frame;
+        elseif(GT{trackID}(i) ~= -1)
+            %R1(1:3,1:3) = Ry(i);
+            %P = P2*R1;
+            %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
+            cx = mean([GT{7}(i),GT{9}(i)]);
+            cy = mean([GT{8}(i),GT{10}(i)]);
+            pxCoords = [cx,cy];
+            bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
+            ZGT{frame}(:,1) = [pxCoords(1);pxCoords(2);GT{zInd}(i);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
+            count = 1;
+            oldFrame = frame;  
+        end
+    end
 end

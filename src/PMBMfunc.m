@@ -36,7 +36,7 @@ XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOVsize, boarder, pctWithinBoa
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
 % Disp
-size(XuUpdTmp,2)
+%size(XuUpdTmp,2)
 % Predict states for old potential targets
 Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps);
 
@@ -169,6 +169,7 @@ if keepGlobs ~= 0
             if Xtmp{keepGlobs(j)}(i).r > threshold
                 Xupd{j}(iInd) = Xtmp{keepGlobs(j)}(i);
                 Xupd{j}(iInd).w = weights(iInd);
+
                 if isnan(Xupd{j}(iInd).w)
                     keyboard
                 end
@@ -191,6 +192,7 @@ else % TODO: Do we wanna do this?!
         end
     end
 end
+Xupd = Xupd(~cellfun(@isempty,Xupd));  
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight
 ind = 1;

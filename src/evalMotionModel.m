@@ -33,7 +33,7 @@ end
 T = 0.1;
 sigmaQ = 1;
 H = generateMeasurementModel([],'linear');
-[F, Q] = generateMotionModel(sigmaQ, T, 'cv');
+[F, Q] = generateMotionModel(sigmaQ, T, 'cv','linear');
 Xupd = [0;0;0;0];
 P = 0.3*eye(4);
 R = 0.01*eye(2);
