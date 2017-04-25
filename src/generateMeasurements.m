@@ -1,10 +1,12 @@
 function Z = generateMeasurements(set,sequence,datapath,mode)
 global nbrOfStates;
-filename = [datapath,'inferResult.txt'];
-formatSpec = '%f%f%f%f%f%f%f%f%f';
-f = fopen(filename);
-detections = textscan(f,formatSpec);
-fclose(f);
+    if(strcmp(mode,'linear'))
+        filename = [datapath,'inferResult.txt'];
+        formatSpec = '%f%f%f%f%f%f%f%f%f';
+        f = fopen(filename);
+        detections = textscan(f,formatSpec);
+        fclose(f);
+    end
 Z = cell(1);
 if(strcmp(mode,'linear'))
     if(nbrOfStates == 4)

@@ -3,7 +3,7 @@ clear Pest
 close all
 dbstop error
 clc
-mode = 'linear';
+mode = 'GT';
 global nbrOfStates;
 nbrOfStates = 6;
 global nbrOfMeasStates;
@@ -73,7 +73,7 @@ end
 %     Z = generateGT(set,sequence,datapath,nbrOfStates);
 % end
 
-Z = generateMeasurements(set,sequence,datapath,'linear');
+Z = generateMeasurements(set,sequence,datapath,mode);
 %%%%%% Inititate %%%%%%
 sigmaQ = 10;         % Process (motion) noise % 20 ok1
 if(nbrOfStates == 6)
@@ -127,7 +127,7 @@ H = generateMeasurementModel({},nbrOfStates);
 
 % Add cov on pos?? 
 if(nbrOfStates == 6)
-    Q = Q + 10*diag([1.1 1.1 0.1 0.2 0.2 0.2]);
+    Q = Q + 10*diag([1.1 1.1 1 0.1 0.1 1]);
 elseif(nbrOfStates == 4)
     Q = Q + 10*diag([1 1 0 0]);
 end
@@ -170,7 +170,7 @@ Xupd = cell(1);
 % Threshold existence probability keep for next iteration
 threshold = 0.01;    % 0.01 ok1
 % Threshold existence probability use estimate
-thresholdEst = 0.3; % 0.6 ok1
+thresholdEst = 0.2; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
