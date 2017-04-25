@@ -31,7 +31,7 @@ end
 % end
 
 XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOVsize, boarder, pctWithinBoarder,...
-    covBirth, vinit, weightBirth);
+    covBirth, vinit, weightBirth, motionModel);
 
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
@@ -68,7 +68,7 @@ timeUpd = toc(startUpd);
 
 %disp(['Error: ', num2str(6)])
 % Estimate states using Estimator 1
-[Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst);
+[Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst, motionModel);
 %disp(['Error: ', num2str(7)])
 % Keep the Nh best global hypotheses
 

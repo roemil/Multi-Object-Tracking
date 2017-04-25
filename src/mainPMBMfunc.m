@@ -6,7 +6,7 @@ clc
 mode = 'linear';
 set = 'training';
 sequence = '0000';
-motionModel = 'cv'; % Choose 'cv' or 'cvBB'
+motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal, maxNbrGlobal, Nhconst] ...
     = declareVariables(mode,set,sequence,motionModel);
