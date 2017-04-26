@@ -123,14 +123,14 @@ if strcmp(motionModel,'cv')
     if nbrPosStates == 4
         Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0 0]);
     elseif nbrPosStates == 6
-        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), dInit(2) 0 0 0]);
+        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
     end
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
         Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
     elseif nbrPosStates == 6
-        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), dInit(2) 0 0 0 0 0]);
+        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0 0 0]);
     end
 end
 
@@ -144,8 +144,10 @@ elseif ((strcmp(motionModel,'cvBB')) && (nbrPosStates == 4))
     R = 0.1*eye(4);    % Measurement noise % 0.01 ok1 || 0.001
 elseif ((strcmp(motionModel,'cv')) && (nbrPosStates == 6))
     R = 0.1*eye(3);    % Measurement noise % 0.01 ok1 || 0.001
+    %R(3,3) = 5;
 elseif ((strcmp(motionModel,'cvBB')) && (nbrPosStates == 6))
     R = 0.1*eye(5);    % Measurement noise % 0.01 ok1 || 0.001
+    %R(3,3) = 5;
 end
 
 if(strcmp(mode,'nonlinear'))

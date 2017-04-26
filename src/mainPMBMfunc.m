@@ -5,13 +5,13 @@ dbstop error
 clc
 mode = 'GT';
 set = 'training';
-sequence = '0002';
+sequence = '0000';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
 
-nbrPosStates = 4; % Nbr of position states, pos and velo
+nbrPosStates = 6; % Nbr of position states, pos and velo
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -102,7 +102,7 @@ for k = 1:size(Xest,2)
     if ~strcmp(mode,'GT')
         plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
     else
-        plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize, Z{k})
+        plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize, Z{k},nbrPosStates)
     end
     title(['k = ', num2str(k)])
     waitforbuttonpress
@@ -124,7 +124,7 @@ while 1
     if ~strcmp(mode,'GT')
         plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
     else
-        plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize, Z{k})
+        plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize, Z{k},nbrPosStates)
     end
     title(['k = ', num2str(k)])
     try
