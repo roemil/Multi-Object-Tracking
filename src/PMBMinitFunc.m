@@ -9,6 +9,11 @@ nbrOldTargetsPrev = 1e4;
 % Init undetected targets
 XuUpdTmp = [XuInit, XmuInit];
 
+XmuPred = generateBirthHypo(XuUpdTmp, nbrOfBirths, FOVsize, boarder, pctWithinBoarder,...
+    covBirth, vinit, weightBirth, motionModel, nbrPosStates, dInit);
+
+XuUpdTmp = updatePoisson(XmuPred,Pd);
+
 %%%%%%%%%%%%%%%%%%
 %%%%% Update %%%%%
 %%%%%%%%%%%%%%%%%%
@@ -18,7 +23,8 @@ nbrOfMeas = size(Z,2);
 nbrOfGlobHyp = 0;
 
 % Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XuUpdTmp, nbrOfMeas, Pd, H, R, Z, c, newLabel);
+[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R,...
+    Z, c, newLabel, motionModel,nbrPosStates,nbrStates,nbrMeasStates);
  
 m = size(Z,2);
 
@@ -36,7 +42,7 @@ for i = 1:size(XpotNew,2)
 end
 
 % Estimate states using Estimator 1
-[Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst);
+[Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst, motionModel);
 
 % Remove bernoulli components with low probability of existence
 iInd = 1;

@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k)
+function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = PMBMpredFunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k)
 
 load('simVariables')
 Wold = 0;
@@ -43,85 +43,9 @@ Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps);
 %timePred = toc(startPred);
 %startUpd = tic;
 
-%%%%%%%%%%%%%%%%%%
-%%%%% Update %%%%%
-%%%%%%%%%%%%%%%%%%
-
-% Update for potential targets detected for the first time
-nbrOfMeas = size(Z,2);
-if ~isempty(Xpred)
-    nbrOfGlobHyp = size(Xpred,2);
-else
-    nbrOfGlobHyp = 0;
-end
-
-%disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
-
-% Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R,...
-    Z, c, newLabel, motionModel,nbrPosStates,nbrStates,nbrMeasStates);
-
-%%%% Update for previously potentially detected targets %%%%
-Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates);    
-
-oldInd = 0;
-m = size(Z,2);
-Wnew = diag(rho);
-nbrTargetInd = 1;
-nbrVec = 0;
-for j = 1:max(1,nbrOfGlobHyp)
-    clear Amat; clear S;
-    %disp(['Error: ', num2str(1)])
-    %findA(j) = tic;
-    if ~isempty(Xhypo{j})
-        nbrOldTargets = size(Xhypo{j,1},2);
-        if sum(nbrOldTargets == nbrVec) > 0
-           tInd = find(nbrOldTargets == nbrVec);
-           Amat = Atot{tInd};
-           for i = 1:size(Stot,2)
-               if isempty(Stot{tInd,i})
-                   break
-               end
-               S(:,:,i) = Stot{tInd,i};
-           end
-        else
-           [S, Amat] = generateGlobalIndv2(m, nbrOldTargets); %TODO: THIS IS CURRENTLY THE BEST ONE
-           Atot{nbrTargetInd} = Amat;
-           for i = 1:size(S,3)
-               Stot{nbrTargetInd,i} = S(:,:,i);
-           end
-           nbrVec(nbrTargetInd) = nbrOldTargets;
-           nbrTargetInd = nbrTargetInd+1;
-        end
-    else
-        nbrOldTargets = 0;
-        Amat = 1:m;
-        S = zeros(m,m,1);
-        S(:,:,1) = eye(m);
-    end
-    %disp(['Error: ', num2str(2)])
-    % Display nbr old targets and measurements 
-    %disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
-    %disp(['Nbr measurements: ', num2str(m)])
-    
-    %timeA(j) = toc(findA(j));
-    %%%%% MURTY %%%%%%
-    %startMurt(j) = tic;
-    ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, H, j, maxKperGlobal);
-    %murtTime(j) = toc(startMurt(j));
-    %%%%% Find new global hypotheses %%%%%
-    %startGlob(j) = tic;
-    %disp(['Error: ', num2str(3)])
-    [newGlob, newInd] = generateGlobalHypo5(Xhypo(j,:), XpotNew(:), Z, oldInd, Amat, ass, nbrOldTargets);
-    %globTime(j) = toc(startGlob(j));
-    %disp(['Error: ', num2str(4)])
-    for jnew = oldInd+1:newInd
-        Xtmp{jnew} = newGlob{jnew-oldInd};
-    end
-    oldInd = newInd;
-end
 %disp(['Error: ', num2str(5)])
 % Find global hypotheses weights and weight sum for normalization
+Xtmp = Xpred;
 wSum = cell(size(Xtmp,2),1);
 for j = 1:size(Xtmp,2)
     wSum{j} = 0;
@@ -141,6 +65,7 @@ for j = 1:size(Xtmp,2)
 end
 
 %timeUpd = toc(startUpd);
+
 %disp(['Error: ', num2str(6)])
 % Estimate states using Estimator 1
 [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst, motionModel);
@@ -161,10 +86,10 @@ jInd = 1;
 if keepGlobs ~= 0
     %disp(['Nbr of new globals: ', num2str(size(keepGlobs,1))])
     for j = 1:size(keepGlobs,1)
-        if j == keepGlobs(j)
-            jEst = j;
-        end
         if ~isempty(wSum{keepGlobs(j)})
+            if j == keepGlobs(j)
+                jEst = j;
+            end
             iInd = 1;
             [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
@@ -175,7 +100,6 @@ if keepGlobs ~= 0
                     iInd = iInd+1;
                 end
             end
-            jInd = jInd+1;
         end
     end
 else % TODO: Do we wanna do this?!
@@ -187,16 +111,14 @@ else % TODO: Do we wanna do this?!
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
             for i = 1:size(Xtmp{j},2)
                 if Xtmp{j}(i).r > threshold
-                    Xupd{jInd}(iInd) = Xtmp{j}(i);
-                    Xupd{jInd}(iInd).w = weights(iInd);
+                    Xupd{j}(iInd) = Xtmp{j}(i);
+                    Xupd{j}(iInd).w = weights(iInd);
                     iInd = iInd+1;
                 end
             end
-            jInd = jInd+1;
         end
     end
 end
-
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight
 ind = 1;

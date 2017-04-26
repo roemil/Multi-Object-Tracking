@@ -14,21 +14,9 @@ function plotDetections(set, sequence, frameNbr, Xest, FOVsize)
 
 % Path for textfile with detection data
 detectionPath = strcat('../data/tracking/',set,'/',sequence,'/inferResult.txt');
-% Joachim
-% detectionPath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
-%    ,'/Matlab/Git/Multi-Object-Tracking/data/tracking/',set,'/',sequence,'/inferResult.txt');
-% Emil
-% detectionPath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
-%     ,'/Matlab/Git/Multi-Object-Tracking/data/tracking/',set,'/',sequence,'/inferResult.txt');
 
 % Path for image
 imagePath = strcat('../../kittiTracking/',set,'/image_02/',sequence,'/',frameNbr,'.png');
-% Joachim
-% imagePath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
-%    ,'/Matlab/Git/kittiTracking/',set,'/image_02/',sequence,'/',frameNbr,'.png');
-% Emil
-% imagePath = strcat('/Users/JoachimBenjaminsson/Documents/Chalmers/Master thesis'...
-%     ,'/Matlab/Git/kittiTracking/',set,'/image_02/',sequence,'/',frameNbr,'.png');
 
 delimiter = ',';
 
@@ -81,8 +69,8 @@ if ~isempty(Xest{1})
             Xest{i}(5) = maxWidth;
             Xest{i}(6) = maxHeight;
         end
-        estBox = [Xest{i}(1)-Xest{i}(7)/2, Xest{i}(2)-Xest{i}(8)/2, Xest{i}(7), Xest{i}(8)];
+        estBox = [Xest{i}(1)-Xest{i}(end-2)/2, Xest{i}(2)-Xest{i}(end-1)/2, Xest{i}(end-2), Xest{i}(end-1)];
         rectangle('Position',estBox,'EdgeColor','r','LineWidth',1,'LineStyle','--')
-        text(estBox(1), estBox(2), num2str(Xest{i}(9)),'Fontsize',15,'Color','red')
+        text(estBox(1), estBox(2), num2str(Xest{i}(end)),'Fontsize',18,'Color','red')
     end
 end
