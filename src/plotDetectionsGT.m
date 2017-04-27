@@ -47,12 +47,12 @@ maxHeight = max(boxes(:,4));
 
 if ~isempty(Xest{1})
     for i = 1:size(Xest,2)
-        if size(Xest{i},1) == 4
-            Xest{i}(5) = maxWidth;
-            Xest{i}(6) = maxHeight;
+        if ((Xest{i}(1) > FOVsize(1,1)) && (Xest{i}(1) < FOVsize(2,1)))
+            if ((Xest{i}(2) > FOVsize(1,2)) && (Xest{i}(2) < FOVsize(2,2)))
+                estBox = [Xest{i}(1)-Xest{i}(end-2)/2, Xest{i}(2)-Xest{i}(end-1)/2, Xest{i}(end-2), Xest{i}(end-1)];
+                rectangle('Position',estBox,'EdgeColor','r','LineWidth',1,'LineStyle','--')
+                text(estBox(1), estBox(2), num2str(Xest{i}(end)),'Fontsize',18,'Color','red')
+            end
         end
-        estBox = [Xest{i}(1)-Xest{i}(end-2)/2, Xest{i}(2)-Xest{i}(end-1)/2, Xest{i}(end-2), Xest{i}(end-1)];
-        rectangle('Position',estBox,'EdgeColor','r','LineWidth',1,'LineStyle','--')
-        text(estBox(1), estBox(2), num2str(Xest{i}(end)),'Fontsize',18,'Color','red')
     end
 end

@@ -51,9 +51,7 @@ iInd = 1;
 for i = 1:size(Xtmp{1},2)
     if Xtmp{1}(i).r > threshold
         Xupd{1}(iInd) = Xtmp{1}(i);
-        if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
-            Xupd{1}(iInd).P = 5*Xupd{1}(iInd).P+diag([50 10 0 0 0 0]);
-        end
+        Xupd{1}(iInd).P = 5*Xupd{1}(iInd).P+diag([50 10 0 0 0 0]);
         Xupd{1}(iInd).w = norm_weights(iInd);
         iInd = iInd+1;
     end

@@ -5,7 +5,7 @@ dbstop error
 clc
 mode = 'GT';
 set = 'training';
-sequence = '0018';
+sequence = '0003';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 
@@ -19,7 +19,7 @@ nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 
 Xupd = cell(1);
 
-K = 100; %size(Z,2); % Length of sequence
+K = min(120,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -40,7 +40,7 @@ for t = 1:nbrSim
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
         PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn);
     disp(['Iteration time: ', num2str(toc)])
-    
+
     if strcmp(plotOn,'true')
         frameNbr = '000000';
         if ~strcmp(mode,'GT')
@@ -160,6 +160,7 @@ for k = 1:K
         clear Ptmp
         if k == 1
             k = 2;
+            frameNbr = sprintf('%06d',k-1);
         end
         for i = 1:size(Xpred{k}{jEst(k-1)},2)
             Xtmp{i} = Xpred{k}{jEst(k-1)}(i).state;

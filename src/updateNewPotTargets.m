@@ -41,6 +41,7 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, 
         XpotNew{z}.box = Z(nbrMeasStates+1:nbrMeasStates+2,z);
         XpotNew{z}.label = newLabel;
         newLabel = newLabel+1;
+        XpotNew{z}.nbrMeasAss = 1; % TAGass Nbr meas assignments
         if strcmp(motionModel,'cvBB')
             XpotNew{z}.state(nbrPosStates+1:nbrPosStates+2) = Z(nbrMeasStates+1:nbrMeasStates+2,z);
             XpotNew{z}.P(nbrPosStates+1:nbrPosStates+2,nbrPosStates+1:nbrPosStates+2) = R(end-1:end,end-1:end);

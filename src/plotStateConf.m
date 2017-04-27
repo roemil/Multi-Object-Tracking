@@ -20,6 +20,8 @@ axis('image')
 hold on
 xlim([FOVsize(1,1) FOVsize(2,1)])
 ylim([FOVsize(1,2) FOVsize(2,2)])
+% xlim([340 500])
+% ylim([140 290])
 
 n = 100;
 phi = linspace(0,2*pi,n);

@@ -15,6 +15,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, m
             Xhypo{j,nbrOfMeas+1}(i).box = Xpred{j}(i).box;
             Xhypo{j,nbrOfMeas+1}(i).label = Xpred{j}(i).label;
             Xhypo{j,nbrOfMeas+1}(i).S = 0;
+            Xhypo{j,nbrOfMeas+1}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss; % TAGass
         end
     end
          
@@ -66,6 +67,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, m
 %                 end
                 Xhypo{j,z}(i).r = 1;
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
+                Xhypo{j,z}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss+1; % TAGass
             end
         end
     end

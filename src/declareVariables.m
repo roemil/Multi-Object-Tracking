@@ -114,7 +114,7 @@ if strcmp(motionModel,'cv')
 end
 
 T = 0.1; % sampling time, 1 fps
-sigmaQ = 45;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 35;         % Process (motion) noise % 20 ok1 || 24 apr 10
 sigmaBB = 2;
 dInit = [0 20];
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
@@ -131,9 +131,9 @@ elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
         %Q = Q + 0.2*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
-        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]); % 0.1 seems good! 
-        F(3,3) = 1.1*F(3,3);
-        F(4,4) = 1.1*F(4,4);
+        Q = Q + 0.05*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]); % 0.1 seems good! 0.15
+        %F(3,3) = 1.1*F(3,3);
+        %F(4,4) = 1.1*F(4,4);
     elseif nbrPosStates == 6
         Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0 0 0]);
     end
@@ -154,7 +154,7 @@ elseif ((strcmp(motionModel,'cvBB')) && (nbrPosStates == 6))
     R = 0.1*eye(5);    % Measurement noise % 0.01 ok1 || 0.001
     %R(3,3) = 5;
 end
-
+R = 4*R;
 if(strcmp(mode,'nonlinear'))
     h = {'distance','angle'};
     H = generateMeasurementModel(h,'nonlinear',nbrPosStates, motionModel);
@@ -173,7 +173,7 @@ c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Threshold existence probability keep for next iteration
-threshold = 1e-3;    % 0.01 ok1
+threshold = 1e-2;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
@@ -198,7 +198,7 @@ pctWithinBoarder = 0.2;
 % Weight of the births
 weightBirth = 1;
 % Number of births
-nbrOfBirths = 150; % 600 ok1
+nbrOfBirths = 180; % 600 ok1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
@@ -209,8 +209,8 @@ nbrInitBirth = 3000; % 600 ok1
 covBirth = 20; % 20 ok1
 wInit = 1;%0.2;
 
-FOVinit = FOVsize;%+50*[-1 -1;
-                   % 1 1];
+FOVinit = FOVsize;+50*[-1 -1;
+                    1 1];
 XmuUpd = cell(1);
 XuUpd = cell(1);
 % TODO: Should the weights be 1/nbrInitBirth?
