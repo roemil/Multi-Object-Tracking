@@ -1,5 +1,6 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel)
+function [XuUpd, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
+    PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel,birthSpawn)
 
 load('simVariables')
 Wold = 0;
@@ -10,7 +11,7 @@ nbrOldTargetsPrev = 1e4;
 XuUpdTmp = [XuInit, XmuInit];
 
 XmuPred = generateBirthHypo(XuUpdTmp, nbrOfBirths, FOVsize, boarder, pctWithinBoarder,...
-    covBirth, vinit, weightBirth, motionModel, nbrPosStates, dInit);
+    covBirth, vinit, weightBirth, motionModel, nbrPosStates, dInit, birthSpawn);
 
 XuUpdTmp = updatePoisson(XmuPred,Pd);
 

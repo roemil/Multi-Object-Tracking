@@ -35,6 +35,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, m
                 %Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:2,z), H*Xhypo{j,z}(i).state, Xhypo{j,z}(i).S);
                 %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H*Xhypo{j,z}(i).state, Xhypo{j,z}(i).S)]
                 %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S)]
+                %Xpred{j}(i).label
                 %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H(1:2,1:2)*Xpred{j}(i).state(1:2), Xhypo{j,z}(i).S(1:2,1:2))]
                 %Xhypo{j,z}(i).w
                 %[Z(1:2,z), H*Xpred{j}(i).state]
@@ -60,9 +61,9 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, m
 %                 plot(x(1,:),x(2,:),'-c','LineWidth',2)
 %                 legend('Z','Pred','Upd','3\sigma','\sigma')
 %                 waitforbuttonpress
-                if isnan(Xhypo{j,z}(i).w)
-                   keyboard
-                end
+%                 if isnan(Xhypo{j,z}(i).w)
+%                    keyboard
+%                 end
                 Xhypo{j,z}(i).r = 1;
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
             end

@@ -5,15 +5,16 @@ dbstop error
 clc
 mode = 'GT';
 set = 'training';
-sequence = '0000';
+sequence = '0018';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
+birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
 
-nbrPosStates = 6; % Nbr of position states, pos and velo
+nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
-    maxNbrGlobal, Nhconst, XmuUpd, XuUpd] ...
+    maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
 
 Xupd = cell(1);
@@ -37,7 +38,7 @@ for t = 1:nbrSim
     tic
     %Z = measGenerateCase2(X, R, FOVsize, K);
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
-        PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel);
+        PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn);
     disp(['Iteration time: ', num2str(toc)])
     
     if strcmp(plotOn,'true')
@@ -64,10 +65,11 @@ for t = 1:nbrSim
         tic;
         if ~isempty(Z{k})
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
+                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k);
         else
+            disp('No measurement')
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMpredFunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k);
+                PMBMpredFunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k);
         end
         disp(['Iteration time: ', num2str(toc)])
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
@@ -143,6 +145,34 @@ while 1
     %pause(1.5)
 %end
 end
+
+%% Plot confidence
+
+type = 'pred';
+j = 1;
+figure;
+for k = 1:K
+    frameNbr = sprintf('%06d',k-1);
+    if strcmp(type,'est')
+        plotStateConf(set, sequence, frameNbr, Xest{k}, Pest{k}, FOVsize, Z{k})
+    elseif strcmp(type,'pred')
+        clear Xtmp
+        clear Ptmp
+        if k == 1
+            k = 2;
+        end
+        for i = 1:size(Xpred{k}{jEst(k-1)},2)
+            Xtmp{i} = Xpred{k}{jEst(k-1)}(i).state;
+            Xtmp{i}(end+1) = Xpred{k}{jEst(k-1)}(i).label;
+            Ptmp{i} = Xpred{k}{jEst(k-1)}(i).P;
+        end
+        plotStateConf(set, sequence, frameNbr, Xtmp, Ptmp, FOVsize, Z{k})
+    end
+    title(['k = ', num2str(k)])
+    waitforbuttonpress
+end
+
+
 %% Plot pred and upd
 figure;
 %for k = 2:size(Xest,2)

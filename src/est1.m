@@ -62,6 +62,7 @@ function [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xupd, threshold, motio
                 west = [west, Xupd{ind}(i).w];
                 labelsEst = [labelsEst, Xupd{ind}(i).label];
             end
+        end
     else
         Xest = [];
         Pest = [];

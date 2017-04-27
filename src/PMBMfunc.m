@@ -1,5 +1,6 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, k)
+function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
+    PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k)
 
 load('simVariables')
 Wold = 0;
@@ -31,7 +32,7 @@ end
 % end
 
 XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOVsize, boarder, pctWithinBoarder,...
-    covBirth, vinit, weightBirth, motionModel, nbrPosStates, dInit);
+    covBirth, vinit, weightBirth, motionModel, nbrPosStates, dInit, birthSpawn);
 
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
@@ -161,8 +162,8 @@ jInd = 1;
 if keepGlobs ~= 0
     %disp(['Nbr of new globals: ', num2str(size(keepGlobs,1))])
     for j = 1:size(keepGlobs,1)
-        if j == keepGlobs(j)
-            jEst = j;
+        if jEst == keepGlobs(j)
+            jEst = jInd;
         end
         if ~isempty(wSum{keepGlobs(j)})
             iInd = 1;
@@ -182,6 +183,9 @@ else % TODO: Do we wanna do this?!
     disp('keepGlobs is 0')
     for j = 1:size(Xtmp,2)
         if ~isempty(wSum{j})
+            if jEst == j
+                jEst = jInd;
+            end
             iInd = 1;
             [weights, ~] = normalizeLogWeights(wSum{j});
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);

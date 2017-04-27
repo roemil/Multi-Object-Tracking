@@ -1,5 +1,5 @@
 function [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, ...
-    maxKperGlobal, maxNbrGlobal, Nhconst, XmuUpd, XuUpd] ...
+    maxKperGlobal, maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -114,21 +114,26 @@ if strcmp(motionModel,'cv')
 end
 
 T = 0.1; % sampling time, 1 fps
-sigmaQ = 25;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 45;         % Process (motion) noise % 20 ok1 || 24 apr 10
 sigmaBB = 2;
 dInit = [0 20];
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
 if strcmp(motionModel,'cv')
     %Q = Q + 25*diag([1.2 1 0 0]); % 10
     if nbrPosStates == 4
-        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0 0]);
+        Q = Q + 0.15*diag([FOVsize(2,1), 1.2*FOVsize(2,2), 0 0]);
+        F(3,3) = 1.5*F(3,3);
+        F(4,4) = 1.5*F(4,4);
     elseif nbrPosStates == 6
         Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
     end
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
-        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
+        %Q = Q + 0.2*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
+        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]); % 0.1 seems good! 
+        F(3,3) = 1.1*F(3,3);
+        F(4,4) = 1.1*F(4,4);
     elseif nbrPosStates == 6
         Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0 0 0]);
     end
@@ -159,7 +164,7 @@ elseif(strcmp(mode,'GT'))
     H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
 end
 
-Pd = 0.9;   % Detection probability % 0.7 ok1
+Pd = 0.95;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
 c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
 
@@ -200,7 +205,7 @@ nbrOfBirths = 150; % 600 ok1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 vinit = 0;
-nbrInitBirth = 2000; % 600 ok1
+nbrInitBirth = 3000; % 600 ok1
 covBirth = 20; % 20 ok1
 wInit = 1;%0.2;
 
