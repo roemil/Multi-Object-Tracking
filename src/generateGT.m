@@ -9,7 +9,7 @@ f = fopen(filename);
 GT = textscan(f,formatSpec);
 fclose(f);
 
-P2 =[7.215377e+02 0.000000e+00 6.095593e+02 4.485728e+01;
+P =[7.215377e+02 0.000000e+00 6.095593e+02 4.485728e+01;
     0.000000e+00 7.215377e+02 1.728540e+02 2.163791e-01; 
     0.000000e+00 0.000000e+00 1.000000e+00 2.745884e-03];
 
@@ -63,10 +63,10 @@ if(nbrOfStates == 4)
         elseif(GT{trackID}(i) ~= -1)
             %R1(1:3,1:3) = Ry(i);
             %P = P2*R1;
-            %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
-            cx = mean([GT{7}(i),GT{9}(i)]);
-            cy = mean([GT{8}(i),GT{10}(i)]);
-            pxCoords = [cx,cy];
+            pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
+%             cx = mean([GT{7}(i),GT{9}(i)]);
+%             cy = mean([GT{8}(i),GT{10}(i)]);
+%             pxCoords = [cx,cy];
             bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
             ZGT{frame}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
             count = 1;
@@ -77,6 +77,7 @@ elseif(nbrOfStates == 6)
     cx(1) = mean([GT{7}(3),GT{9}(3)]);
     cy(1) = mean([GT{8}(3),GT{10}(3)]);
     pxCoords = [cx,cy];
+    %pxCoords = camera2pixelcoords([GT{xInd}(3);GT{yInd}(3);GT{zInd}(3)],P);
     ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);GT{zInd}(3);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
     count = 1;
     oldFrame = GT{1}(3)+1;

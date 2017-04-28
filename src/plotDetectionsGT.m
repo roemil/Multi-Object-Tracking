@@ -57,12 +57,12 @@ for i = 1 : size(GT,2)
     ycoord(i) = GT(2,i);
 end
 % Read and plot image
+clf;
 img = imread(imagePath);
-%figure;
+%fig = figure;
 imagesc(img)
 axis('image')
 hold on
-
 % Plot bounding boxes
 for i = 1:size(ind,1)
     rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
@@ -77,6 +77,7 @@ if ~isempty(Xest{1})
         end
         estBox = [Xest{i}(1)-Xest{i}(7)/2, Xest{i}(2)-Xest{i}(8)/2, Xest{i}(7), Xest{i}(8)];
         rectangle('Position',estBox,'EdgeColor','r','LineWidth',1,'LineStyle','--')
+        plot(Xest{i}(1),Xest{i}(2),'gx')
         text(estBox(1), estBox(2), num2str(Xest{i}(9)),'Fontsize',15,'Color','red')
     end
 end

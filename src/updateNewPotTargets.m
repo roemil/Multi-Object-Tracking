@@ -12,11 +12,12 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, 
         XpotNew{z}.P = zeros(nbrOfStates,nbrOfStates);
         for i = 1:size(XmuPred,2)
             % Pass through Kalman
-            [XmuUpd{z}(i).state, XmuUpd{z}(i).P, XmuUpd{z}(i).S] = KFUpd(XmuPred(i).state,H, XmuPred(i).P, R, Z(1:nbrOfMeasStates,z));
+            Z1 = pixel2cameracoords(Z(1:nbrOfMeasStates-1,z),Z(nbrOfMeasStates,z));
+            [XmuUpd{z}(i).state, XmuUpd{z}(i).P, XmuUpd{z}(i).S] = KFUpd(XmuPred(i).state,H, XmuPred(i).P, R, Z1);
             
             % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
             % Compute weight
-            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:nbrOfMeasStates,z), H*XmuPred(i).state, XmuUpd{z}(i).S);
+            w(1,i) = XmuPred(i).w*mvnpdf(Z1, H*XmuPred(i).state, XmuUpd{z}(i).S);
             
             % TODO: temp solution
             Xmutmp(1:nbrOfStates,i) = XmuPred(i).state;
@@ -32,7 +33,7 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, 
             XpotNew{z}.P = XpotNew{z}.P+w(1,i)*XmuUpd{z}(i).P; % (44)
         end
         
-        e = Pd*generateGaussianMix(Z(1:nbrOfMeasStates,z), ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
+        e = Pd*generateGaussianMix(Z1, ones(1,size(Xmutmp,2)), H*Xmutmp, Stmp);
         rho(z) = e+c;
         XpotNew{z}.w = log(e+c); % rho (45) (44)
         XpotNew{z}.r = e/rho(z); % (43) (44)
