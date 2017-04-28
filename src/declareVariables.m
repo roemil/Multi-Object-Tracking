@@ -154,7 +154,7 @@ elseif ((strcmp(motionModel,'cvBB')) && (nbrPosStates == 6))
     R = 0.1*eye(5);    % Measurement noise % 0.01 ok1 || 0.001
     %R(3,3) = 5;
 end
-R = 4*R;
+%R = 4*R;
 if(strcmp(mode,'nonlinear'))
     h = {'distance','angle'};
     H = generateMeasurementModel(h,'nonlinear',nbrPosStates, motionModel);

@@ -193,11 +193,20 @@ else % TODO: Do we wanna do this?!
                 if Xtmp{j}(i).r > threshold
                     Xupd{jInd}(iInd) = Xtmp{j}(i);
                     Xupd{jInd}(iInd).w = weights(iInd);
+                    if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
+                        Xupd{jInd}(iInd).P = 3*Xupd{jInd}(iInd).P+diag([30 10 0 0 0 0]);
+                    end
                     iInd = iInd+1;
                 end
             end
             jInd = jInd+1;
         end
+    end
+end
+
+if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
+    for i = 1:size(Pest,2)
+        Pest{i} = 3*Pest{i}+diag([30 10 0 0 0 0]);
     end
 end
 

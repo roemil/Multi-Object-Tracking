@@ -5,7 +5,7 @@ dbstop error
 clc
 mode = 'GT';
 set = 'training';
-sequence = '0003';
+sequence = '0002';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 
@@ -98,7 +98,8 @@ disp(['Total simulation time: ', num2str(simTime)])
 
 % Plot estimates
 
-figure;
+figure('units','normalized','position',[.05 .05 .9 .9]);
+subplot('position', [0.02 0 0.98 1])
 for k = 1:size(Xest,2)
     frameNbr = sprintf('%06d',k-1);
     if ~strcmp(mode,'GT')
@@ -118,7 +119,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot estimates
 
-figure;
+figure('units','normalized','position',[.05 .05 .9 .9]);
+subplot('position', [0.02 0 0.98 1])
 %for k = 1:size(Xest,2)
 k = 1;
 while 1
@@ -148,12 +150,13 @@ end
 
 %% Plot confidence
 
-type = 'pred';
+type = 'est';
 j = 1;
-figure;
+figure('units','normalized','position',[.05 .05 .9 .9]);
+subplot('position', [0.02 0 0.98 1])
 for k = 1:K
     frameNbr = sprintf('%06d',k-1);
-    if strcmp(type,'est')
+    if ((strcmp(type,'est')) && (~isempty(Xest{k}{1})))
         plotStateConf(set, sequence, frameNbr, Xest{k}, Pest{k}, FOVsize, Z{k})
     elseif strcmp(type,'pred')
         clear Xtmp
