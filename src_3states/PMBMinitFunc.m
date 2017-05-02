@@ -11,7 +11,7 @@ nbrOldTargetsPrev = 1e4;
 XuUpdTmp = [XuInit, XmuInit];
 
 XmuPred = generateBirthHypo(XuUpdTmp, nbrOfBirths, FOV, boarder, pctWithinBoarder,...
-    covBirth, vinit, weightBirth, motionModel, nbrPosStates, birthSpawn,mode);
+    covBirth, vinit, weightBirth, motionModel, nbrPosStates, birthSpawn, mode);
 
 XuUpdTmp = updatePoisson(XmuPred,Pd);
 
@@ -43,7 +43,6 @@ for i = 1:size(XpotNew,2)
     end
 end
 
-% TODO: CONT HERE, r is low
 % Estimate states using Estimator 1
 [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst, motionModel);
 

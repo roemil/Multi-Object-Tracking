@@ -5,7 +5,7 @@ dbstop error
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0002';
+sequence = '0000';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 
@@ -53,7 +53,7 @@ for t = 1:nbrSim
         pause(0.1)
         %keyboard
     end
-    
+    keyboard
     % Only keep births
     tmp = XuUpd;
     clear XuUpd;
@@ -65,7 +65,7 @@ for t = 1:nbrSim
         tic;
         if ~isempty(Z{k})
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k);
+                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
         else
             disp('No measurement')
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
@@ -117,6 +117,35 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Compare 3d estimate and GT
+
+k = 1;
+j = 1;
+
+[est, true] = estGTdiff(sequence,set,k,Xupd{1,k}{j});
+
+%% 3D to 2D
+
+clear X2d
+load simVariables.mat
+type = 'upd';
+X = Xupd;
+
+if strcmp(type,'upd')
+    for k = 1:K
+        for j = 1:size(Xupd{1,k},2)
+            iInd = 1;
+            for i = 1:size(Xupd{1,k}{j},2)
+                if ~isempty(Xupd{1,k}{j}(i))
+                    X2d{k,j}(:,iInd) = H3dTo2d(1:2,:)*Xupd{1,k}{j}(i).state;
+                    iInd = iInd+1;
+                end
+            end
+        end
+    end
+end
+
+
 %% Plot estimates
 
 figure('units','normalized','position',[.05 .05 .9 .9]);

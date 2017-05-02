@@ -1,4 +1,4 @@
-function ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, H, j, maxKperGlobal)
+function ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, j, maxKperGlobal)
 
 wHyp = 1;
 wHypSum = 0;

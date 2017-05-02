@@ -174,7 +174,7 @@ elseif (strcmp(mode,'GTnonlinear'))
     H3dTo2d = [P2(:,1:3), zeros(3,5), P2(:,4); zeros(2,6), eye(2), zeros(2,1)];
     R3dTo2d = 0.1*eye(5);
     
-    Hdistance = @(x) sqrt(x(1)^2+x(2)^2+x(3)^2);
+    Hdistance = @(x) sqrt(x(1,:).^2+x(2,:).^2+x(3,:).^2);
     Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
     Jh = @(x) [x(1)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), x(2)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), x(3)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), zeros(1,3)];
 end
@@ -188,7 +188,7 @@ c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Threshold existence probability keep for next iteration
-threshold = 1e-2;    % 0.01 ok1
+threshold = 1e-5;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
@@ -227,8 +227,11 @@ wInit = 1;%0.2;
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];
 
-FOV = [-40 -5 0;
-    40 5 60];
+% FOV = [-45 -1 -5;
+%     45 4 150];
+
+FOV = [-45 -1 -5;
+    45 4 30];
                 
 XmuUpd = cell(1);
 XuUpd = cell(1);
@@ -245,7 +248,7 @@ if strcmp(motionModel,'cv')
             unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit)]';      % Pred state
         XuUpd{1}(i).P = covBirth*eye(4);      % Pred cov
     end
-elseif strcmp(motionModel,'cvBB')
+elseif strcmp(motionModel,'cvBB') && ~strcmp(mode,'GTnonlinear')
     for i = 1:nbrInitBirth
         XmuUpd{1}(i).w = wInit;    % Pred weight
         XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
@@ -257,19 +260,21 @@ elseif strcmp(motionModel,'cvBB')
             unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit), 0, 0]';      % Pred state
         XuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
     end
-elseif strcmp(mode,'GTnonlinear')
+elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
     for i = 1:nbrInitBirth
         XmuUpd{1}(i).w = wInit;    % Pred weight
         XmuUpd{1}(i).state = [unifrnd(FOV(1,1), FOV(2,1)), ...
             unifrnd(FOV(1,2), FOV(2,2)), unifrnd(FOV(1,3), FOV(2,3)), ...
-            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
-        XmuUpd{1}(i).P = covBirth*eye(8);      % Pred cov
+            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0, 1]';      % Pred state
+        XmuUpd{1}(i).P = covBirth*eye(9);      % Pred cov
+        XmuUpd{1}(i).P(end,end) = 0;
 
         XuUpd{1}(i).w = wInit;    % Pred weight
         XuUpd{1}(i).state = [unifrnd(FOV(1,1), FOV(2,1)), ...
             unifrnd(FOV(1,2), FOV(2,2)), unifrnd(FOV(1,3), FOV(2,3)), ...
-            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit)]';      % Pred state
-        XuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
+            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0, 1]';      % Pred state
+        XuUpd{1}(i).P = covBirth*eye(9);      % Pred cov
+        XuUpd{1}(i).P(end,end) = 0;
     end
 end
 

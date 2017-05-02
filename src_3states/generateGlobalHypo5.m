@@ -30,7 +30,7 @@ if ~isempty(Xhypo{1})
         Xtmp{z}(end+z) = Xnew{z};
     end
 else
-    Xtmp{1} = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0);
+    Xtmp{1} = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0);
     for z = 1:m
         Xtmp{z}(z) = Xnew{z};
     end

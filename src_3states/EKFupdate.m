@@ -1,4 +1,4 @@
-%   Perform update with linear KF and Gaussian models
+%   Perform update with nonlinear KF and Gaussian models
 %   
 %   Input:      Xpred:  Predicted states
 %               Ppred:  Covariance matri of predicted states

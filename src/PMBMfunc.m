@@ -206,7 +206,9 @@ end
 
 if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
     for i = 1:size(Pest,2)
-        Pest{i} = 3*Pest{i}+diag([30 10 0 0 0 0]);
+        if ~isempty(Pest{i})
+            Pest{i} = 3*Pest{i}+diag([30 10 0 0 0 0]);
+        end
     end
 end
 

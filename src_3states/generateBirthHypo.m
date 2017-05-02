@@ -135,11 +135,12 @@ elseif strcmp(birthSpawn, 'uniform')
 %             end
 %          end
      elseif strcmp(mode,'GTnonlinear')
-         XmuPred(end+1).w = weightBirth;
-                XmuPred(end).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
+        XmuPred(end+1).w = weightBirth;
+        XmuPred(end).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
             unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(FOVsize(1,3), FOVsize(2,3)), ...
-            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit)]';
-                XmuPred(end).P = covBirth*eye(6); 
+            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0, 1]';
+        XmuPred(end).P = covBirth*eye(9);
+        XmuPred(end).P(end,end) = 0;
      end
 end
     

@@ -1,6 +1,6 @@
 %%%%% PMBM %%%%%
 function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
-    PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k)
+    PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k)
 
 load('simVariables')
 Wold = 0;
@@ -31,8 +31,8 @@ end
 %     XmuPred(end).P = covBirth*eye(4);
 % end
 
-XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOVsize, boarder, pctWithinBoarder,...
-    covBirth, vinit, weightBirth, motionModel, nbrPosStates, dInit, birthSpawn);
+XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOV, boarder, pctWithinBoarder,...
+    covBirth, vinit, weightBirth, motionModel, nbrPosStates, birthSpawn, mode);
 
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
@@ -59,11 +59,13 @@ end
 %disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R,...
+[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H3dTo2d, ...
+    Hdistance, R3dTo2d, Rdistance, Jh,...
     Z, c, newLabel, motionModel,nbrPosStates,nbrStates,nbrMeasStates);
 
 %%%% Update for previously potentially detected targets %%%%
-Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates);    
+Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, R, Z, motionModel, ...
+    nbrPosStates, nbrMeasStates, H3dTo2d, Hdistance, R3dTo2d, Rdistance);    
 
 oldInd = 0;
 m = size(Z,2);
@@ -108,7 +110,7 @@ for j = 1:max(1,nbrOfGlobHyp)
     %timeA(j) = toc(findA(j));
     %%%%% MURTY %%%%%%
     %startMurt(j) = tic;
-    ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, H, j, maxKperGlobal);
+    ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, j, maxKperGlobal);
     %murtTime(j) = toc(startMurt(j));
     %%%%% Find new global hypotheses %%%%%
     %startGlob(j) = tic;
