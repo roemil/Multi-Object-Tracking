@@ -5,7 +5,7 @@ dbstop error
 clc
 mode = 'GT';
 set = 'training';
-sequence = '0018';
+sequence = '0012';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 
