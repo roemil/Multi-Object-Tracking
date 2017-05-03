@@ -122,8 +122,8 @@ if strcmp(motionModel,'cv')
     %Q = Q + 25*diag([1.2 1 0 0]); % 10
     if nbrPosStates == 4
         Q = Q + 0.15*diag([FOVsize(2,1), 1.2*FOVsize(2,2), 0 0]);
-        F(3,3) = 1.5*F(3,3);
-        F(4,4) = 1.5*F(4,4);
+        %F(3,3) = 1.5*F(3,3);
+        %F(4,4) = 1.5*F(4,4);
     elseif nbrPosStates == 6
         Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
     end

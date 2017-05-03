@@ -53,7 +53,7 @@ for t = 1:nbrSim
         pause(0.1)
         %keyboard
     end
-    keyboard
+keyboard
     % Only keep births
     tmp = XuUpd;
     clear XuUpd;
@@ -122,7 +122,7 @@ end
 k = 1;
 j = 1;
 
-[est, true] = estGTdiff(sequence,set,k,Xupd{1,k}{j});
+[est, true] = estGTdiff(sequence,set,k,Xupd{1,k}{j},'true');
 
 %% 3D to 2D
 
@@ -137,7 +137,7 @@ if strcmp(type,'upd')
             iInd = 1;
             for i = 1:size(Xupd{1,k}{j},2)
                 if ~isempty(Xupd{1,k}{j}(i))
-                    X2d{k,j}(:,iInd) = H3dTo2d(1:2,:)*Xupd{1,k}{j}(i).state;
+                    X2d{k,j}(:,iInd) = H3dFunc(Xupd{1,k}{j}(i).state);
                     iInd = iInd+1;
                 end
             end

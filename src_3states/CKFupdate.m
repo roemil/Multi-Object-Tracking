@@ -17,17 +17,17 @@
 
 function [X,P,S] = CKFupdate(Xpred, Ppred, H, Z, R, n)
 
-X = zeros(size(Xpred,1),2*n);
+Xtmp = zeros(size(Xpred,1),2*n);
 Wi = 1/(2*n);
 
 for i = 1:n
     Psqrt = chol(Ppred)';
-    X(:,i) = Xpred+sqrt(n)*Psqrt(:,i);
-    X(:,i+n) = Xpred-sqrt(n)*Psqrt(:,i);
+    Xtmp(:,i) = Xpred+sqrt(n)*Psqrt(:,i);
+    Xtmp(:,i+n) = Xpred-sqrt(n)*Psqrt(:,i);
 end
-hX = H(X);
+hX = H(Xtmp);
 yhatpred = repmat(Wi*sum(hX,2),1,2*n);
-Pxy = Wi*(X-repmat(Xpred,1,2*n))*(hX-yhatpred)';
+Pxy = Wi*(Xtmp-repmat(Xpred,1,2*n))*(hX-yhatpred)';
 S = Wi*(hX-yhatpred)*(hX-yhatpred)'+R;
 X = Xpred+Pxy/S*(Z-yhatpred(:,1));
 P = Ppred-Pxy/S*Pxy';

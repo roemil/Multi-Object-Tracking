@@ -20,8 +20,8 @@ for k = 0:20
             limX(1) = min(limX(1), GT{14}(i));
             limX(2) = max(limX(2), GT{14}(i));
             
-            limY(1) = min(limY(1), GT{15}(i));
-            limY(2) = max(limY(2), GT{15}(i));
+            limY(1) = min(limY(1), GT{15}(i)-GT{11}(i)/2);
+            limY(2) = max(limY(2), GT{15}(i)-GT{11}(i)/2);
             
             limZ(1) = min(limZ(1), GT{16}(i));
             limZ(2) = max(limZ(2), GT{16}(i));

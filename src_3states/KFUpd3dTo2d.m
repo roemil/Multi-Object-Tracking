@@ -11,14 +11,14 @@
 %
 %%
 
-function [X,P,S] = KFUpd3dTo2d(Xprev,H, P, R, z)
+function [X,P,S] = KFUpd3dTo2d(Xprev,H, Pprev, R, z)
 
 nbrMeas = size(z,1);
 
-S = H(1:nbrMeas,:)*P*H(1:nbrMeas,:)'+R; % create inovation variance matrix S
-K = P*H(1:nbrMeas,:)'/S; % calculate kalman gain
-St = H(1:3,:)*P*H(1:3,:)'+[R, zeros(2,1); zeros(1,3)];
-Kt = P*H(1:3,:)'/St;
+S = H(1:nbrMeas,:)*Pprev*H(1:nbrMeas,:)'+R; % create inovation variance matrix S
+K = Pprev*H(1:nbrMeas,:)'/S; % calculate kalman gain
+St = H(1:3,:)*Pprev*H(1:3,:)'+[R, zeros(2,1); zeros(1,3)];
+Kt = Pprev*H(1:3,:)'/St;
 zt = [z;1];
 tmp = H*Xprev;
 if tmp(3) ~= 0
@@ -31,9 +31,9 @@ v = z - HXprev; % compute innovation
 vt = zt-HXprevt;
 X = Xprev+K*v;  % Perform update on states
 Xt = Xprev+tmp(3)*Kt*vt;
-%[distanceToMeas(X,z,'0000','training',1), distanceToMeas(Xt,z,'0000','training',1)]
-P = P - K*S*K'; % Perform update on covariance matrix
-Pt = P - Kt*St*Kt';
-P
-Pt
+%[distanceToMeas(Xprev,z,'0000','training',1), distanceToMeas(X,z,'0000','training',1), distanceToMeas(Xt,z,'0000','training',1)]
+Pt = Pprev - Kt*St*Kt';
+P = Pprev - K*S*K'; % Perform update on covariance matrix
+%P
+%Pt
 end

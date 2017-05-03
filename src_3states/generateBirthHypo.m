@@ -135,12 +135,41 @@ elseif strcmp(birthSpawn, 'uniform')
 %             end
 %          end
      elseif strcmp(mode,'GTnonlinear')
-        XmuPred(end+1).w = weightBirth;
-        XmuPred(end).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
-            unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(FOVsize(1,3), FOVsize(2,3)), ...
-            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0, 1]';
-        XmuPred(end).P = covBirth*eye(9);
-        XmuPred(end).P(end,end) = 0;
+         % This generates uniformly over Z, however it is not very uniform in
+            % the 3D space
+%          for i = 1:nbrOfBirths
+%             Zrnd = unifrnd(FOVsize(1,3), FOVsize(2,3));
+%             Xrange = Zrnd*tand(43);
+%             Yrange = Zrnd*tand(16);
+%             XmuPred(end+1).w = weightBirth;
+%             XmuPred(end).state = [unifrnd(-Xrange, Xrange), ...
+%                 unifrnd(-Yrange, Yrange), Zrnd, ...
+%                 unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';
+%             XmuPred(end).P = covBirth*eye(8);
+%             %XmuPred(end).P(end,end) = 0; % If 1 at end of states
+%          end
+         for i = 1:nbrOfBirths/5
+            Zrnd = unifrnd(FOVsize(1,3), 8); % TODO: True angle of view?
+            Xrange = Zrnd*tand(43); % 45? 40.6
+            Yrange = Zrnd*tand(16); % 13
+            XmuPred(end+1).w = weightBirth;    % Pred weight
+            XmuPred(end).state = [unifrnd(-Xrange, Xrange), ...
+                unifrnd(-Yrange, Yrange), Zrnd, ...
+                unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
+            XmuPred(end).P = covBirth;%*eye(8);      % Pred cov
+            %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
+        end
+        for i = nbrOfBirths/5+1:nbrOfBirths
+            Zrnd = unifrnd(8, FOVsize(2,3)); % TODO: True angle of view?
+            Xrange = Zrnd*tand(43); % 45? 40.6
+            Yrange = Zrnd*tand(16); % 13
+            XmuPred(end+1).w = weightBirth;    % Pred weight
+            XmuPred(end).state = [unifrnd(-Xrange, Xrange), ...
+                unifrnd(-Yrange, Yrange), Zrnd, ...
+                unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
+            XmuPred(end).P = covBirth;%*eye(8);      % Pred cov
+            %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
+        end
      end
 end
     

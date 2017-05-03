@@ -59,13 +59,13 @@ end
 %disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H3dTo2d, ...
+[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H3dFunc, ...
     Hdistance, R3dTo2d, Rdistance, Jh,...
     Z, c, newLabel, motionModel,nbrPosStates,nbrStates,nbrMeasStates);
 
 %%%% Update for previously potentially detected targets %%%%
 Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, R, Z, motionModel, ...
-    nbrPosStates, nbrMeasStates, H3dTo2d, Hdistance, R3dTo2d, Rdistance);    
+    nbrPosStates, nbrMeasStates, H3dTo2d, H3dFunc, Hdistance, R3dTo2d, Rdistance);    
 
 oldInd = 0;
 m = size(Z,2);

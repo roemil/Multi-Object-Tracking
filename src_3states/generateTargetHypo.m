@@ -1,4 +1,5 @@
-function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, R, Z, motionModel, nbrPosStates, nbrMeasStates, H3dTo2d, Hdistance, R3dTo2d, Rdistance)
+function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, R, Z, ...
+    motionModel, nbrPosStates, nbrMeasStates, H3dTo2d, H3dFunc, Hdistance, R3dTo2d, Rdistance)
 
 % Create missdetection hypo in index size(Z{k},2)+1
     if(isempty(Xpred)) % If we have no predicted targets, we cannot 
@@ -30,18 +31,21 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, R, Z, moti
                     %Xhypo{j,z}(i).box = Z(3:4,z);
                 elseif strcmp(motionModel,'cvBB')
                     % Bounding box center
-                    [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd3dTo2d(Xpred{j}(i).state, H3dTo2d, Xpred{j}(i).P, R3dTo2d(1:2,1:2), Z(1:2,z));
+                    %[Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd3dTo2d(Xpred{j}(i).state, H3dTo2d, Xpred{j}(i).P, R3dTo2d(1:2,1:2), Z(1:2,z));
+                    [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(1:2,1:2)]...
+                        = CKFupdate(Xpred{j}(i).state,Xpred{j}(i).P, H3dFunc, Z(1:2,z), R3dTo2d(1:2,1:2),8);
+                    
                     
                     % Bound box size
-                    [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(4:5,4:5)] = KFUpd(Xhypo{j,z}(i).state, H3dTo2d(4:5,:), Xhypo{j,z}(i).P, R3dTo2d(4:5,4:5), Z(4:5,z));
+                    [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(4:5,4:5)] = KFUpd(Xhypo{j,z}(i).state, H3dTo2d(4:5,1:end-1), Xhypo{j,z}(i).P, R3dTo2d(4:5,4:5), Z(4:5,z));
                     
                     % Distance
                     Rd = Rdistance(Xhypo{j,z}(i).state);
-                    [Xhypo{j,z}(i).state(1:end-1), Xhypo{j,z}(i).P(1:end-1,1:end-1), Xhypo{j,z}(i).S(3,3)]...
-                        = CKFupdate(Xhypo{j,z}(i).state(1:end-1), Xhypo{j,z}(i).P(1:end-1,1:end-1), Hdistance, Rd, Z(3,z), 4);
+                    [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(3,3)]...
+                        = CKFupdate(Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Hdistance, Rd, Z(3,z), 8);
                     
                     Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + ...
-                        log_mvnpdf(Z(1:nbrMeasStates,z), [H3dTo2d(1:2,:)*Xpred{j}(i).state; Hdistance(Xpred{j}(i).state)], Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
+                        log_mvnpdf(Z(1:nbrMeasStates,z), [H3dFunc(Xpred{j}(i).state); Hdistance(Xpred{j}(i).state)], Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
                     
                     Xhypo{j,z}(i).box = Xhypo{j,z}(i).state(nbrPosStates+1:nbrPosStates+2);
                 end

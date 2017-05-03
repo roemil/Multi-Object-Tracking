@@ -66,6 +66,7 @@ if(nbrOfStates == 4)
             %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
             cx = mean([GT{7}(i),GT{9}(i)]);
             cy = mean([GT{8}(i),GT{10}(i)]);
+            cy = GT{10}(i);
             pxCoords = [cx,cy];
             bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
             ZGT{frame}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
@@ -82,7 +83,7 @@ elseif(nbrOfStates == 6)
     % This is [px py, z]??
     % ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);GT{zInd}(3);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
     % This is [px py d]
-    d = sqrt(GT{14}(ind)^2+GT{15}(ind)^2+GT{16}(ind)^2);
+    d = sqrt(GT{14}(ind)^2+(GT{15}(ind)-GT{11}(ind)/2)^2+GT{16}(ind)^2);
     ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);d;bbsize(1);bbsize(2);GT{trackID}(ind)]; % cx
     count = 2;
     oldFrame = GT{1}(ind)+1;
@@ -97,7 +98,7 @@ elseif(nbrOfStates == 6)
             pxCoords = [cx,cy];
             bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
             %ZGT{frame}(:,count+1) = [pxCoords(1);pxCoords(2);GT{zInd}(i);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
-            d = sqrt(GT{14}(i)^2+GT{15}(i)^2+GT{16}(i)^2);
+            d = sqrt(GT{14}(i)^2+(GT{15}(ind)-GT{11}(i)/2)^2+GT{16}(i)^2);
             ZGT{frame}(:,count) = [pxCoords(1);pxCoords(2);d;bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
             count = count + 1;
             oldFrame = frame;
@@ -110,7 +111,7 @@ elseif(nbrOfStates == 6)
             cy = mean([GT{8}(i),GT{10}(i)]);
             pxCoords = [cx,cy];
             bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
-            d = sqrt(GT{14}(i)^2+GT{15}(i)^2+GT{16}(i)^2);
+            d = sqrt(GT{14}(i)^2+(GT{15}(ind)-GT{11}(i)/2)^2+GT{16}(i)^2);
             ZGT{frame}(:,count) = [pxCoords(1);pxCoords(2);d;bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
             count = count+1;
             oldFrame = frame;  
