@@ -112,7 +112,7 @@ for k = 1:size(Xest,2)
     %pause(1.5)
 end
 
-
+%%%%%% TODO: XuUpd not assigned -> increase thresh or nbr of births
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
