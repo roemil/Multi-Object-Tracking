@@ -119,12 +119,12 @@ if r==3 & c==3
   X(:) = scale*(k*XYZ(:,1)+x0);
   Y(:) = scale*(k*XYZ(:,2)+y0);
   Z(:) = scale*(k*XYZ(:,3)+z0);
-  h4=surf(X,Y,Z);
+  %h4=surf(X,Y,Z,'FaceAlpha',0);
   colormap gray
   alpha(0.3)
   camlight
   if nargout
-    h=[h1 h2 h3 h4];
+    h=[h1 h2 h3];% h4];
   end
 elseif r==2 & c==2
   % Make the matrix has positive eigenvalues - else it's not a valid covariance matrix!

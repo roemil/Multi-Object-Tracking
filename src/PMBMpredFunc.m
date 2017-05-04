@@ -84,7 +84,8 @@ minTmp = min(size(wGlob,2), Nh);
 %disp(['Error: ', num2str(8)])
 % Remove bernoulli components with low probability of existence
 jInd = 1;
-if keepGlobs ~= 0
+if sum(keepGlobs ~= 0) ~= 0
+    keepGlobs = keepGlobs(keepGlobs ~= 0);
     %disp(['Nbr of new globals: ', num2str(size(keepGlobs,1))])
     for j = 1:size(keepGlobs,1)
         if ~isempty(wSum{keepGlobs(j)})

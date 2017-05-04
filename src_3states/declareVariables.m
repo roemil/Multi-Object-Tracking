@@ -196,7 +196,7 @@ elseif (strcmp(mode,'GTnonlinear'))
     
     Hdistance = @(x) sqrt(x(1,:).^2+x(2,:).^2+x(3,:).^2);
     %Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
-    Rdistance = @(x) 25;
+    Rdistance = @(x) 5;
     Jh = @(x) [x(1)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), x(2)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), x(3)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), zeros(1,3)];
     
     H = @(x) [H3dFunc(x); Hdistance(x)];
@@ -253,7 +253,7 @@ vinit = 0;
 nbrInitBirth = 1000; % 600 ok1
 global covBirth
 if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
-    covBirth = diag([1 0.5 1 2 1 2 20 20]); %*0.5
+    covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
 else
     covBirth = 20; % 20 ok1
 end

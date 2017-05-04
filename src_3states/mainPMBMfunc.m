@@ -117,6 +117,74 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Plot estimates Img-plane
+%% Plot estimates 3D
+
+figure('units','normalized','position',[.05 .05 .9 .9]);
+subplot('position', [0.02 0 0.98 1])
+k = 1;
+while 1
+    frameNbr = sprintf('%06d',k-1);
+    if strcmp(mode,'GTnonlinear')
+        plotImgEstGT(sequence,set,k,Xest{k});
+    elseif ~strcmp(mode,'GTnonlinear')
+        % Not implemented
+    end
+    title(['k = ', num2str(k)])
+    try
+        waitforbuttonpress; 
+    catch
+        fprintf('Window closed. Exiting...\n');
+        break
+    end
+    key = get(gcf,'CurrentCharacter');
+    switch lower(key)  
+        case 'a'
+            k = k - 1;
+        case 'l'
+            k = k + 1;
+    end
+    %pause(1.5)
+%end
+end
+
+%% Plot estimates 3D
+
+figure('units','normalized','position',[.05 .05 .9 .9]);
+%subplot('position', [0.02 0 0.98 1])
+k = 1;
+while 1
+    frameNbr = sprintf('%06d',k-1);
+    if strcmp(mode,'GTnonlinear')
+        [p1, p2, l, h] = plot3DestGT(sequence,set,k,Xest{k},Pest{k},true);
+    elseif ~strcmp(mode,'GTnonlinear')
+        % Not implemented
+    end
+    title(['k = ', num2str(k)])
+    try
+        waitforbuttonpress; 
+    catch
+        fprintf('Window closed. Exiting...\n');
+        break
+    end
+    key = get(gcf,'CurrentCharacter');
+    switch lower(key)  
+        case 'a'
+            k = k - 1;
+            delete(p1)
+            delete(p2)
+            delete(l)
+            delete(h)
+        case 'l'
+            k = k + 1;
+            delete(p1)
+            delete(p2)
+            delete(l)
+            delete(h)
+    end
+    %pause(1.5)
+%end
+end
 %% Compare 3d estimate and GT
 
 k = 1;
