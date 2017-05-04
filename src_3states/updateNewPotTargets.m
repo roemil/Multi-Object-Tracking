@@ -1,5 +1,7 @@
 function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, ...
-    Pd, H3dFunc, Hdistance, R3dTo2d, Rdistance, Jh, Z, c, newLabel,motionModel,nbrPosStates,nbrStates,nbrMeasStates)
+    Z, newLabel,motionModel, nbrPosStates)
+global Pd, global H3dFunc, global Hdistance, global R3dTo2d, global Rdistance, global Jh
+global c, global nbrStates, global nbrMeasStates, global H, global R
 
     rho = zeros(nbrOfMeas,1);
     
@@ -35,13 +37,13 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, ...
             %tmp2 = distanceToMeas(XmuUpd2{z}(i).state,Z(1:2,z),'0000','training',1);
             
             % Test combine
-            H = @(x) [H3dFunc(x); Hdistance(x)];
-            R = [R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rd];
+            %H = @(x) [H3dFunc(x); Hdistance(x)];
+            %R = [R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rd];
             [XmuUpd{z}(i).state, XmuUpd{z}(i).P, XmuUpd{z}(i).S]...
                  = CKFupdate(XmuPred(i).state, XmuPred(i).P, H, Z(1:3,z), R, 8);
             
             % FOR CHECK
-            %[distanceToMeas(XmuPred(i).state,Z(1:2,z),'0000','training',1),tmp, tmp2, distanceToMeas(XmuUpd{z}(i).state,Z(1:2,z),'0000','training',1)]
+            %[distanceToMeas(XmuPred(i).state,Z(1:2,z),'0000','training',1);tmp; tmp2; distanceToMeas(XmuUpd{z}(i).state,Z(1:2,z),'0000','training',1)]
             % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
             % Compute weight
             
@@ -83,9 +85,9 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, ...
             %XpotNew{z}.state(nbrPosStates+3) = 1; % If 1 at end of states
             %XpotNew{z}.P(nbrPosStates+3,nbrPosStates+3) = 0;
         end
-        XpotNew{z}.state(end+1) = XpotNew{z}.label;
-        distanceToMeas(XpotNew{z}.state,Z(1:2,z),'0000','training',1)
-        distanceToMeas(XpotNew2{z}.state,Z(1:2,z),'0000','training',1)
+        %XpotNew{z}.state(end+1) = XpotNew{z}.label;
+        %distanceToMeas(XpotNew{z}.state,Z(1:2,z),'0000','training',1)
+        %distanceToMeas(XpotNew2{z}.state,Z(1:2,z),'0000','training',1)
         % TODO: Add 1 as the last state?
 %         XpotNew{z}.state(end+1) = 1;
 %         XpotNew{z}.P(end+1,end+1) = 0;

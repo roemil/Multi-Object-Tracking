@@ -97,12 +97,15 @@ Xupd = cell(1,1);
 %%%%%%%% Motion model and covariance matrix %%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+global FOVsize
 if strcmp(mode,'GT') || (strcmp(mode,'GTnonlinear'))
     FOVsize = [0,0;1242,375]; % in m
 else
     FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
 end
 
+global nbrStates
+global nbrMeasStates
 if strcmp(motionModel,'cv')
         nbrStates = 4; % Total number of states
         if nbrPosStates == 4
@@ -120,10 +123,15 @@ if strcmp(motionModel,'cv')
         end
 end
 
+global T
 T = 0.1; % sampling time, 1 fps
-sigmaQ = 35;         % Process (motion) noise % 20 ok1 || 24 apr 10
+global sigmaQ
+sigmaQ = 1;         % Process (motion) noise % 20 ok1 || 24 apr 10
+global sigmaBB
 sigmaBB = 2;
 dInit = [0 20];
+global F
+global Q
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
 if strcmp(motionModel,'cv')
     %Q = Q + 25*diag([1.2 1 0 0]); % 10
@@ -142,7 +150,7 @@ elseif strcmp(motionModel, 'cvBB')
         %F(3,3) = 1.1*F(3,3);
         %F(4,4) = 1.1*F(4,4);
     elseif nbrPosStates == 6
-        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0 0 0]);
+        %Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0 0 0]);
     end
 end
 
@@ -150,6 +158,14 @@ end
 %%%%%% Measurement model and covariance matrix %%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+global R
+global H
+global H3dTo2d
+global H3dFunc
+global R3dTo2d
+global Hdistance
+global Rdistance
+global Jh
 if ((strcmp(motionModel,'cv')) && (nbrPosStates == 4))
     R = 0.1*eye(2);
 elseif ((strcmp(motionModel,'cvBB')) && (nbrPosStates == 4))
@@ -175,17 +191,24 @@ elseif (strcmp(mode,'GTnonlinear'))
     
     % Including BB
     H3dTo2d = [P2(:,1:3), zeros(3,5), P2(:,4); zeros(2,6), eye(2), zeros(2,1)];
-    H3dFunc = @(x) (H3dTo2d(1:2,1:8)*x + H3dTo2d(1:2,9))./(x(3)+H3dTo2d(3,9));
+    H3dFunc = @(x) (H3dTo2d(1:2,1:8)*x + H3dTo2d(1:2,9))./(x(3,:)+H3dTo2d(3,9));
     R3dTo2d = 0.1*eye(5);
     
     Hdistance = @(x) sqrt(x(1,:).^2+x(2,:).^2+x(3,:).^2);
-    Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
+    %Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
+    Rdistance = @(x) 25;
     Jh = @(x) [x(1)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), x(2)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), x(3)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), zeros(1,3)];
+    
+    H = @(x) [H3dFunc(x); Hdistance(x)];
+    R = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
 end
 
+global Pd
 Pd = 0.95;   % Detection probability % 0.7 ok1
+global Ps
 Ps = 0.99;   % Survival probability % 0.98 ok1
-c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
+global c
+c = 0.0001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Thresholds and Murty %%%%%%%%%%%%%%%
@@ -215,26 +238,32 @@ boarder = [0, FOVsize(2,1)-boarderWidth;
 % Percentage of births within boarders
 pctWithinBoarder = 0.2;
 % Weight of the births
+global weightBirth
 weightBirth = 1;
 % Number of births
+global nbrOfBirths
 nbrOfBirths = 180; % 600 ok1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+global vinit
 vinit = 0;
 nbrInitBirth = 1000; % 600 ok1
+global covBirth
 if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
-    covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]);
+    covBirth = diag([1 0.5 1 2 1 2 20 20]); %*0.5
 else
     covBirth = 20; % 20 ok1
 end
+global wInit
 wInit = 1;%0.2;
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];
 
+global FOV
                 % from findFOV
 % FOV = [-45 -2 -5;
 %     45 3 150];
@@ -344,7 +373,7 @@ if strcmp(mode,'GTnonlinear')
     save('simVariables','R','T','FOVsize','R','F','Q','Pd','Ps','c','threshold',...
         'poissThresh','vinit','thresholdEst','covBirth','boarder','pctWithinBoarder',...
         'weightBirth','motionModel','nbrPosStates','nbrStates','nbrMeasStates','H3dTo2d','H3dFunc','Hdistance',...
-        'R3dTo2d','Rdistance','Jh','FOV');
+        'R3dTo2d','Rdistance','Jh','FOV','H','R');
 else 
     save('simVariables','R','T','FOVsize','R','F','Q','H','Pd','Ps','c','threshold',...
         'poissThresh','vinit','thresholdEst','covBirth','boarder','pctWithinBoarder',...

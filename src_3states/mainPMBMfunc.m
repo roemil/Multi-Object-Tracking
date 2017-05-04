@@ -53,7 +53,7 @@ for t = 1:nbrSim
         pause(0.1)
         %keyboard
     end
-keyboard
+
     % Only keep births
     tmp = XuUpd;
     clear XuUpd;
@@ -122,7 +122,9 @@ end
 k = 1;
 j = 1;
 
-[est, true] = estGTdiff(sequence,set,k,Xupd{1,k}{j},'true');
+%[est, true] = estGTdiff(sequence,set,k,Xupd{1,k}{j},true,true);
+
+[est, true] = estGTdiff(sequence,set,k,Xest{k},true,true);
 
 %% 3D to 2D
 
@@ -137,7 +139,8 @@ if strcmp(type,'upd')
             iInd = 1;
             for i = 1:size(Xupd{1,k}{j},2)
                 if ~isempty(Xupd{1,k}{j}(i))
-                    X2d{k,j}(:,iInd) = H3dFunc(Xupd{1,k}{j}(i).state);
+                    X2d{k,j}{:,iInd} = H3dFunc(Xupd{1,k}{j}(i).state);
+                    P2d{k,j}{:,iInd}
                     iInd = iInd+1;
                 end
             end
@@ -179,7 +182,7 @@ end
 
 %% Plot confidence
 
-type = 'est';
+type = 'pred';
 j = 1;
 figure('units','normalized','position',[.05 .05 .9 .9]);
 subplot('position', [0.02 0 0.98 1])
@@ -195,7 +198,7 @@ for k = 1:K
             frameNbr = sprintf('%06d',k-1);
         end
         for i = 1:size(Xpred{k}{jEst(k-1)},2)
-            Xtmp{i} = Xpred{k}{jEst(k-1)}(i).state;
+            Xtmp{i} = H3dFunc(Xpred{k}{jEst(k-1)}(i).state);
             Xtmp{i}(end+1) = Xpred{k}{jEst(k-1)}(i).label;
             Ptmp{i} = Xpred{k}{jEst(k-1)}(i).P;
         end

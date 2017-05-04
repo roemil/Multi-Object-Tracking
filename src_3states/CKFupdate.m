@@ -17,6 +17,10 @@
 
 function [X,P,S] = CKFupdate(Xpred, Ppred, H, Z, R, n)
 
+if isa(R,'function_handle')
+    R = R(Z(3));
+end
+
 Xtmp = zeros(size(Xpred,1),2*n);
 Wi = 1/(2*n);
 

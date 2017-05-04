@@ -1,5 +1,6 @@
-function XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOVsize, boarder,...
-    pctWithinBoarder, covBirth, vinit, weightBirth, motionModel, nbrPosStates, birthSpawn,mode)
+function XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode)
+global nbrOfBirths, global FOV, global boarder, global pctWithinBoarder
+global covBirth, global vinit, global weightBirth, global birthSpawn
 
 if strcmp(birthSpawn, 'boarders')
     if nbrPosStates == 4
@@ -135,6 +136,7 @@ elseif strcmp(birthSpawn, 'uniform')
 %             end
 %          end
      elseif strcmp(mode,'GTnonlinear')
+         FOVsize = FOV;
          % This generates uniformly over Z, however it is not very uniform in
             % the 3D space
 %          for i = 1:nbrOfBirths

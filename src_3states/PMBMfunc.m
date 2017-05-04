@@ -31,8 +31,7 @@ end
 %     XmuPred(end).P = covBirth*eye(4);
 % end
 
-XmuPred = generateBirthHypo(XmuPred, nbrOfBirths, FOV, boarder, pctWithinBoarder,...
-    covBirth, vinit, weightBirth, motionModel, nbrPosStates, birthSpawn, mode);
+XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode);
 
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
@@ -59,13 +58,12 @@ end
 %disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H3dFunc, ...
-    Hdistance, R3dTo2d, Rdistance, Jh,...
-    Z, c, newLabel, motionModel,nbrPosStates,nbrStates,nbrMeasStates);
+[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Z, ...
+    newLabel, motionModel,nbrPosStates);
 
 %%%% Update for previously potentially detected targets %%%%
-Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, R, Z, motionModel, ...
-    nbrPosStates, nbrMeasStates, H3dTo2d, H3dFunc, Hdistance, R3dTo2d, Rdistance);    
+Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Z, motionModel, ...
+    nbrPosStates);    
 
 oldInd = 0;
 m = size(Z,2);
