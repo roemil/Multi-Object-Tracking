@@ -1,6 +1,8 @@
-function XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode)
+function XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode,k)
 global nbrOfBirths, global FOV, global boarder, global pctWithinBoarder
-global covBirth, global vinit, global weightBirth, global birthSpawn
+global covBirth, global vinit, global weightBirth, global birthSpawn,
+global pose, global egoMotionOn, global RcamToVelo, global TcamToVelo,
+global R20, global T20, global RveloToImu, global TimuToVelo
 
 if strcmp(birthSpawn, 'boarders')
     if nbrPosStates == 4
@@ -160,6 +162,13 @@ elseif strcmp(birthSpawn, 'uniform')
                 unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
             XmuPred(end).P = covBirth;%*eye(8);      % Pred cov
             %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
+            if egoMotionOn
+                % Local cam2 -> local cam0 -> local velo -> global velo
+                XmuPred(end).state(1:3) = local2global(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
+                    +TcamToVelo,RveloToImu,TimuToVelo,pose{k}(1:3,4));
+                XmuPred(end).state(1:3) = local2global(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
+                    +TcamToVelo,RveloToImu,TimuToVelo,pose{k}(1:3,4));
+            end
         end
         for i = nbrOfBirths/5+1:nbrOfBirths
             Zrnd = unifrnd(8, FOVsize(2,3)); % TODO: True angle of view?
@@ -171,6 +180,13 @@ elseif strcmp(birthSpawn, 'uniform')
                 unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
             XmuPred(end).P = covBirth;%*eye(8);      % Pred cov
             %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
+            if egoMotionOn
+                % Local cam2 -> local cam0 -> local velo -> global velo
+                XmuPred(end).state(1:3) = local2global(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
+                    +TcamToVelo,RveloToImu,TimuToVelo,pose{k}(1:3,4));
+                XmuPred(end).state(1:3) = local2global(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
+                    +TcamToVelo,RveloToImu,TimuToVelo,pose{k}(1:3,4));
+            end
         end
      end
 end

@@ -10,7 +10,7 @@ nbrOldTargetsPrev = 1e4;
 % Init undetected targets
 XuUpdTmp = [XuInit, XmuInit];
 
-XmuPred = generateBirthHypo(XuUpdTmp,  motionModel, nbrPosStates, mode);
+XmuPred = generateBirthHypo(XuUpdTmp,  motionModel, nbrPosStates, mode, 1);
 
 XuUpdTmp = updatePoisson(XmuPred,Pd);
 

@@ -31,7 +31,7 @@ end
 %     XmuPred(end).P = covBirth*eye(4);
 % end
 
-XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode);
+XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
 
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);

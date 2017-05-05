@@ -4,5 +4,5 @@
 % x and y has to be on the form [forward, left, up] (velodyn coordinate
 % system)
 function y = global2local(x,R,t)
-    y = R*x+t;
+    y = R*x+repmat(t,1,size(x,2));
 end

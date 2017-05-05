@@ -30,9 +30,11 @@ for i = 1:size(boxes,1)
     rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
 end
 
-for i = 1:size(X,2)
-    tmp = H(X{i}(1:end-1));
-    box = [tmp(1)-X{i}(end-2)/2, tmp(2)-X{i}(end-1)/2, X{i}(end-2), X{i}(end-1)];
-    rectangle('Position',box,'EdgeColor','r','LineWidth',1,'LineStyle','--')
-    text(box(1), box(2), num2str(X{i}(end)),'Fontsize',18,'Color','red')
+if ~isempty(X{1})
+    for i = 1:size(X,2)
+        tmp = H(X{i}(1:end-1));
+        box = [tmp(1)-X{i}(end-2)/2, tmp(2)-X{i}(end-1)/2, X{i}(end-2), X{i}(end-1)];
+        rectangle('Position',box,'EdgeColor','r','LineWidth',1,'LineStyle','--')
+        text(box(1), box(2), num2str(X{i}(end)),'Fontsize',18,'Color','red')
+    end
 end

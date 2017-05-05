@@ -3,7 +3,7 @@
 % translation t (velo-imu)(3x1), ego-position egoPos
 % x, y and egoPos has to be on the form [forward, left, up] (velodyn coordinate
 % system)
-
+% t (imu-velo)??
 function y = local2global(x,R,t, egoPos)
     y = R*(x+egoPos-t);
 end

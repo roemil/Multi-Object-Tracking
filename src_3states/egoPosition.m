@@ -55,15 +55,16 @@ for i=1:size(oxts{1},1)
   R  = Rz*Ry*Rx;
   
   %normalize translation and rotation (start at 0/0/0)
-  if isempty(Tr_0_inv) && k == 1
+  if isempty(Tr_0_inv) %&& k == 1
    Tr_0_inv = inv([R t;0 0 0 1]);
   end
       
   % add pose
-  %pose{i} = Tr_0_inv*[R t;0 0 0 1];
-  varargout{1} = Tr_0_inv*[R t;0 0 0 1];
+  pose{i} = Tr_0_inv*[R t;0 0 0 1];
+  %varargout{1} = pose%Tr_0_inv*[R t;0 0 0 1];
   %if(k==1)
-      varargout{2} = Tr_0_inv;
+      %varargout{2} = Tr_0_inv;
   %end
 
 end
+varargout{1} = pose;

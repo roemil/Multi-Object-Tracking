@@ -44,10 +44,10 @@ global c, global nbrStates, global nbrMeasStates, global H, global R
             % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
             % Compute weight
             
-            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), [H3dFunc(XmuPred(i).state); Hdistance(XmuPred(i).state)], XmuUpd{z}(i).S);
+            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state), XmuUpd{z}(i).S);
             
             % TODO: temp solution
-            Xmutmp(1:3,i) = [H3dFunc(XmuPred(i).state); Hdistance(XmuPred(i).state)];
+            Xmutmp(1:3,i) = H(XmuPred(i).state);%[H3dFunc(XmuPred(i).state); Hdistance(XmuPred(i).state)];
             Stmp{i} = XmuUpd{z}(i).S;
             
             % --alt 2--

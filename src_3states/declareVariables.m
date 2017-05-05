@@ -73,14 +73,57 @@ P2 = readCalibration(P2path,2);
 %     0.000000e+00 0.000000e+00 1.000000e+00 2.745884e-03];
 
 if egoMotionOn
-    fid = fopen(P2path);
-      % load 3x4 projection matrix
-      C = textscan(fid,'%s %f %f %f %f %f %f %f %f %f %f %f %f');
-      for i=0:11
-        tr_imu_velo(floor(i/4)+1,mod(i,4)+1) = C{i+2}(6);
-      end
+    base_dir = strcat('../../kittiTracking/data_tracking_oxts/',set);
+    filenameIMU = [base_dir,sequence,'.txt'];
 
-      fclose(fid);
+    oxts = loadOxtsliteData(base_dir,1:1);
+    global pose
+    pose = egoPosition(oxts);
+    
+    % imu to velo
+%     imu_velo = strcat('../../data_tracking_calib/calib2/calib_imu_to_velo.txt');
+%     fid = fopen(imu_velo);
+%     C = textscan(fid,'%s %f %f %f %f %f %f %f %f %f %f %f %f');
+%     for i=0:11
+%     tr_imu_velo(floor(i/4)+1,mod(i,4)+1) = C{i+2}(6);
+%     end
+%     fclose(fid);
+    global RimuToVelo
+    RimuToVelo = [9.999976e-01 7.553071e-04 -2.035826e-03;
+        -7.854027e-04 9.998898e-01 -1.482298e-02;
+        2.024406e-03 1.482454e-02 9.998881e-01];
+    global TimuToVelo
+    TimuToVelo = [-8.086759e-01 3.195559e-01 -7.997231e-01]';
+    
+    % TODO: use \ instead? R\1'??
+    global RveloToImu
+    RveloToImu = inv(RimuToVelo);
+    %global TveloToImu
+    %TveloToImu = -TimuToVelo;
+    
+    global RveloToCam
+    RveloToCam = [6.927964e-03 -9.999722e-01 -2.757829e-03;
+        -1.162982e-03 2.749836e-03 -9.999955e-01;
+        9.999753e-01 6.931141e-03 -1.143899e-03];
+    global TveloToCam
+    TveloToCam = [-2.457729e-02 -6.127237e-02 -3.321029e-01]';
+    
+    global RcamToVelo
+    RcamToVelo = inv(RveloToCam);
+    global TcamToVelo
+    TcamToVelo = -TveloToCam;
+    
+    global R02
+    R02 = [9.999838e-01 -5.012736e-03 -2.710741e-03;
+        5.002007e-03 9.999797e-01 -3.950381e-03;
+        2.730489e-03 3.936758e-03 9.999885e-01];
+    global T02
+    T02 = [5.989688e-02 -1.367835e-03 4.637624e-03]';
+    
+    global R20
+    R20 = inv(R02);
+    global T20
+    T20 = -T02;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -138,7 +181,7 @@ end
 global T
 T = 0.1; % sampling time, 1 fps
 global sigmaQ
-sigmaQ = 4;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 8;         % Process (motion) noise % 20 ok1 || 24 apr 10
 global sigmaBB
 sigmaBB = 2;
 dInit = [0 20];
@@ -211,8 +254,18 @@ elseif (strcmp(mode,'GTnonlinear'))
     Rdistance = @(x) 5;
     Jh = @(x) [x(1)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), x(2)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), x(3)/sqrt(x(1)^2 + x(2)^2 + x(3)^2), zeros(1,3)];
     
-    H = @(x) [H3dFunc(x); Hdistance(x)];
-    R = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
+    if egoMotionOn
+        Hcam = @(x) [H3dFunc(x); Hdistance(x)];
+        Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
+        
+        % global velo -> local velo -> local cam0 -> local cam2
+        H = @(x) Hcam([R02*(RveloToCam*global2local(x(1:3,:),RimuToVelo,TimuToVelo)+TveloToCam)+T02;...
+            -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
+        R = @(x) Rcam(x);
+    else
+        H = @(x) [H3dFunc(x); Hdistance(x)];
+        R = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
+    end
 end
 
 global Pd
@@ -227,7 +280,7 @@ c = 0.0001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Threshold existence probability keep for next iteration
-threshold = 1e-5;    % 0.01 ok1
+threshold = 1e-4;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
@@ -254,7 +307,7 @@ global weightBirth
 weightBirth = 1;
 % Number of births
 global nbrOfBirths
-nbrOfBirths = 180; % 600 ok1
+nbrOfBirths = 250; % 600 ok1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
@@ -265,7 +318,11 @@ vinit = 0;
 nbrInitBirth = 1000; % 600 ok1
 global covBirth
 if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
-    covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
+    if ~egoMotionOn
+        covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
+    else
+        covBirth = diag([1 1 0.5 2 2 1 20 20]); %0.5
+    end
 else
     covBirth = 20; % 20 ok1
 end
@@ -354,6 +411,13 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
             unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
         XuUpd{1}(i).P = covBirth*eye(8);      % Pred cov
         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
+        if egoMotionOn
+            % Local cam2 -> local cam0 -> local velo -> global velo
+            XmuUpd{1}(i).state(1:3) = local2global(RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo,RveloToImu,TimuToVelo,zeros(3,1));
+            XuUpd{1}(i).state(1:3) = local2global(RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo,RveloToImu,TimuToVelo,zeros(3,1));
+        end
     end
     for i = nbrInitBirth/5+1:nbrInitBirth
         Zrnd = unifrnd(8, FOV(2,3)); % TODO: True angle of view?
@@ -375,6 +439,13 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
             unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
         XuUpd{1}(i).P = covBirth;%*eye(8);      % Pred cov
         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
+        if egoMotionOn
+            % Local cam2 -> local cam0 -> local velo -> global velo
+            XmuUpd{1}(i).state(1:3) = local2global(RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo,RveloToImu,TimuToVelo,zeros(3,1));
+            XuUpd{1}(i).state(1:3) = local2global(RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo,RveloToImu,TimuToVelo,zeros(3,1));
+        end
     end
 end
 
