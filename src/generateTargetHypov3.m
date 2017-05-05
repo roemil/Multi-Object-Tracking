@@ -1,4 +1,4 @@
-function Xhypo = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates)
+function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates)
 % Create missdetection hypo in index size(Z{k},2)+1
     if(isempty(Xpred)) % If we have no predicted targets, we cannot 
                           % generate hypotheses
@@ -20,10 +20,13 @@ function Xhypo = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z,
 %          
     % Generate hypothesis for each single in each global for each measurement 
     %zInd = 1;
+    Stmp = cell(nbrOfMeas,nbrOfGlobHyp);
     for z = 1:nbrOfMeas
         for j = 1:nbrOfGlobHyp
+            nbrMeasObj = nbrOfMeas+size(Xpred{j},2);
+            ind = 1;
             for i = 1:size(Xpred{j},2)
-                if(gating(Z(:,z),H,Xpred{j}(i),R,100))
+                if(gating(Z(:,z),H,Xpred{j}(i),R,100)) % 100
                     if strcmp(motionModel,'cv')
                         %[Xhypo(i).state, Xhypo(i).P, Xhypo(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates,z));
                         [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates));
@@ -43,10 +46,13 @@ function Xhypo = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z,
                     Xhypo{j,z}(i).r = 1;
                     Xhypo{j,z}(i).label = Xpred{j}(i).label;
                     Xhypo{j,z}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss+1; % TAGass
+                    Stmp{z,j}(ind,1:nbrMeasObj) = 0;
+                    Stmp{z,j}(ind,i) = 1;
+                    ind = ind+1;
                else
                    Xhypo{j,z}(i).state = [];%ones(size(Xpred{1}(1).state));
-                    Xhypo{j,z}(i).P = eye(size(Xpred{1}(1).P));
-                    Xhypo{j,z}(i).S = eye(size(Xpred{1}(1).P));
+                    Xhypo{j,z}(i).P = 0; %eye(size(Xpred{1}(1).P));
+                    Xhypo{j,z}(i).S = 0; %eye(size(Xpred{1}(1).P));
                     Xhypo{j,z}(i).w = -1000;
                     Xhypo{j,z}(i).box = [313;313];
                     Xhypo{j,z}(i).r = 1;
@@ -54,10 +60,50 @@ function Xhypo = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z,
                     Xhypo{j,z}(i).nbrMeasAss = 0; % TAGass
                 end
             end
+            Stmp{z,j}(end+1,1:nbrMeasObj) = 0;
+            Stmp{z,j}(end,size(Xpred{j},2)+z) = 1;
+        end
+    end
+
+S = zeros(nbrOfMeas,1,1,nbrOfGlobHyp);
+indvInd = zeros(nbrOfMeas,2);
+for j = 1:nbrOfGlobHyp
+    for z = 1:nbrOfMeas
+        indvInd(z,:) = [1, size(Stmp{z,j},1)];
+    end
+    ind = 1;
+    nbrObj = size(Xhypo{j,1},2);
+    while indvInd(1,1) <= indvInd(1,2)
+        for z = 1:size(Stmp,1)
+            S(z,1:(nbrObj+nbrOfMeas),ind,j) = Stmp{z,j}(indvInd(z,1),:);
+        end
+        indvInd(nbrOfMeas,1) = indvInd(nbrOfMeas,1)+1;
+        for indI = nbrOfMeas:-1:2
+            if indvInd(indI,1) > indvInd(indI,2)
+                indvInd(indI,1) = 1;
+                indvInd(indI-1,1) = indvInd(indI-1,1)+1;
+            end
+        end
+        %sumCol = sum(S(:,:,ind,j));
+        if sum(sum(S(:,:,ind,j))) == 0
+            keyboard
+        end
+        if isempty(find(sum(S(:,:,ind,j)) > 1,1))
+            ind = ind+1;
         end
     end
 end
 
+% OLD TRY
+% j = 1;
+% Amat = zeros(1,nbrOfMeas);
+% for z = 1:nbrOfMeas
+%     ind = 1;
+%     nbrObj = size(Stmp{z,j},1);
+%     newInd = ind+nbrObj-1;
+%     [~, Amat(ind:newInd,z)] = find(Stmp{z,j} == 1); 
+%     ind = newInd+1;
+% end
 % %
 % % Create missdetection hypo in index size(Z{k},2)+1
 %     if(isempty(Xpred)) % If we have no predicted targets, we cannot 

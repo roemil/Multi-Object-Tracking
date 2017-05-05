@@ -114,7 +114,7 @@ if strcmp(motionModel,'cv')
 end
 
 T = 0.1; % sampling time, 1 fps
-sigmaQ = 35;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 45;         % Process (motion) noise % 20 ok1 || 24 apr 10
 sigmaBB = 2;
 dInit = [0 20];
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
@@ -130,8 +130,8 @@ if strcmp(motionModel,'cv')
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
-        %Q = Q + 0.2*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
-        Q = Q + 0.05*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]); % 0.1 seems good! 0.15
+        Q = Q + 0.05*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
+        %Q = Q + 0.05*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]); % 0.1 seems good! 0.15
         %F(3,3) = 1.1*F(3,3);
         %F(4,4) = 1.1*F(4,4);
     elseif nbrPosStates == 6
@@ -198,7 +198,7 @@ pctWithinBoarder = 0.2;
 % Weight of the births
 weightBirth = 1;
 % Number of births
-nbrOfBirths = 180; % 600 ok1
+nbrOfBirths = 150; % 600 ok1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
