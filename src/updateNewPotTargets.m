@@ -31,7 +31,7 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, 
             XpotNew{z}.state(1:nbrPosStates) = XpotNew{z}.state(1:nbrPosStates)+w(1,i)*XmuUpd{z}(i).state(1:nbrPosStates); % (44)
             XpotNew{z}.P(1:nbrPosStates,1:nbrPosStates) = XpotNew{z}.P(1:nbrPosStates,1:nbrPosStates)+w(1,i)*XmuUpd{z}(i).P(1:nbrPosStates,1:nbrPosStates); % (44)
         end
-        XpotNew{z}.P(1:nbrPosStates,1:nbrPosStates) = XpotNew{z}.P(1:nbrPosStates,1:nbrPosStates)+20*eye(4);
+        XpotNew{z}.P(1:nbrPosStates,1:nbrPosStates) = XpotNew{z}.P(1:nbrPosStates,1:nbrPosStates)+20*eye(nbrPosStates);
         e = Pd*generateGaussianMix(Z(1:nbrMeasStates,z), ones(1,size(Xmutmp,2)), H(1:nbrMeasStates,1:nbrPosStates)*Xmutmp(1:nbrPosStates,:), Stmp);
 
         rho(z) = e+c;
