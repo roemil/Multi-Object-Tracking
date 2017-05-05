@@ -9,6 +9,8 @@ sequence = '0000';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
+global egoMotionOn
+egoMotionOn = true; 
 
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);

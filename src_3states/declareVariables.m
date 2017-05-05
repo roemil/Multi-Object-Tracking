@@ -2,6 +2,7 @@ function [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, ...
     maxKperGlobal, maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates)
 
+global egoMotionOn
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Load Detections %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,6 +71,17 @@ P2 = readCalibration(P2path,2);
 % P2 =[7.215377e+02 0.000000e+00 6.095593e+02 4.485728e+01;
 %     0.000000e+00 7.215377e+02 1.728540e+02 2.163791e-01; 
 %     0.000000e+00 0.000000e+00 1.000000e+00 2.745884e-03];
+
+if egoMotionOn
+    fid = fopen(P2path);
+      % load 3x4 projection matrix
+      C = textscan(fid,'%s %f %f %f %f %f %f %f %f %f %f %f %f');
+      for i=0:11
+        tr_imu_velo(floor(i/4)+1,mod(i,4)+1) = C{i+2}(6);
+      end
+
+      fclose(fid);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initiate cells %%%%%%%%%%%%%%%%%%%
