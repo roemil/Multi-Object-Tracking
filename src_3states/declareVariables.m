@@ -126,7 +126,7 @@ end
 global T
 T = 0.1; % sampling time, 1 fps
 global sigmaQ
-sigmaQ = 1;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 4;         % Process (motion) noise % 20 ok1 || 24 apr 10
 global sigmaBB
 sigmaBB = 2;
 dInit = [0 20];

@@ -29,6 +29,7 @@ for i = 1:size(est,2)
     l = [l, text(est(1,i), est(3,i), est(2,i), num2str(labels(1,i)),'Fontsize',18,'Color','red')];
     
     if plotConf
+        addpath('error_ellipse')
         Ptmp = zeros(3,3);
         Ptmp(1,1) = P{i}(1,1);
         Ptmp(2:3,2:3) = diag([P{i}(3,3), P{i}(2,2)]);

@@ -7,6 +7,7 @@ mode = 'GTnonlinear';
 set = 'training';
 sequence = '0000';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
+global birthSpawn
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 
 XmuUpd = cell(1,1);
@@ -118,7 +119,6 @@ end
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot estimates Img-plane
-%% Plot estimates 3D
 
 figure('units','normalized','position',[.05 .05 .9 .9]);
 subplot('position', [0.02 0 0.98 1])
@@ -148,15 +148,27 @@ while 1
 %end
 end
 
+%% Plot each 3D state
+
+plotConf = false;
+%subplot('position', [0.02 0 0.98 1])
+if strcmp(mode,'GTnonlinear')
+    plotEach3Dstate(sequence,set,Xest,Pest,plotConf);
+else
+    % Not implemented
+end
+
+
 %% Plot estimates 3D
 
+plotConf = false;
 figure('units','normalized','position',[.05 .05 .9 .9]);
 %subplot('position', [0.02 0 0.98 1])
 k = 1;
 while 1
     frameNbr = sprintf('%06d',k-1);
     if strcmp(mode,'GTnonlinear')
-        [p1, p2, l, h] = plot3DestGT(sequence,set,k,Xest{k},Pest{k},true);
+        [p1, p2, l, h] = plot3DestGT(sequence,set,k,Xest{k},Pest{k},plotConf);
     elseif ~strcmp(mode,'GTnonlinear')
         % Not implemented
     end
@@ -174,13 +186,17 @@ while 1
             delete(p1)
             delete(p2)
             delete(l)
-            delete(h)
+            if plotConf
+                delete(h)
+            end
         case 'l'
             k = k + 1;
             delete(p1)
             delete(p2)
             delete(l)
-            delete(h)
+            if plotConf
+                delete(h)
+            end
     end
     %pause(1.5)
 %end
