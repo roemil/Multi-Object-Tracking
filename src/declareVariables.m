@@ -61,7 +61,11 @@ elseif(strcmp(mode,'nonlinear'))
         end
     end
 elseif(strcmp(mode,'GT'))
-    Z = generateGT(set,sequence,datapath, nbrPosStates);
+    if(strcmp(motionModel,'ca'))
+        Z = generateGT(set,sequence,datapath, 4);
+    else
+        Z = generateGT(set,sequence,datapath, nbrPosStates);
+    end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -137,7 +141,7 @@ elseif strcmp(motionModel,'ca')
         F(4,4) = 1.5*F(4,4);
     elseif nbrPosStates == 6
         %Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
-        Q = Q + 50*diag([1 1 0 0 0 0]);
+        Q = Q + 100*diag([1.2 1.15 .3 .3 0 0])
     end
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
