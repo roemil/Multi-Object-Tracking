@@ -6,7 +6,7 @@
 %clear
 % groundtruth and results are examples. Ricreate these two structures if
 % you wanto to use it in your own multi-target tracker.
-
+clear gt, clear result
 generateData
 
 VOCscore = 0.5;
