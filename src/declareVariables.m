@@ -120,7 +120,7 @@ elseif strcmp(motionModel,'cvBB')
 end
 
 T = 0.1; % sampling time, 1 fps
-sigmaQ = 45;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 35;         % Process (motion) noise % 20 ok1 || 24 apr 10
 sigmaBB = 2;
 dInit = [0 20];
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);

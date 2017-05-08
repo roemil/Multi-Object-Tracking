@@ -24,20 +24,20 @@ for i = 1 : size(Xest,2)
 end
 
 % THIS IS FOR CA
-% for i = 1 : size(Xest,2)
-%     for j = 1 : size(Xest{i},2)
-%         result(i).trackerData.idxTracks(j) = Xest{i}{j}(end);%
-%         result(i).trackerData.target(j).bbox = [Xest{i}{j}(1)-Xest{i}{j}(7)*0.5 Xest{i}{j}(2)-Xest{i}{j}(8)*0.5 Xest{i}{j}(7:8)'];%[camera2pixelcoords(Xest{i}{j}(1:3),P)', Xest{i}{j}(7:8)'];
-%     end
-% end
-      
-% THIS IS FOR CVBB
 for i = 1 : size(Xest,2)
     for j = 1 : size(Xest{i},2)
         result(i).trackerData.idxTracks(j) = Xest{i}{j}(end);%
-        result(i).trackerData.target(j).bbox = [Xest{i}{j}(1)-Xest{i}{j}(5)*0.5 Xest{i}{j}(2)-Xest{i}{j}(6)*0.5 Xest{i}{j}(5:6)'];%[camera2pixelcoords(Xest{i}{j}(1:3),P)', Xest{i}{j}(7:8)'];
+        result(i).trackerData.target(j).bbox = [Xest{i}{j}(1)-Xest{i}{j}(7)*0.5 Xest{i}{j}(2)-Xest{i}{j}(8)*0.5 Xest{i}{j}(7:8)'];%[camera2pixelcoords(Xest{i}{j}(1:3),P)', Xest{i}{j}(7:8)'];
     end
 end
+      
+% THIS IS FOR CVBB
+% for i = 1 : size(Xest,2)
+%     for j = 1 : size(Xest{i},2)
+%         result(i).trackerData.idxTracks(j) = Xest{i}{j}(end);%
+%         result(i).trackerData.target(j).bbox = [Xest{i}{j}(1)-Xest{i}{j}(5)*0.5 Xest{i}{j}(2)-Xest{i}{j}(6)*0.5 Xest{i}{j}(5:6)'];%[camera2pixelcoords(Xest{i}{j}(1:3),P)', Xest{i}{j}(7:8)'];
+%     end
+% end
 
 %Generate tracking data
 % 
