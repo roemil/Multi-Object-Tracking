@@ -9,7 +9,7 @@ set = 'training';
 sequence = '0000';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
-
+addpath('mtimesx');
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
 
@@ -20,7 +20,7 @@ nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 
 Xupd = cell(1);
 
-K = min(120,size(Z,2)); % Length of sequence
+K = min(150,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -151,7 +151,7 @@ end
 
 %% Plot confidence
 
-type = 'est';
+type = 'pred';
 j = 1;
 figure('units','normalized','position',[.05 .05 .9 .9]);
 subplot('position', [0.02 0 0.98 1])

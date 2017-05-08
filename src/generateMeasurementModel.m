@@ -12,6 +12,13 @@ if strcmp(mode,'linear')
         elseif nbrStates == 6
             H = kron([1 0],eye(3));
         end
+    elseif(strcmp(motionModel, 'ca'))
+        if nbrStates == 4
+            % Measure position
+            H = kron([1 0],eye(2));
+        elseif nbrStates == 6
+            H = kron([1 0 0],eye(2));
+        end        
     elseif strcmp(motionModel, 'cvBB')
         if nbrStates == 4
             % Measure position

@@ -63,7 +63,7 @@ end
     Z, c, newLabel, motionModel,nbrPosStates,nbrStates,nbrMeasStates);
 
 %%%% Update for previously potentially detected targets %%%%
-Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates);    
+[Xhypo, S] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates);    
 
 oldInd = 0;
 m = size(Z,2);
@@ -71,35 +71,35 @@ Wnew = diag(rho);
 nbrTargetInd = 1;
 nbrVec = 0;
 for j = 1:max(1,nbrOfGlobHyp)
-    clear Amat; clear S;
-    %disp(['Error: ', num2str(1)])
-    %findA(j) = tic;
-    if ~isempty(Xhypo{j})
-        nbrOldTargets = size(Xhypo{j,1},2);
-        if sum(nbrOldTargets == nbrVec) > 0
-           tInd = find(nbrOldTargets == nbrVec);
-           Amat = Atot{tInd};
-           for i = 1:size(Stot,2)
-               if isempty(Stot{tInd,i})
-                   break
-               end
-               S(:,:,i) = Stot{tInd,i};
-           end
-        else
-           [S, Amat] = generateGlobalIndv2(m, nbrOldTargets); %TODO: THIS IS CURRENTLY THE BEST ONE
-           Atot{nbrTargetInd} = Amat;
-           for i = 1:size(S,3)
-               Stot{nbrTargetInd,i} = S(:,:,i);
-           end
-           nbrVec(nbrTargetInd) = nbrOldTargets;
-           nbrTargetInd = nbrTargetInd+1;
-        end
-    else
-        nbrOldTargets = 0;
-        Amat = 1:m;
-        S = zeros(m,m,1);
-        S(:,:,1) = eye(m);
-    end
+%     clear Amat; clear S;
+%     %disp(['Error: ', num2str(1)])
+%     %findA(j) = tic;
+%     if ~isempty(Xhypo{j})
+%         nbrOldTargets = size(Xhypo{j,1},2);
+%         if sum(nbrOldTargets == nbrVec) > 0
+%            tInd = find(nbrOldTargets == nbrVec);
+%            Amat = Atot{tInd};
+%            for i = 1:size(Stot,2)
+%                if isempty(Stot{tInd,i})
+%                    break
+%                end
+%                S(:,:,i) = Stot{tInd,i};
+%            end
+%         else
+%            [S, Amat] = generateGlobalIndv2(m, nbrOldTargets); %TODO: THIS IS CURRENTLY THE BEST ONE
+%            Atot{nbrTargetInd} = Amat;
+%            for i = 1:size(S,3)
+%                Stot{nbrTargetInd,i} = S(:,:,i);
+%            end
+%            nbrVec(nbrTargetInd) = nbrOldTargets;
+%            nbrTargetInd = nbrTargetInd+1;
+%         end
+%     else
+%         nbrOldTargets = 0;
+%         Amat = 1:m;
+%         S = zeros(m,m,1);
+%         S(:,:,1) = eye(m);
+%     end
     %disp(['Error: ', num2str(2)])
     % Display nbr old targets and measurements 
     %disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
@@ -108,12 +108,13 @@ for j = 1:max(1,nbrOfGlobHyp)
     %timeA(j) = toc(findA(j));
     %%%%% MURTY %%%%%%
     %startMurt(j) = tic;
-    ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, H, j, maxKperGlobal);
+    ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S(:,:,:,j), Pd, H, j, maxKperGlobal);
     %murtTime(j) = toc(startMurt(j));
     %%%%% Find new global hypotheses %%%%%
     %startGlob(j) = tic;
     %disp(['Error: ', num2str(3)])
-    [newGlob, newInd] = generateGlobalHypo5(Xhypo(j,:), XpotNew(:), Z, oldInd, Amat, ass, nbrOldTargets);
+    nbrOldTargets = size(Xhypo{j,1},2);
+    [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S(:,:,:,j), ass, nbrOldTargets);
     %globTime(j) = toc(startGlob(j));
     %disp(['Error: ', num2str(4)])
     for jnew = oldInd+1:newInd
@@ -158,6 +159,7 @@ minTmp = min(size(wGlob,2), Nh);
 %end
 %disp(['Error: ', num2str(8)])
 % Remove bernoulli components with low probability of existence
+Xupd = cell(1);
 jInd = 1;
 if sum(keepGlobs ~= 0) ~= 0
     keepGlobs = keepGlobs(keepGlobs ~= 0);
@@ -194,9 +196,9 @@ else % TODO: Do we wanna do this?!
                 if Xtmp{j}(i).r > threshold
                     Xupd{jInd}(iInd) = Xtmp{j}(i);
                     Xupd{jInd}(iInd).w = weights(iInd);
-                    if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
-                        Xupd{jInd}(iInd).P = 3*Xupd{jInd}(iInd).P+diag([30 10 0 0 0 0]);
-                    end
+%                     if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
+%                         Xupd{jInd}(iInd).P = 3*Xupd{jInd}(iInd).P+diag([30 10 0 0 0 0]);
+%                     end
                     iInd = iInd+1;
                 end
             end
@@ -205,13 +207,13 @@ else % TODO: Do we wanna do this?!
     end
 end
 
-if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
-    for i = 1:size(Pest,2)
-        if ~isempty(Pest{i})
-            Pest{i} = 3*Pest{i}+diag([30 10 0 0 0 0]);
-        end
-    end
-end
+% if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
+%     for i = 1:size(Pest,2)
+%         if ~isempty(Pest{i})
+%             Pest{i} = 3*Pest{i}+diag([30 10 0 0 0 0]);
+%         end
+%     end
+% end
 
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight
