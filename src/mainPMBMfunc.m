@@ -2,6 +2,7 @@ clear Xest
 clear Pest
 close all
 dbstop error
+addpath('mtimesx')
 clc
 mode = 'GT';
 set = 'training';

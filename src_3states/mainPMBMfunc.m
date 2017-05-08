@@ -2,6 +2,8 @@ clear Xest
 clear Pest
 close all
 dbstop error
+addpath('IMU')
+addpath('mtimesx')
 clc
 mode = 'GTnonlinear';
 set = 'training';
@@ -38,6 +40,10 @@ for t = 1:nbrSim
     disp('-------------------------------------')
     
     disp(['--------------- k = ', num2str(1), ' ---------------'])
+    global k
+    k = 1;
+    [a, MSGID] = lastwarn();
+    warning('off', MSGID)
     tic
     %Z = measGenerateCase2(X, R, FOVsize, K);
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
@@ -56,7 +62,7 @@ for t = 1:nbrSim
         pause(0.1)
         %keyboard
     end
-
+    
     % Only keep births
     tmp = XuUpd;
     clear XuUpd;
@@ -157,7 +163,6 @@ if strcmp(mode,'GTnonlinear')
 else
     % Not implemented
 end
-
 
 %% Plot estimates 3D
 

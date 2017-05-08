@@ -1,7 +1,8 @@
 function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, ...
     Z, newLabel,motionModel, nbrPosStates)
 global Pd, global H3dFunc, global Hdistance, global R3dTo2d, global Rdistance, global Jh
-global c, global nbrStates, global nbrMeasStates, global H, global R
+global c, global nbrStates, global nbrMeasStates, global H, global R,
+global pose, global k
 
     rho = zeros(nbrOfMeas,1);
     
@@ -37,17 +38,17 @@ global c, global nbrStates, global nbrMeasStates, global H, global R
             
             % Current, do update on pix center and distance simultaneously
             [XmuUpd{z}(i).state, XmuUpd{z}(i).P, XmuUpd{z}(i).S]...
-                 = CKFupdate(XmuPred(i).state, XmuPred(i).P, H, Z(1:3,z), R, 8);
+                 = CKFupdate(XmuPred(i).state, XmuPred(i).P, H, Z(1:3,z), R, 6);
             
             % FOR CHECK
             %[distanceToMeas(XmuPred(i).state,Z(1:2,z),'0000','training',1);tmp; tmp2; distanceToMeas(XmuUpd{z}(i).state,Z(1:2,z),'0000','training',1)]
             % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
             % Compute weight
             
-            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state), XmuUpd{z}(i).S);
+            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state,pose{k}(1:3,4)), XmuUpd{z}(i).S);
             
             % TODO: temp solution
-            Xmutmp(1:3,i) = H(XmuPred(i).state);%[H3dFunc(XmuPred(i).state); Hdistance(XmuPred(i).state)];
+            Xmutmp(1:3,i) = H(XmuPred(i).state,pose{k}(1:3,4));%[H3dFunc(XmuPred(i).state); Hdistance(XmuPred(i).state)];
             Stmp{i} = XmuUpd{z}(i).S;
             
             % --alt 2--

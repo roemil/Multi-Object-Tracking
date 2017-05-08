@@ -2,7 +2,8 @@ function XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode,k)
 global nbrOfBirths, global FOV, global boarder, global pctWithinBoarder
 global covBirth, global vinit, global weightBirth, global birthSpawn,
 global pose, global egoMotionOn, global RcamToVelo, global TcamToVelo,
-global R20, global T20, global RveloToImu, global TimuToVelo
+global R20, global T20, global RveloToImu, global TimuToVelo, global k,
+global RimuToVelo
 
 if strcmp(birthSpawn, 'boarders')
     if nbrPosStates == 4
@@ -164,10 +165,8 @@ elseif strcmp(birthSpawn, 'uniform')
             %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
             if egoMotionOn
                 % Local cam2 -> local cam0 -> local velo -> global velo
-                XmuPred(end).state(1:3) = local2global(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
-                    +TcamToVelo,RveloToImu,TimuToVelo,pose{k}(1:3,4));
-                XmuPred(end).state(1:3) = local2global(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
-                    +TcamToVelo,RveloToImu,TimuToVelo,pose{k}(1:3,4));
+                XmuPred(end).state(1:3) = (RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
+                    +TcamToVelo) + RimuToVelo*pose{k}(1:3,4)+TimuToVelo;
             end
         end
         for i = nbrOfBirths/5+1:nbrOfBirths
@@ -182,10 +181,8 @@ elseif strcmp(birthSpawn, 'uniform')
             %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
             if egoMotionOn
                 % Local cam2 -> local cam0 -> local velo -> global velo
-                XmuPred(end).state(1:3) = local2global(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
-                    +TcamToVelo,RveloToImu,TimuToVelo,pose{k}(1:3,4));
-                XmuPred(end).state(1:3) = local2global(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
-                    +TcamToVelo,RveloToImu,TimuToVelo,pose{k}(1:3,4));
+                XmuPred(end).state(1:3) = (RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
+                    +TcamToVelo) + RimuToVelo*pose{k}(1:3,4)+TimuToVelo;
             end
         end
      end

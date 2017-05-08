@@ -259,8 +259,10 @@ elseif (strcmp(mode,'GTnonlinear'))
         Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
         
         % global velo -> local velo -> local cam0 -> local cam2
-        H = @(x) Hcam([R02*(RveloToCam*global2local(x(1:3,:),RimuToVelo,TimuToVelo)+TveloToCam)+T02;...
+        H = @(x,egoPos) Hcam([R02*(RveloToCam*(x(1:3,:) - (RimuToVelo*egoPos+TimuToVelo))+TveloToCam) + T02;
             -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
+        %H = @(x) Hcam([R02*(RveloToCam*global2local(x(1:3,:),RimuToVelo,TimuToVelo)+TveloToCam)+T02;...
+        %    -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
         R = @(x) Rcam(x);
     else
         H = @(x) [H3dFunc(x); Hdistance(x)];
@@ -321,7 +323,7 @@ if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
     if ~egoMotionOn
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
-        covBirth = diag([1 1 0.5 2 2 1 20 20]); %0.5
+        covBirth = 0.1*diag([1 1 0.5 2 2 1 20 20]); %0.5
     end
 else
     covBirth = 20; % 20 ok1
@@ -413,10 +415,10 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
         if egoMotionOn
             % Local cam2 -> local cam0 -> local velo -> global velo
-            XmuUpd{1}(i).state(1:3) = local2global(RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo,RveloToImu,TimuToVelo,zeros(3,1));
-            XuUpd{1}(i).state(1:3) = local2global(RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo,RveloToImu,TimuToVelo,zeros(3,1));
+            XmuUpd{1}(i).state(1:3) = (RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo) + RimuToVelo*pose{1}(1:3,4)+TimuToVelo;
+            XuUpd{1}(i).state(1:3) = (RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo) + RimuToVelo*pose{1}(1:3,4)+TimuToVelo;
         end
     end
     for i = nbrInitBirth/5+1:nbrInitBirth
@@ -441,10 +443,10 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
         if egoMotionOn
             % Local cam2 -> local cam0 -> local velo -> global velo
-            XmuUpd{1}(i).state(1:3) = local2global(RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo,RveloToImu,TimuToVelo,zeros(3,1));
-            XuUpd{1}(i).state(1:3) = local2global(RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo,RveloToImu,TimuToVelo,zeros(3,1));
+            XmuUpd{1}(i).state(1:3) = (RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo) + RimuToVelo*pose{1}(1:3,4)+TimuToVelo;
+            XuUpd{1}(i).state(1:3) = (RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo) + RimuToVelo*pose{1}(1:3,4)+TimuToVelo;
         end
     end
 end

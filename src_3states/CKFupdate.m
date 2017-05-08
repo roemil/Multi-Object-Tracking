@@ -16,6 +16,7 @@
 %%
 
 function [X,P,S] = CKFupdate(Xpred, Ppred, H, Z, R, n)
+global pose, global k
 
 if isa(R,'function_handle')
     R = R(Z(3));
@@ -29,7 +30,7 @@ for i = 1:n
     Xtmp(:,i) = Xpred+sqrt(n)*Psqrt(:,i);
     Xtmp(:,i+n) = Xpred-sqrt(n)*Psqrt(:,i);
 end
-hX = H(Xtmp);
+hX = H(Xtmp,pose{k}(1:3,4));
 yhatpred = repmat(Wi*sum(hX,2),1,2*n);
 Pxy = Wi*(Xtmp-repmat(Xpred,1,2*n))*(hX-yhatpred)';
 S = Wi*(hX-yhatpred)*(hX-yhatpred)'+R;

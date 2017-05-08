@@ -3,6 +3,9 @@ global FOVsize
 global H3dFunc
 global H3dTo2d
 global H
+global egoMotionOn
+global k
+global pose
 
 datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
 filename = [datapath,'.txt'];
@@ -32,7 +35,11 @@ end
 
 if ~isempty(X{1})
     for i = 1:size(X,2)
-        tmp = H(X{i}(1:end-1));
+        if egoMotionOn
+            tmp = H(X{i}(1:end-1),pose{k}(1:3,4));
+        else
+            tmp = H(X{i}(1:end-1));
+        end
         box = [tmp(1)-X{i}(end-2)/2, tmp(2)-X{i}(end-1)/2, X{i}(end-2), X{i}(end-1)];
         rectangle('Position',box,'EdgeColor','r','LineWidth',1,'LineStyle','--')
         text(box(1), box(2), num2str(X{i}(end)),'Fontsize',18,'Color','red')

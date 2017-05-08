@@ -1,7 +1,8 @@
 function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
     motionModel, nbrPosStates)
  global Pd, global R, global nbrMeasStates, global H3dTo2d, global H3dFunc, ...
-     global Hdistance, global R3dTo2d, global Rdistance, global H, global R,
+ global Hdistance, global R3dTo2d, global Rdistance, global H, global R,
+ global pose, global k
 
 % Create missdetection hypo in index size(Z{k},2)+1
     if(isempty(Xpred)) % If we have no predicted targets, we cannot 
@@ -35,7 +36,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
                     % Bounding box center
                     %[Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd3dTo2d(Xpred{j}(i).state, H3dTo2d, Xpred{j}(i).P, R3dTo2d(1:2,1:2), Z(1:2,z));
                     [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates)]...
-                        = CKFupdate(Xpred{j}(i).state,Xpred{j}(i).P, H, Z(1:nbrMeasStates,z), R, 8);
+                        = CKFupdate(Xpred{j}(i).state,Xpred{j}(i).P, H, Z(1:nbrMeasStates,z), R, 6);
                     
                     % Bound box size
                     [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(nbrMeasStates+1:5,nbrMeasStates+1:5)] = ...
@@ -46,7 +47,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
                     %    = CKFupdate(Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Hdistance, Rd, Z(3,z), 8);
                     
                     Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + ...
-                        log_mvnpdf(Z(1:nbrMeasStates,z), H(Xpred{j}(i).state), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
+                        log_mvnpdf(Z(1:nbrMeasStates,z), H(Xpred{j}(i).state,pose{k}(1:3,4)), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
                     
                     Xhypo{j,z}(i).box = Xhypo{j,z}(i).state(nbrPosStates+1:nbrPosStates+2);
                 end
