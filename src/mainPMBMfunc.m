@@ -144,6 +144,10 @@ while 1
             k = k - 1;
         case 'l'
             k = k + 1;
+        case 'o'
+            k = k + 10;
+        case 'q'
+            k = k - 10;
     end
     %pause(1.5)
 %end

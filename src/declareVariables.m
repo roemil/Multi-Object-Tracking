@@ -106,13 +106,13 @@ if strcmp(motionModel,'cv')
 elseif strcmp(motionModel,'ca')
         nbrStates = 6; % Total number of states
         nbrMeasStates = 2;
-    elseif strcmp(motionModel,'cvBB')
-        nbrStates = 6;
-        if nbrPosStates == 4
-            nbrMeasStates = 2; % Number of measurements used for weighting
-        elseif nbrPosStates == 6
-            nbrMeasStates = 3;
-        end
+elseif strcmp(motionModel,'cvBB')
+    nbrStates = 6;
+    if nbrPosStates == 4
+        nbrMeasStates = 2; % Number of measurements used for weighting
+    elseif nbrPosStates == 6
+        nbrMeasStates = 3;
+    end
 end
 
 T = 0.1; % sampling time, 1 fps
@@ -142,7 +142,7 @@ elseif strcmp(motionModel,'ca')
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
-        Q = Q + 0.05*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
+        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
         %Q = Q + 0.05*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]); % 0.1 seems good! 0.15
         %F(3,3) = 1.1*F(3,3);
         %F(4,4) = 1.1*F(4,4);
