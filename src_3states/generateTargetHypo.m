@@ -55,11 +55,11 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
                 %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H*Xhypo{j,z}(i).state, Xhypo{j,z}(i).S)]
                 %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S)]
                 %Xpred{j}(i).label
-%                 [Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:3,z), H(Xpred{j}(i).state), Xhypo{j,z}(i).S(1:3,1:3))]
-%                 [Z(1:3,z), H(Xpred{j}(i).state), abs(Z(1:3,z)-H(Xpred{j}(i).state))]
-%                 [Z(1:3,z), H(Xhypo{j,z}(i).state), abs(Z(1:3,z)-H(Xhypo{j,z}(i).state))]
-%                  tmp = H(Xpred{j}(i).state);
-%                  tmp2 = H(Xhypo{j,z}(i).state);
+%                 [Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:3,z), H(Xpred{j}(i).state,pose{k}(1:3,4)), Xhypo{j,z}(i).S(1:3,1:3))]
+%                 [Z(1:3,z), H(Xpred{j}(i).state,pose{k}(1:3,4)), abs(Z(1:3,z)-H(Xpred{j}(i).state,pose{k}(1:3,4)))]
+%                 [Z(1:3,z), H(Xhypo{j,z}(i).state,pose{k}(1:3,4)), abs(Z(1:3,z)-H(Xhypo{j,z}(i).state,pose{k}(1:3,4)))]
+%                  tmp = H(Xpred{j}(i).state,pose{k}(1:3,4));
+%                  tmp2 = H(Xhypo{j,z}(i).state,pose{k}(1:3,4));
 %                  figure;
 %                  plot(Z(1,z),Z(2,z),'+r','markersize',10)
 %                  hold on 
@@ -72,12 +72,13 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
 %                 plot(x(1,:),x(2,:),'-k','LineWidth',2)
 %                 x = repmat(tmp2(1:2),1,n)+sqrtm(Xhypo{j,z}(i).S(1:2,1:2))*[cos(phi);sin(phi)];
 %                 plot(x(1,:),x(2,:),'-c','LineWidth',2)
-%                  legend('Z','Pred','Upd','3\sigma','\sigma')
+%                 legend('Z','Pred','Upd','3\sigma','\sigma')
+%                 title(['z = ', num2str(z), ' i = ', num2str(i), ' j = ', num2str(j)])
+%                 waitforbuttonpress
 %                  estGTdiff('0000','training',2,Xpred{j}(i).state,true,true);
 %                  estGTdiff('0000','training',2,Xhypo{j,z}(i).state,true,true);
 %                  distanceToMeas(Xpred{j}(i).state,Z(1:2,z),'0000','training',2)
 %                  distanceToMeas(Xhypo{j,z}(i).state,Z(1:2,z),'0000','training',2)
-%                  waitforbuttonpress
                 Xhypo{j,z}(i).r = 1;
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
                 Xhypo{j,z}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss+1; % TAGass

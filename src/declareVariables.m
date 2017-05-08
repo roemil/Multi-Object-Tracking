@@ -142,7 +142,7 @@ elseif strcmp(motionModel,'ca')
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
-        Q = Q + 0.05*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
+        Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]);
         %Q = Q + 0.05*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]); % 0.1 seems good! 0.15
         %F(3,3) = 1.1*F(3,3);
         %F(4,4) = 1.1*F(4,4);
@@ -187,7 +187,7 @@ c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Threshold existence probability keep for next iteration
-threshold = 1e-2;    % 0.01 ok1
+threshold = 1e-3;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration

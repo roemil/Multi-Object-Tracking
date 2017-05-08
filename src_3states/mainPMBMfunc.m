@@ -78,7 +78,7 @@ for t = 1:nbrSim
         else
             disp('No measurement')
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMpredFunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k);
+                PMBMpredFunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
         end
         disp(['Iteration time: ', num2str(toc)])
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
@@ -112,9 +112,9 @@ subplot('position', [0.02 0 0.98 1])
 for k = 1:size(Xest,2)
     frameNbr = sprintf('%06d',k-1);
     if ~strcmp(mode,'GT')
-        plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
+        plotImgEstGT(sequence,set,k,Xest{k});
     else
-        plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize, Z{k},nbrPosStates)
+        plotImgEstGT(sequence,set,k,Xest{k});
     end
     title(['k = ', num2str(k)])
     waitforbuttonpress

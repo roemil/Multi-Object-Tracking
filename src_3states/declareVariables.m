@@ -75,8 +75,8 @@ P2 = readCalibration(P2path,2);
 if egoMotionOn
     base_dir = strcat('../../kittiTracking/data_tracking_oxts/',set);
     filenameIMU = [base_dir,sequence,'.txt'];
-
-    oxts = loadOxtsliteData(base_dir,1:1);
+    seq = str2num(sequence)+1;
+    oxts = loadOxtsliteData(base_dir,seq:seq);
     global pose
     pose = egoPosition(oxts);
     
@@ -98,8 +98,8 @@ if egoMotionOn
     % TODO: use \ instead? R\1'??
     global RveloToImu
     RveloToImu = inv(RimuToVelo);
-    %global TveloToImu
-    %TveloToImu = -TimuToVelo;
+    global TveloToImu
+    TveloToImu = -TimuToVelo;
     
     global RveloToCam
     RveloToCam = [6.927964e-03 -9.999722e-01 -2.757829e-03;
@@ -181,7 +181,7 @@ end
 global T
 T = 0.1; % sampling time, 1 fps
 global sigmaQ
-sigmaQ = 8;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 15;         % Process (motion) noise % 20 ok1 || 24 apr 10
 global sigmaBB
 sigmaBB = 2;
 dInit = [0 20];
@@ -205,7 +205,7 @@ elseif strcmp(motionModel, 'cvBB')
         %F(3,3) = 1.1*F(3,3);
         %F(4,4) = 1.1*F(4,4);
     elseif nbrPosStates == 6
-        %Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0 0 0]);
+        %Q = Q + diag([0.3, 0.3, 0.5 0 0 0 0 0]);
     end
 end
 
@@ -258,12 +258,21 @@ elseif (strcmp(mode,'GTnonlinear'))
         Hcam = @(x) [H3dFunc(x); Hdistance(x)];
         Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
         
-        % global velo -> local velo -> local cam0 -> local cam2
-        H = @(x,egoPos) Hcam([R02*(RveloToCam*(x(1:3,:) - (RimuToVelo*egoPos+TimuToVelo))+TveloToCam) + T02;
+        % global IMU -> local IMU -> local velo -> local cam0 -> local cam2
+        H = @(x,egoPos) Hcam([R02*(RveloToCam*(RimuToVelo*(x(1:3,:) - egoPos)+TimuToVelo)+TveloToCam) + T02;
             -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
-        %H = @(x) Hcam([R02*(RveloToCam*global2local(x(1:3,:),RimuToVelo,TimuToVelo)+TveloToCam)+T02;...
-        %    -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
         R = @(x) Rcam(x);
+        
+        % ALT!!
+%         fid = fopen(P2_path);
+%       % load 3x4 projection matrix
+%         C = textscan(fid,'%s %f %f %f %f %f %f %f %f %f %f %f %f',4);
+%         P2rect = zeros(3,3);
+%         for i=0:11
+%             P2rect(floor(i/4)+1,mod(i,4)+1) = C{i+2}(5);
+%         end
+        %P2rect(4,:) = [0 0 1];
+        %H = @(x,egoPos) 
     else
         H = @(x) [H3dFunc(x); Hdistance(x)];
         R = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
@@ -317,13 +326,13 @@ nbrOfBirths = 250; % 600 ok1
 
 global vinit
 vinit = 0;
-nbrInitBirth = 1000; % 600 ok1
+nbrInitBirth = 3000; % 600 ok1
 global covBirth
 if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
     if ~egoMotionOn
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
-        covBirth = 0.1*diag([1 1 0.5 2 2 1 20 20]); %0.5
+        covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
     end
 else
     covBirth = 20; % 20 ok1
@@ -340,7 +349,16 @@ global FOV
 %     45 3 150];
 
 FOV = [-45 -2 0;
-    45 2.6 20];
+    45 2.6 150];
+%FOV = [-45 -2 0;
+%    45 2.6 20];
+
+global maxX
+maxX = 50;
+global maxY
+maxY = 3.5;
+global Zinter
+Zinter = 16;
                 
 XmuUpd = cell(1);
 XuUpd = cell(1);
@@ -394,9 +412,9 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
 %         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
 %     end
     for i = 1:nbrInitBirth/5
-        Zrnd = unifrnd(FOV(1,3), 8); % TODO: True angle of view?
-        Xrange = Zrnd*tand(43); % 45? 40.6
-        Yrange = Zrnd*tand(16); % 13
+        Zrnd = unifrnd(FOV(1,3), Zinter); % TODO: True angle of view?
+        Xrange = min(maxX, Zrnd*tand(43)); % 45? 40.6
+        Yrange = min(maxY, Zrnd*tand(16)); % 13
         XmuUpd{1}(i).w = wInit;    % Pred weight
         XmuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
             unifrnd(-Yrange, Yrange), Zrnd, ...
@@ -404,9 +422,9 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         XmuUpd{1}(i).P = covBirth*eye(8);      % Pred cov
         %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
 
-        Zrnd = unifrnd(FOV(1,3), FOV(2,3));
-        Xrange = Zrnd*tand(43);
-        Yrange = Zrnd*tand(16);
+        Zrnd = unifrnd(FOV(1,3), Zinter);
+        Xrange = min(maxX, Zrnd*tand(43));
+        Yrange = min(maxY, Zrnd*tand(16));
         XuUpd{1}(i).w = wInit;    % Pred weight
         XuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
             unifrnd(-Yrange, Yrange), Zrnd, ...
@@ -415,16 +433,16 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
         if egoMotionOn
             % Local cam2 -> local cam0 -> local velo -> global velo
-            XmuUpd{1}(i).state(1:3) = (RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo) + RimuToVelo*pose{1}(1:3,4)+TimuToVelo;
-            XuUpd{1}(i).state(1:3) = (RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo) + RimuToVelo*pose{1}(1:3,4)+TimuToVelo;
+            XmuUpd{1}(i).state(1:3) = RveloToImu*(RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo)+TveloToImu + pose{1}(1:3,4);
+            XuUpd{1}(i).state(1:3) = RveloToImu*(RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo)+TveloToImu + pose{1}(1:3,4);
         end
     end
     for i = nbrInitBirth/5+1:nbrInitBirth
-        Zrnd = unifrnd(8, FOV(2,3)); % TODO: True angle of view?
-        Xrange = Zrnd*tand(43); % 45? 40.6
-        Yrange = Zrnd*tand(16); % 13
+        Zrnd = unifrnd(Zinter, FOV(2,3)); % TODO: True angle of view?
+        Xrange = min(maxX, Zrnd*tand(43)); % 45? 40.6
+        Yrange = min(maxY, Zrnd*tand(16)); % 13
         XmuUpd{1}(i).w = wInit;    % Pred weight
         XmuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
             unifrnd(-Yrange, Yrange), Zrnd, ...
@@ -432,9 +450,9 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         XmuUpd{1}(i).P = covBirth;%*eye(8);      % Pred cov
         %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
 
-        Zrnd = unifrnd(FOV(1,3), FOV(2,3));
-        Xrange = Zrnd*tand(43);
-        Yrange = Zrnd*tand(16);
+        Zrnd = unifrnd(Zinter, FOV(2,3));
+        Xrange = min(maxX, Zrnd*tand(43));
+        Yrange = min(maxY, Zrnd*tand(16));
         XuUpd{1}(i).w = wInit;    % Pred weight
         XuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
             unifrnd(-Yrange, Yrange), Zrnd, ...
@@ -443,10 +461,10 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
         if egoMotionOn
             % Local cam2 -> local cam0 -> local velo -> global velo
-            XmuUpd{1}(i).state(1:3) = (RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo) + RimuToVelo*pose{1}(1:3,4)+TimuToVelo;
-            XuUpd{1}(i).state(1:3) = (RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo) + RimuToVelo*pose{1}(1:3,4)+TimuToVelo;
+            XmuUpd{1}(i).state(1:3) = RveloToImu*(RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo)+TveloToImu + pose{1}(1:3,4);
+            XuUpd{1}(i).state(1:3) = RveloToImu*(RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
+                +TcamToVelo)+TveloToImu + pose{1}(1:3,4);
         end
     end
 end

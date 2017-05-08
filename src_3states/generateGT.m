@@ -37,7 +37,7 @@ xInd = 14;
 yInd = 15;
 zInd = 16;
 %ryInd = 17;
-bbsize = [GT{9}(3) - GT{7}(3),GT{10}(3)-GT{8}(3)];
+%bbsize = [GT{9}(3) - GT{7}(3),GT{10}(3)-GT{8}(3)];
 
 if(nbrOfStates == 4)
 
@@ -80,6 +80,7 @@ elseif(nbrOfStates == 6)
     cx(1) = mean([GT{7}(ind),GT{9}(ind)]);
     cy(1) = mean([GT{8}(ind),GT{10}(ind)]);
     pxCoords = [cx,cy];
+    bbsize = [GT{9}(ind) - GT{7}(ind),GT{10}(ind)-GT{8}(ind)];
     % This is [px py, z]??
     % ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);GT{zInd}(3);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
     % This is [px py d]

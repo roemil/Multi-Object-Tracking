@@ -1,4 +1,4 @@
-function run_demoVehiclePath (base_dir)
+function run_demoVehiclePath (base_dir,frames)
 % KITTI RAW DATA DEVELOPMENT KIT
 % 
 % Plots OXTS poses of a sequence
@@ -16,10 +16,15 @@ if nargin<1
 end
 
 % load oxts data
-oxts = loadOxtsliteData(base_dir,1:1);
+% oxts = loadOxtsliteData(base_dir,1:1);
+oxts = loadOxtsliteData(base_dir,frames);
 
 % transform to poses
 pose = convertOxtsToPose(oxts);
+
+% TEST
+global RimuToVelo, global TimuToVelo
+Ti = [inv(RimuToVelo), TimuToVelo; 0 0 0 1];
 
 % plot every 10'th pose
 figure; hold on; axis equal;
@@ -31,6 +36,9 @@ for i=1:10:length(pose)
   plot3(B(1,3:4),B(2,3:4),B(3,3:4),'-g','LineWidth',2); % y: green
   plot3(B(1,5:6),B(2,5:6),B(3,5:6),'-b','LineWidth',2); % z: blue
   norm(B(2,3:4))
+  % TEST
+  tmp = Ti*pose{i}(:,4);
+  plot3(tmp(1),tmp(2),tmp(3),'r*')
 end
 xlabel('x');
 ylabel('y');
