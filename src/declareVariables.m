@@ -135,14 +135,8 @@ if strcmp(motionModel,'cv')
     end
 elseif strcmp(motionModel,'ca')
     %Q = Q + 25*diag([1.2 1 0 0]); % 10
-    if nbrPosStates == 4
-        Q = Q + 0.15*diag([FOVsize(2,1), 1.2*FOVsize(2,2), 0 0]);
-        F(3,3) = 1.5*F(3,3);
-        F(4,4) = 1.5*F(4,4);
-    elseif nbrPosStates == 6
         %Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
-        Q = Q + 100*diag([1.1 1.15 .2 .2 0 0])
-    end
+    Q = Q + 100*diag([1.1 1.15 .2 .2 0 0])
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
@@ -216,7 +210,7 @@ pctWithinBoarder = 0.2;
 % Weight of the births
 weightBirth = 1;
 % Number of births
-nbrOfBirths = 150; % 600 ok1
+nbrOfBirths = 200; % 600 ok1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
