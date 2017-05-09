@@ -3,12 +3,14 @@ clear Pest
 close all
 dbstop error
 addpath('mtimesx')
+addpath('evalMOT')
+addpath('../../kittiTracking')
 clc
 
 mode = 'GT';
 set = 'training';
 sequence = '0000';
-motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
+motionModel = 'ca'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 addpath('mtimesx');
 addpath('evalMOT');

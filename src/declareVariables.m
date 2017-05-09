@@ -155,6 +155,8 @@ end
 
 if ((strcmp(motionModel,'cv')) && (nbrPosStates == 4))
     R = 0.1*eye(2);
+elseif((strcmp(motionModel,'ca')) && (nbrPosStates == 4))
+    R = 0.1*eye(2);
 elseif((strcmp(motionModel,'ca')) && (nbrPosStates == 6))
     R = 0.1*eye(2);
 elseif ((strcmp(motionModel,'cvBB')) && (nbrPosStates == 4))
