@@ -113,6 +113,14 @@ elseif strcmp(birthSpawn, 'uniform')
                     unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit) 0 0]';
                 XmuPred(end).P = covBirth*eye(6);
             end
+        elseif strcmp(motionModel, 'ca')
+            for i = 1:nbrOfBirths
+                XmuPred(end+1).w = weightBirth;
+                XmuPred(end).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...
+                    unifrnd(FOVsize(1,2), FOVsize(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),...
+                    unifrnd(-2,2), unifrnd(-2,2)]';
+                XmuPred(end).P = covBirth*eye(6);
+            end
         end
      elseif nbrPosStates == 6
          if strcmp(motionModel,'cv')

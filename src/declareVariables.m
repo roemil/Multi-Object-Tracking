@@ -175,7 +175,11 @@ if(strcmp(mode,'nonlinear'))
 elseif(strcmp(mode,'linear'))
     H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
 elseif(strcmp(mode,'GT'))
-    H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
+    if(strcmp(motionModel,'ca'))
+        H = generateMeasurementModel({},'linear',6, motionModel);
+    else
+        H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
+    end
 end
 
 Pd = 0.95;   % Detection probability % 0.7 ok1
