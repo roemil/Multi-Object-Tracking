@@ -8,14 +8,14 @@ clc
 mode = 'GT';
 set = 'training';
 sequence = '0000';
-motionModel = 'ca'; % Choose 'cv' or 'cvBB'
+motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 addpath('mtimesx');
 addpath('evalMOT');
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
 
-nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
+nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
