@@ -136,7 +136,7 @@ if strcmp(motionModel,'cv')
 elseif strcmp(motionModel,'ca')
     %Q = Q + 25*diag([1.2 1 0 0]); % 10
         %Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
-    Q = Q + 100*diag([1.1 1.15 .2 .2 0 0])
+    Q = Q + 100*diag([1.3 1.2 .1 .1 -0.3 -0.3])
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4

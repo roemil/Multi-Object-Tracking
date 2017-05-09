@@ -66,7 +66,7 @@ function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, 
         end
     end
 
-S = zeros(nbrOfMeas,1,1,nbrOfGlobHyp);
+S = zeros(nbrOfMeas,nbrOfMeas+size(Xpred{1},2),1,nbrOfGlobHyp);
 indvInd = zeros(nbrOfMeas,2);
 for j = 1:nbrOfGlobHyp
     for z = 1:nbrOfMeas
