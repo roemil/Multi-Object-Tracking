@@ -62,6 +62,7 @@ end
 [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, H, R,...
     Z, c, newLabel, motionModel,nbrPosStates,nbrStates,nbrMeasStates);
 
+%generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates)
 %%%% Update for previously potentially detected targets %%%%
 [Xhypo, S] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates);    
 

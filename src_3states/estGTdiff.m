@@ -1,6 +1,7 @@
 function [est, true] = estGTdiff(seq,set,k,X,plotOn3D,plotOnImg)
 global RcamToVelo, global TcamToVelo, global R20, global T20,
 global RimuToVelo, global TimuToVelo, global pose, global egoMotionOn
+global TveloToImu
 
 if nargin == 4
     plotOn3D = false;
@@ -19,10 +20,11 @@ ind = find(GT{1} == k-1 & GT{2} ~= -1);
 true = [GT{14}(ind)'; (GT{15}(ind)-GT{11}(ind)/2)'; GT{16}(ind)'];
 
 if egoMotionOn
-        GT = [GT{14}(ind)';
-            (GT{15}(ind)-GT{11}(ind)/2)';
-            GT{16}(ind)'];
-        true = RcamToVelo*(R20*GT+repmat(T20,1,size(GT,2)))+repmat(TcamToVelo,1,size(GT,2))+RimuToVelo*pose{k}(1:3,4)+TimuToVelo;
+    truelabel = GT{2}(ind);
+    GT = [GT{14}(ind)';
+        (GT{15}(ind)-GT{11}(ind)/2)';
+        GT{16}(ind)'];
+    true = TveloToImu(1:3,:)*TcamToVelo*T20*[GT;ones(1,size(GT,2))]+pose{k}(1:3,4);
 end
 %true = [GT{14}(ind)'; GT{15}(ind)'; GT{16}(ind)'];
 
@@ -80,9 +82,15 @@ if plotOn3D
     end
     hold on
     if ~egoMotionOn
-        p2 = plot3(true(1,:),true(3,:),true(2,:),'g*','markersize',20);
+        p2 = plot3(true(1,:),true(3,:),true(2,:),'g*','markersize',20,'lineWidth',1);
+        for i = 1:size(true,2)
+            text(true(1,i), true(3,i), true(2,i), num2str(truelabel(i)),'Fontsize',18,'Color','green')
+        end
     else
-        p2 = plot3(true(1,:),true(2,:),true(3,:),'g*','markersize',20);
+        p2 = plot3(true(1,:),true(2,:),true(3,:),'g*','markersize',10,'lineWidth',2);
+        for i = 1:size(true,2)
+            text(true(1,i), true(2,i), true(3,i), num2str(truelabel(i)),'Fontsize',18,'Color','green')
+        end
     end
     if labels(1) ~= 0
         if ~egoMotionOn

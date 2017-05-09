@@ -1,9 +1,9 @@
 function XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode,k)
 global nbrOfBirths, global FOV, global boarder, global pctWithinBoarder
 global covBirth, global vinit, global weightBirth, global birthSpawn,
-global pose, global egoMotionOn, global RcamToVelo, global TcamToVelo,
-global R20, global T20, global RveloToImu, global TimuToVelo, global k,
-global RimuToVelo, global maxX, global maxY, global Zinter, global TveloToImu
+global pose, global egoMotionOn, global TcamToVelo
+global T20, global TveloToImu, global k,
+global maxX, global maxY, global Zinter, global TcamToVelo, global xAngle, global yAngle
 
 if strcmp(birthSpawn, 'boarders')
     if nbrPosStates == 4
@@ -153,10 +153,10 @@ elseif strcmp(birthSpawn, 'uniform')
 %             XmuPred(end).P = covBirth*eye(8);
 %             %XmuPred(end).P(end,end) = 0; % If 1 at end of states
 %          end
-         for i = 1:nbrOfBirths/5
+         for i = 1:ceil(nbrOfBirths/10)
             Zrnd = unifrnd(FOVsize(1,3), Zinter); % TODO: True angle of view?
-            Xrange = min(maxX, Zrnd*tand(43)); % 45? 40.6
-            Yrange = min(maxY, Zrnd*tand(16)); % 13
+            Xrange = min(maxX, Zrnd*tand(xAngle)); % 45? 40.6
+            Yrange = min(maxY, Zrnd*tand(yAngle)); % 13
             XmuPred(end+1).w = weightBirth;    % Pred weight
             XmuPred(end).state = [unifrnd(-Xrange, Xrange), ...
                 unifrnd(-Yrange, Yrange), Zrnd, ...
@@ -166,14 +166,14 @@ elseif strcmp(birthSpawn, 'uniform')
             if egoMotionOn
                 % Local cam2 -> local cam0 -> local velo -> local IMU ->
                 % global IMU
-                XmuPred(end).state(1:3) = RveloToImu*(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
-                    +TcamToVelo)+TveloToImu + pose{k}(1:3,4);
+                XmuPred(end).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuPred(end).state(1:3);1]))...
+                    + pose{k}(1:3,4);
             end
         end
-        for i = nbrOfBirths/5+1:nbrOfBirths
+        for i = ceil(nbrOfBirths/10)+1:nbrOfBirths
             Zrnd = unifrnd(Zinter, FOVsize(2,3)); % TODO: True angle of view?
-            Xrange = min(maxX, Zrnd*tand(43)); % 45? 40.6
-            Yrange = min(maxY, Zrnd*tand(16)); % 13
+            Xrange = min(maxX, Zrnd*tand(xAngle)); % 45? 40.6
+            Yrange = min(maxY, Zrnd*tand(yAngle)); % 13
             XmuPred(end+1).w = weightBirth;    % Pred weight
             XmuPred(end).state = [unifrnd(-Xrange, Xrange), ...
                 unifrnd(-Yrange, Yrange), Zrnd, ...
@@ -183,8 +183,8 @@ elseif strcmp(birthSpawn, 'uniform')
             if egoMotionOn
                 % Local cam2 -> local cam0 -> local velo -> local IMU ->
                 % global IMU
-                XmuPred(end).state(1:3) = RveloToImu*(RcamToVelo*((R20*XmuPred(end).state(1:3))+T20)...
-                    +TcamToVelo)+TveloToImu + pose{k}(1:3,4);
+                XmuPred(end).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuPred(end).state(1:3);1]))...
+                    + pose{k}(1:3,4);
             end
         end
      end

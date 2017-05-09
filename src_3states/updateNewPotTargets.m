@@ -78,7 +78,7 @@ global pose, global k
         rho(z) = e+c;
         XpotNew{z}.w = log(e+c); % rho (45) (44)
         XpotNew{z}.r = e/rho(z); % (43) (44)
-        %[XpotNew{z}.w XpotNew{z}.r]
+        %[XpotNew{z}.w XpotNew{z}.r e]
         XpotNew{z}.S = 0;
         XpotNew{z}.box = Z(nbrMeasStates+1:nbrMeasStates+2,z);
         XpotNew{z}.label = newLabel;

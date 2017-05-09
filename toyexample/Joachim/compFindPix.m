@@ -102,3 +102,75 @@ xtpixP2rect = xtpixP2rect(1:2)/xtpixP2rect(3)
 
 xtpixP2rect2 = P2rect*R0_rect2*T*[xt;1];
 xtpixP2rect2 = xtpixP2rect2(1:2)/xtpixP2rect2(3)
+%%
+
+datapath = strcat('../../kittiTracking/','training','/','label_02/','0000');
+filename = [datapath,'.txt'];
+formatSpec = '%f%f%s%f%f%f%f%f%f%f%f%f%f%f%f%f%f';
+f = fopen(filename);
+GT = textscan(f,formatSpec);
+fclose(f);
+k = 1;
+frameNbr = sprintf('%06d',k-1);
+imagePath = strcat('../../kittiTracking/','training','/image_02/','0000','/',frameNbr,'.png');
+
+% Read and plot image
+%figure;
+img = imread(imagePath);
+imagesc(img);
+axis('image')
+hold on
+xlim([FOVsize(1,1) FOVsize(2,1)])
+ylim([FOVsize(1,2) FOVsize(2,2)])
+
+ind = find(GT{1} == k-1 & GT{2} ~= -1);
+boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];
+
+cx(1:3) = mean([GT{7}(ind),GT{9}(ind)],2);
+cy(1:3) = mean([GT{8}(ind),GT{10}(ind)],2);
+
+%(GT{15}(ind)-GT{11}(ind)/2)
+x = [GT{14}(ind)';
+        (GT{15}(ind)-GT{11}(ind)/2)';
+        GT{16}(ind)'];
+
+global H3dFunc
+P2rect = [7.070493e+02 0.000000e+00 6.040814e+02 4.575831e+01;
+    0.000000e+00 7.070493e+02 1.805066e+02 -3.454157e-01;
+    0.000000e+00 0.000000e+00 1.000000e+00 4.981016e-03];
+% from 0000
+R0_rect = zeros(4,4);
+R0_rect(1:3,1:3) = [9.999128e-01 1.009263e-02 -8.511932e-03;
+    -1.012729e-02 9.999406e-01 -4.037671e-03;
+    8.470675e-03 4.123522e-03 9.999556e-01];
+R0_rect(4,4) = 1;
+
+%From calib
+R0_rect2 = [9.999239000000e-01 9.837760000000e-03 -7.445048000000e-03;
+    -9.869795000000e-03 9.999421000000e-01 -4.278459000000e-03;
+    7.402527000000e-03 4.351614000000e-03 9.999631000000e-01];
+R0_rect2(1:3,1:3) = [9.999128e-01 1.009263e-02 -8.511932e-03;
+    -1.012729e-02 9.999406e-01 -4.037671e-03;
+    8.470675e-03 4.123522e-03 9.999556e-01];
+R0_rect2(4,4) = 1;
+
+P2path = strcat('../../data_tracking_calib/',set,'/','calib/',sequence,'.txt');
+
+P2 = readCalibration(P2path,2);
+
+for i = 1:size(boxes,1)
+    rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
+    plot(cx(i),cy(i),'g*')
+    tmp = H3dFunc([x(:,i); zeros(5,1)]);
+    tmp2 = P2rect*[x(:,i);1];
+    tmp3 = P2*R0_rect*[x(:,i);1]; % ord P2rect
+    tmp4 = P2rect*R0_rect2*[x(:,i);1];
+    plot(tmp(1),tmp(2),'r*')
+    plot(tmp2(1)/tmp2(3),tmp2(2)/tmp2(3),'b*')
+    plot(tmp3(1)/tmp3(3),tmp3(2)/tmp3(3),'co','linewidth',1)
+    plot(tmp4(1)/tmp4(3),tmp4(2)/tmp4(3),'y*')
+end
+
+
+    
+    

@@ -8,15 +8,20 @@ clc
 mode = 'GTnonlinear';
 set = 'training';
 sequence = '0000';
+global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 global egoMotionOn
 egoMotionOn = true; 
 
+global plotHypoConf
+plotHypoConf = false;
+
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
 
+global nbrPosStates
 nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
@@ -49,7 +54,7 @@ for t = 1:nbrSim
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
         PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
     disp(['Iteration time: ', num2str(toc)])
-
+    rest{1}
     if strcmp(plotOn,'true')
         frameNbr = '000000';
         if ~strcmp(mode,'GT')
@@ -160,6 +165,15 @@ plotConf = false;
 %subplot('position', [0.02 0 0.98 1])
 if strcmp(mode,'GTnonlinear')
     plotEach3Dstate(sequence,set,Xest,Pest,plotConf);
+else
+    % Not implemented
+end
+
+%% Plot birds-eye view
+
+plotConf = false;
+if strcmp(mode,'GTnonlinear')
+    plotBirdsEye(sequence,set,Xest,Pest,plotConf);
 else
     % Not implemented
 end

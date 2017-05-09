@@ -88,42 +88,32 @@ if egoMotionOn
 %     tr_imu_velo(floor(i/4)+1,mod(i,4)+1) = C{i+2}(6);
 %     end
 %     fclose(fid);
-    global RimuToVelo
     RimuToVelo = [9.999976e-01 7.553071e-04 -2.035826e-03;
         -7.854027e-04 9.998898e-01 -1.482298e-02;
         2.024406e-03 1.482454e-02 9.998881e-01];
+    tImuToVelo = [-8.086759e-01 3.195559e-01 -7.997231e-01]';
     global TimuToVelo
-    TimuToVelo = [-8.086759e-01 3.195559e-01 -7.997231e-01]';
-    
-    % TODO: use \ instead? R\1'??
-    global RveloToImu
-    RveloToImu = inv(RimuToVelo);
+    TimuToVeloTimuToVelo = [RimuToVelo, tImuToVelo; 0 0 0 1];
     global TveloToImu
-    TveloToImu = -TimuToVelo;
+    TveloToImu = inv(TimuToVelo);
     
-    global RveloToCam
     RveloToCam = [6.927964e-03 -9.999722e-01 -2.757829e-03;
         -1.162982e-03 2.749836e-03 -9.999955e-01;
         9.999753e-01 6.931141e-03 -1.143899e-03];
+    tVeloToCam = [-2.457729e-02 -6.127237e-02 -3.321029e-01]';
     global TveloToCam
-    TveloToCam = [-2.457729e-02 -6.127237e-02 -3.321029e-01]';
-    
-    global RcamToVelo
-    RcamToVelo = inv(RveloToCam);
+    TveloToCam = [RveloToCam, tVeloToCam; 0 0 0 1];
     global TcamToVelo
-    TcamToVelo = -TveloToCam;
+    TcamToVelo = inv(TveloToCam);
     
-    global R02
     R02 = [9.999838e-01 -5.012736e-03 -2.710741e-03;
         5.002007e-03 9.999797e-01 -3.950381e-03;
         2.730489e-03 3.936758e-03 9.999885e-01];
+    t02 = [5.989688e-02 -1.367835e-03 4.637624e-03]';
     global T02
-    T02 = [5.989688e-02 -1.367835e-03 4.637624e-03]';
-    
-    global R20
-    R20 = inv(R02);
+    T02 = [R02, t02; 0 0 0 1];
     global T20
-    T20 = -T02;
+    T20 = inv(T02);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -181,7 +171,7 @@ end
 global T
 T = 0.1; % sampling time, 1 fps
 global sigmaQ
-sigmaQ = 15;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 10; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
 global sigmaBB
 sigmaBB = 2;
 dInit = [0 20];
@@ -247,7 +237,7 @@ elseif (strcmp(mode,'GTnonlinear'))
     % Including BB
     H3dTo2d = [P2(:,1:3), zeros(3,5), P2(:,4); zeros(2,6), eye(2), zeros(2,1)];
     H3dFunc = @(x) (H3dTo2d(1:2,1:8)*x + H3dTo2d(1:2,9))./(x(3,:)+H3dTo2d(3,9));
-    R3dTo2d = 0.1*eye(5);
+    R3dTo2d = diag([15 15 15 5 5]);
     
     Hdistance = @(x) sqrt(x(1,:).^2+x(2,:).^2+x(3,:).^2);
     %Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
@@ -259,7 +249,9 @@ elseif (strcmp(mode,'GTnonlinear'))
         Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
         
         % global IMU -> local IMU -> local velo -> local cam0 -> local cam2
-        H = @(x,egoPos) Hcam([R02*(RveloToCam*(RimuToVelo*(x(1:3,:) - egoPos)+TimuToVelo)+TveloToCam) + T02;
+        %H = @(x,egoPos) Hcam([R02*(RveloToCam*(RimuToVelo*(x(1:3,:) - egoPos)+TimuToVelo)+TveloToCam) + T02;
+        %    -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
+        H = @(x,egoPos) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*[(x(1:3,:) - egoPos);ones(1,size(x,2))]));
             -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
         R = @(x) Rcam(x);
         
@@ -284,14 +276,14 @@ Pd = 0.95;   % Detection probability % 0.7 ok1
 global Ps
 Ps = 0.99;   % Survival probability % 0.98 ok1
 global c
-c = 0.0001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
+c = 0.00001;    % clutter intensity % 0.0001
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Thresholds and Murty %%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Threshold existence probability keep for next iteration
-threshold = 1e-4;    % 0.01 ok1
+threshold = 1e-5;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
@@ -318,7 +310,7 @@ global weightBirth
 weightBirth = 1;
 % Number of births
 global nbrOfBirths
-nbrOfBirths = 250; % 600 ok1
+nbrOfBirths = 400; % 250
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
@@ -326,13 +318,15 @@ nbrOfBirths = 250; % 600 ok1
 
 global vinit
 vinit = 0;
-nbrInitBirth = 3000; % 600 ok1
+nbrInitBirth = 1500; % 600 
 global covBirth
 if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
     if ~egoMotionOn
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
-        covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
+        %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
+        covBirth = 2*diag([1 1 1 2 2 1 20 20]); %0.1 2*Q
+        covBirth(7:8,7:8) = diag([20 20]);
     end
 else
     covBirth = 20; % 20 ok1
@@ -354,11 +348,15 @@ FOV = [-45 -2 0;
 %    45 2.6 20];
 
 global maxX
-maxX = 50;
+maxX = 1e6; % 50
 global maxY
-maxY = 3.5;
+maxY = 1e6; %3.5
 global Zinter
 Zinter = 16;
+global xAngle
+xAngle = 41; %43 50-55, 65. 75
+global yAngle
+yAngle = 14; % 16
                 
 XmuUpd = cell(1);
 XuUpd = cell(1);
@@ -398,8 +396,8 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
 %         XmuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
 %             unifrnd(-Yrange, Yrange), Zrnd, ...
 %             unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
-%         XmuUpd{1}(i).P = covBirth*eye(8);      % Pred cov
-%         %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
+%         XmuUpd{1}(i).P = covBirth;      % Pred cov
+%         
 % 
 %         Zrnd = unifrnd(FOV(1,3), FOV(2,3));
 %         Xrange = Zrnd*tand(43);
@@ -408,41 +406,13 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
 %         XuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
 %             unifrnd(-Yrange, Yrange), Zrnd, ...
 %             unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
-%         XuUpd{1}(i).P = covBirth*eye(8);      % Pred cov
-%         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
+%         XuUpd{1}(i).P = covBirth;      % Pred cov
+%         
 %     end
-    for i = 1:nbrInitBirth/5
+    for i = 1:ceil(nbrInitBirth/10)
         Zrnd = unifrnd(FOV(1,3), Zinter); % TODO: True angle of view?
-        Xrange = min(maxX, Zrnd*tand(43)); % 45? 40.6
-        Yrange = min(maxY, Zrnd*tand(16)); % 13
-        XmuUpd{1}(i).w = wInit;    % Pred weight
-        XmuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
-            unifrnd(-Yrange, Yrange), Zrnd, ...
-            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
-        XmuUpd{1}(i).P = covBirth*eye(8);      % Pred cov
-        %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
-
-        Zrnd = unifrnd(FOV(1,3), Zinter);
-        Xrange = min(maxX, Zrnd*tand(43));
-        Yrange = min(maxY, Zrnd*tand(16));
-        XuUpd{1}(i).w = wInit;    % Pred weight
-        XuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
-            unifrnd(-Yrange, Yrange), Zrnd, ...
-            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
-        XuUpd{1}(i).P = covBirth*eye(8);      % Pred cov
-        %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
-        if egoMotionOn
-            % Local cam2 -> local cam0 -> local velo -> global velo
-            XmuUpd{1}(i).state(1:3) = RveloToImu*(RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo)+TveloToImu + pose{1}(1:3,4);
-            XuUpd{1}(i).state(1:3) = RveloToImu*(RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo)+TveloToImu + pose{1}(1:3,4);
-        end
-    end
-    for i = nbrInitBirth/5+1:nbrInitBirth
-        Zrnd = unifrnd(Zinter, FOV(2,3)); % TODO: True angle of view?
-        Xrange = min(maxX, Zrnd*tand(43)); % 45? 40.6
-        Yrange = min(maxY, Zrnd*tand(16)); % 13
+        Xrange = min(maxX, Zrnd*tand(xAngle)); % 45? 40.6
+        Yrange = min(maxY, Zrnd*tand(yAngle)); % 13
         XmuUpd{1}(i).w = wInit;    % Pred weight
         XmuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
             unifrnd(-Yrange, Yrange), Zrnd, ...
@@ -450,9 +420,9 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         XmuUpd{1}(i).P = covBirth;%*eye(8);      % Pred cov
         %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
 
-        Zrnd = unifrnd(Zinter, FOV(2,3));
-        Xrange = min(maxX, Zrnd*tand(43));
-        Yrange = min(maxY, Zrnd*tand(16));
+        Zrnd = unifrnd(FOV(1,3), Zinter);
+        Xrange = min(maxX, Zrnd*tand(xAngle));
+        Yrange = min(maxY, Zrnd*tand(yAngle));
         XuUpd{1}(i).w = wInit;    % Pred weight
         XuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
             unifrnd(-Yrange, Yrange), Zrnd, ...
@@ -461,10 +431,38 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
         if egoMotionOn
             % Local cam2 -> local cam0 -> local velo -> global velo
-            XmuUpd{1}(i).state(1:3) = RveloToImu*(RcamToVelo*((R20*XmuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo)+TveloToImu + pose{1}(1:3,4);
-            XuUpd{1}(i).state(1:3) = RveloToImu*(RcamToVelo*((R20*XuUpd{1}(i).state(1:3))+T20)...
-                +TcamToVelo)+TveloToImu + pose{1}(1:3,4);
+            XmuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuUpd{1}(i).state(1:3);1])) ...
+                + pose{1}(1:3,4);
+            XuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XuUpd{1}(i).state(1:3);1]))...
+                + pose{1}(1:3,4);
+        end
+    end
+    for i = ceil(nbrInitBirth/10)+1:nbrInitBirth
+        Zrnd = unifrnd(Zinter, FOV(2,3)); % TODO: True angle of view?
+        Xrange = min(maxX, Zrnd*tand(xAngle)); % 45? 40.6
+        Yrange = min(maxY, Zrnd*tand(yAngle)); % 13
+        XmuUpd{1}(i).w = wInit;    % Pred weight
+        XmuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
+            unifrnd(-Yrange, Yrange), Zrnd, ...
+            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
+        XmuUpd{1}(i).P = covBirth;%*eye(8);      % Pred cov
+        %XmuUpd{1}(i).P(end,end) = 0;   % If 1 at end of states
+
+        Zrnd = unifrnd(Zinter, FOV(2,3));
+        Xrange = min(maxX, Zrnd*tand(xAngle));
+        Yrange = min(maxY, Zrnd*tand(yAngle));
+        XuUpd{1}(i).w = wInit;    % Pred weight
+        XuUpd{1}(i).state = [unifrnd(-Xrange, Xrange), ...
+            unifrnd(-Yrange, Yrange), Zrnd, ...
+            unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),unifrnd(-vinit,vinit), 0, 0]';      % Pred state
+        XuUpd{1}(i).P = covBirth;%*eye(8);      % Pred cov
+        %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
+        if egoMotionOn
+            % Local cam2 -> local cam0 -> local velo -> global velo
+            XmuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuUpd{1}(i).state(1:3);1]))...
+                + pose{1}(1:3,4);
+            XuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XuUpd{1}(i).state(1:3);1]))...
+                + pose{1}(1:3,4);
         end
     end
 end

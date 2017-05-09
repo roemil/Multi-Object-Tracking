@@ -1,4 +1,5 @@
-function plotImgEstGT(seq,set,k,X)
+function nbrNotInFov = plotBirthsImg(seq,set,X)
+
 global FOVsize
 global H3dFunc
 global H3dTo2d
@@ -27,25 +28,19 @@ xlim([FOVsize(1,1) FOVsize(2,1)])
 ylim([FOVsize(1,2) FOVsize(2,2)])
 
 ind = find(GT{1} == k-1 & GT{2} ~= -1);
-boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];
 
 cx(1:size(ind,1)) = mean([GT{7}(ind),GT{9}(ind)],2);
 cy(1:size(ind,1)) = mean([GT{8}(ind),GT{10}(ind)],2);
 
-for i = 1:size(boxes,1)
-    rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
-    plot(cx(i),cy(i),'g*')
-end
-
-if ~isempty(X{1})
-    for i = 1:size(X,2)
-        if egoMotionOn
-            tmp = H(X{i}(1:end-1),pose{k}(1:3,4));
-        else
-            tmp = H(X{i}(1:end-1));
-        end
-        box = [tmp(1)-X{i}(end-2)/2, tmp(2)-X{i}(end-1)/2, X{i}(end-2), X{i}(end-1)];
-        rectangle('Position',box,'EdgeColor','r','LineWidth',1,'LineStyle','--')
-        text(box(1), box(2), num2str(X{i}(end)),'Fontsize',18,'Color','red')
+nbrNotInFov = zeros(2,1);
+plot(cx,cy,'g*')
+for i = 1:size(X,2)
+    tmp = H(X(i).state,pose{k}(1:3,4));
+    if tmp(1) > FOVsize(2,1) || tmp(1) < FOVsize(1,1)
+        nbrNotInFov(1,1) = nbrNotInFov(1,1)+1;
     end
+    if tmp(2) > FOVsize(2,2) || tmp(2) < FOVsize(1,2)
+        nbrNotInFov(2,1) = nbrNotInFov(2,1)+1;
+    end
+    plot(tmp(1),tmp(2),'r+')
 end
