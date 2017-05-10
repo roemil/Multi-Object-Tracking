@@ -78,7 +78,8 @@ if egoMotionOn
     seq = str2num(sequence)+1;
     oxts = loadOxtsliteData(base_dir,seq:seq);
     global pose
-    pose = egoPosition(oxts);
+    global angles
+    [pose, angles] = egoPosition(oxts);
     
     % imu to velo
 %     imu_velo = strcat('../../data_tracking_calib/calib2/calib_imu_to_velo.txt');
@@ -93,7 +94,7 @@ if egoMotionOn
         2.024406e-03 1.482454e-02 9.998881e-01];
     tImuToVelo = [-8.086759e-01 3.195559e-01 -7.997231e-01]';
     global TimuToVelo
-    TimuToVeloTimuToVelo = [RimuToVelo, tImuToVelo; 0 0 0 1];
+    TimuToVelo = [RimuToVelo, tImuToVelo; 0 0 0 1];
     global TveloToImu
     TveloToImu = inv(TimuToVelo);
     
@@ -251,9 +252,23 @@ elseif (strcmp(mode,'GTnonlinear'))
         % global IMU -> local IMU -> local velo -> local cam0 -> local cam2
         %H = @(x,egoPos) Hcam([R02*(RveloToCam*(RimuToVelo*(x(1:3,:) - egoPos)+TimuToVelo)+TveloToCam) + T02;
         %    -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
-        H = @(x,egoPos) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*[(x(1:3,:) - egoPos);ones(1,size(x,2))]));
-            -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
-        R = @(x) Rcam(x);
+        
+        % Without ego-rotation
+%         H = @(x,egoPos) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*[(x(1:3,:) - egoPos);ones(1,size(x,2))]));
+%             -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
+
+        % Test rotation, invalid I think, we need to bring it to local
+        % first
+        Hlocal = @(x,heading) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*...
+           [([sqrt(x(1,:).^2+x(2,:).^2).*[cos(-heading+atan(x(2,:)./x(1,:))); ...
+           sin(-heading+atan(x(2,:)./x(1,:)))]; x(3,:)]); ones(1,size(x,2))]));
+           -sqrt(x(5,:).^2+x(6,:).^2).*[cos(heading+atan(x(2,:)./x(1,:))); ...
+           sin(heading+atan(x(2,:)./x(1,:)))]; ...
+                    x(4,:); x(7:8,:)]);
+         %Hlocal = @(x) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*[x(1:3);ones(1,size(x,2))]));
+         %    x(4:8,:)]);
+         H = @(x,egoPos,heading) Hlocal([x(1:3,:)-egoPos; x(4:end,:)], heading);
+         R = @(x) Rcam(x);
         
         % ALT!!
 %         fid = fopen(P2_path);
@@ -409,6 +424,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
 %         XuUpd{1}(i).P = covBirth;      % Pred cov
 %         
 %     end
+    heading = angles{1}.heading-angles{1}.heading;
     for i = 1:ceil(nbrInitBirth/10)
         Zrnd = unifrnd(FOV(1,3), Zinter); % TODO: True angle of view?
         Xrange = min(maxX, Zrnd*tand(xAngle)); % 45? 40.6
@@ -431,10 +447,17 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
         if egoMotionOn
             % Local cam2 -> local cam0 -> local velo -> global velo
-            XmuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuUpd{1}(i).state(1:3);1])) ...
-                + pose{1}(1:3,4);
-            XuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XuUpd{1}(i).state(1:3);1]))...
-                + pose{1}(1:3,4);
+            XmuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuUpd{1}(i).state(1:3);1]));
+            XmuUpd{1}(i).state(1:2) = sqrt(XmuUpd{1}(i).state(1,:).^2+XmuUpd{1}(i).state(2,:).^2).*...
+                                        [cos(heading+atan(XmuUpd{1}(i).state(2,:)./XmuUpd{1}(i).state(1,:))); ...
+                                        sin(heading+atan(XmuUpd{1}(i).state(2,:)./XmuUpd{1}(i).state(1,:)))];
+            XmuUpd{1}(i).state(1:3) = XmuUpd{1}(i).state(1:3) + pose{1}(1:3,4);
+            
+            XuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XuUpd{1}(i).state(1:3);1]));
+            XuUpd{1}(i).state(1:2) = sqrt(XuUpd{1}(i).state(1,:).^2+XuUpd{1}(i).state(2,:).^2).*...
+                                        [cos(heading+atan(XuUpd{1}(i).state(2,:)./XuUpd{1}(i).state(1,:))); ...
+                                        sin(heading+atan(XuUpd{1}(i).state(2,:)./XuUpd{1}(i).state(1,:)))];
+            XuUpd{1}(i).state(1:3) = XuUpd{1}(i).state(1:3) + pose{1}(1:3,4);
         end
     end
     for i = ceil(nbrInitBirth/10)+1:nbrInitBirth
@@ -459,10 +482,17 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         %XuUpd{1}(i).P(end,end) = 0; % If 1 at end of states
         if egoMotionOn
             % Local cam2 -> local cam0 -> local velo -> global velo
-            XmuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuUpd{1}(i).state(1:3);1]))...
-                + pose{1}(1:3,4);
-            XuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XuUpd{1}(i).state(1:3);1]))...
-                + pose{1}(1:3,4);
+            XmuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuUpd{1}(i).state(1:3);1]));
+            XmuUpd{1}(i).state(1:2) = sqrt(XmuUpd{1}(i).state(1,:).^2+XmuUpd{1}(i).state(2,:).^2).*...
+                                        [cos(heading+atan(XmuUpd{1}(i).state(2,:)./XmuUpd{1}(i).state(1,:))); ...
+                                        sin(heading+atan(XmuUpd{1}(i).state(2,:)./XmuUpd{1}(i).state(1,:)))];
+            XmuUpd{1}(i).state(1:3) = XmuUpd{1}(i).state(1:3) + pose{1}(1:3,4);
+            
+            XuUpd{1}(i).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XuUpd{1}(i).state(1:3);1]));
+            XuUpd{1}(i).state(1:2) = sqrt(XuUpd{1}(i).state(1,:).^2+XuUpd{1}(i).state(2,:).^2).*...
+                                        [cos(heading+atan(XuUpd{1}(i).state(2,:)./XuUpd{1}(i).state(1,:))); ...
+                                        sin(heading+atan(XuUpd{1}(i).state(2,:)./XuUpd{1}(i).state(1,:)))];
+            XuUpd{1}(i).state(1:3) = XuUpd{1}(i).state(1:3) + pose{1}(1:3,4);
         end
     end
 end

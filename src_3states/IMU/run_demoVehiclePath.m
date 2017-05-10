@@ -20,7 +20,7 @@ end
 oxts = loadOxtsliteData(base_dir,frames);
 
 % transform to poses
-pose = convertOxtsToPose(oxts);
+[pose, heading] = convertOxtsToPose(oxts);
 
 % TEST
 global RimuToVelo, global TimuToVelo

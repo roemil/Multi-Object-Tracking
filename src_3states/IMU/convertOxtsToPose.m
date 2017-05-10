@@ -1,4 +1,4 @@
-function pose = convertOxtsToPose(oxts)
+function [pose, heading]  = convertOxtsToPose(oxts)
 % converts a list of oxts measurements into metric poses,
 % starting at (0,0,0) meters, OXTS coordinates are defined as
 % x = forward, y = right, z = down (see OXTS RT3000 user manual)
@@ -12,6 +12,7 @@ scale = latToScale(oxts{1}(1));
 % init pose
 pose     = [];
 Tr_0_inv = [];
+heading = [];
 
 % for all oxts packets do
 for i=1:size(oxts{1},1)
@@ -42,5 +43,6 @@ for i=1:size(oxts{1},1)
       
   % add pose
   pose{i} = Tr_0_inv*[R t;0 0 0 1];
+  heading{i} = rz;
 end
 

@@ -133,6 +133,8 @@ cy(1:3) = mean([GT{8}(ind),GT{10}(ind)],2);
 x = [GT{14}(ind)';
         (GT{15}(ind)-GT{11}(ind)/2)';
         GT{16}(ind)'];
+global T02
+x2 = T02(1:3,:)*[x;ones(1,size(x,2))];
 
 global H3dFunc
 P2rect = [7.070493e+02 0.000000e+00 6.040814e+02 4.575831e+01;
@@ -165,10 +167,12 @@ for i = 1:size(boxes,1)
     tmp2 = P2rect*[x(:,i);1];
     tmp3 = P2*R0_rect*[x(:,i);1]; % ord P2rect
     tmp4 = P2rect*R0_rect2*[x(:,i);1];
+    tmp5 = H3dFunc([x2(:,i); zeros(5,1)]);
     plot(tmp(1),tmp(2),'r*')
     plot(tmp2(1)/tmp2(3),tmp2(2)/tmp2(3),'b*')
     plot(tmp3(1)/tmp3(3),tmp3(2)/tmp3(3),'co','linewidth',1)
     plot(tmp4(1)/tmp4(3),tmp4(2)/tmp4(3),'y*')
+    plot(tmp5(1),tmp5(2),'k+','markersize',5,'linewidth',1)
 end
 
 

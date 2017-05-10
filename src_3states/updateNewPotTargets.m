@@ -2,7 +2,7 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, ...
     Z, newLabel,motionModel, nbrPosStates)
 global Pd, global H3dFunc, global Hdistance, global R3dTo2d, global Rdistance, global Jh
 global c, global nbrStates, global nbrMeasStates, global H, global R,
-global pose, global k
+global pose, global k, global angles
 
     rho = zeros(nbrOfMeas,1);
     
@@ -45,10 +45,10 @@ global pose, global k
             % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
             % Compute weight
             
-            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state,pose{k}(1:3,4)), XmuUpd{z}(i).S);
+            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading), XmuUpd{z}(i).S);
             
             % TODO: temp solution
-            Xmutmp(1:3,i) = H(XmuPred(i).state,pose{k}(1:3,4));%[H3dFunc(XmuPred(i).state); Hdistance(XmuPred(i).state)];
+            Xmutmp(1:3,i) = H(XmuPred(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);%[H3dFunc(XmuPred(i).state); Hdistance(XmuPred(i).state)];
             Stmp{i} = XmuUpd{z}(i).S;
             
             % --alt 2--

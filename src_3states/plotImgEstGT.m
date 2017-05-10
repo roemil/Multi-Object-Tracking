@@ -5,7 +5,7 @@ global H3dTo2d
 global H
 global egoMotionOn
 global k
-global pose
+global pose, global angles
 
 datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
 filename = [datapath,'.txt'];
@@ -40,7 +40,7 @@ end
 if ~isempty(X{1})
     for i = 1:size(X,2)
         if egoMotionOn
-            tmp = H(X{i}(1:end-1),pose{k}(1:3,4));
+            tmp = H(X{i}(1:end-1),pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
         else
             tmp = H(X{i}(1:end-1));
         end

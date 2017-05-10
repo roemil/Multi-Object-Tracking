@@ -2,7 +2,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
     motionModel, nbrPosStates)
  global Pd, global R, global nbrMeasStates, global H3dTo2d, global H3dFunc, ...
  global Hdistance, global R3dTo2d, global Rdistance, global H, global R,
- global pose, global k, global plotHypoConf
+ global pose, global k, global plotHypoConf, global angles
 
 % Create missdetection hypo in index size(Z{k},2)+1
     if(isempty(Xpred)) % If we have no predicted targets, we cannot 
@@ -47,7 +47,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
                     %    = CKFupdate(Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Hdistance, Rd, Z(3,z), 8);
                     
                     Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + ...
-                        log_mvnpdf(Z(1:nbrMeasStates,z), H(Xpred{j}(i).state,pose{k}(1:3,4)), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
+                        log_mvnpdf(Z(1:nbrMeasStates,z), H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
                     
                     Xhypo{j,z}(i).box = Xhypo{j,z}(i).state(nbrPosStates+1:nbrPosStates+2);
                 end
@@ -57,11 +57,11 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
                 %Xpred{j}(i).label
 %                 Xhypo{j,z}(i).S(1:3,1:3)
                 if plotHypoConf
-                    [Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:3,z), H(Xpred{j}(i).state,pose{k}(1:3,4)), Xhypo{j,z}(i).S(1:3,1:3))]
-                    [Z(1:3,z), H(Xpred{j}(i).state,pose{k}(1:3,4)), abs(Z(1:3,z)-H(Xpred{j}(i).state,pose{k}(1:3,4)))]
-                    [Z(1:3,z), H(Xhypo{j,z}(i).state,pose{k}(1:3,4)), abs(Z(1:3,z)-H(Xhypo{j,z}(i).state,pose{k}(1:3,4)))]
-                     tmp = H(Xpred{j}(i).state,pose{k}(1:3,4));
-                     tmp2 = H(Xhypo{j,z}(i).state,pose{k}(1:3,4));
+                    [Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:3,z), H(Xpred{j}(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading), Xhypo{j,z}(i).S(1:3,1:3))]
+                    [Z(1:3,z), H(Xpred{j}(i).state,pose{k}(1:3,4)), abs(Z(1:3,z)-H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading))]
+                    [Z(1:3,z), H(Xhypo{j,z}(i).state,pose{k}(1:3,4)), abs(Z(1:3,z)-H(Xhypo{j,z}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading))]
+                     tmp = H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading);
+                     tmp2 = H(Xhypo{j,z}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading);
                      figure;
                      plot(Z(1,z),Z(2,z),'+r','markersize',10)
                      hold on 

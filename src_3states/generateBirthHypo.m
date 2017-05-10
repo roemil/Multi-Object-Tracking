@@ -4,6 +4,7 @@ global covBirth, global vinit, global weightBirth, global birthSpawn,
 global pose, global egoMotionOn, global TcamToVelo
 global T20, global TveloToImu, global k,
 global maxX, global maxY, global Zinter, global TcamToVelo, global xAngle, global yAngle
+global angles
 
 if strcmp(birthSpawn, 'boarders')
     if nbrPosStates == 4
@@ -140,6 +141,7 @@ elseif strcmp(birthSpawn, 'uniform')
 %          end
      elseif strcmp(mode,'GTnonlinear')
          FOVsize = FOV;
+         heading = angles{k}.heading-angles{1}.heading;
          % This generates uniformly over Z, however it is not very uniform in
             % the 3D space
 %          for i = 1:nbrOfBirths
@@ -166,8 +168,15 @@ elseif strcmp(birthSpawn, 'uniform')
             if egoMotionOn
                 % Local cam2 -> local cam0 -> local velo -> local IMU ->
                 % global IMU
-                XmuPred(end).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuPred(end).state(1:3);1]))...
-                    + pose{k}(1:3,4);
+                XmuPred(end).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuPred(end).state(1:3);1]));
+                XmuPred(end).state(1:2) = sqrt(XmuPred(end).state(1,:).^2+XmuPred(end).state(2,:).^2).*...
+                                            [cos(heading+atan(XmuPred(end).state(2,:)./XmuPred(end).state(1,:))); ...
+                                            sin(heading+atan(XmuPred(end).state(2,:)./XmuPred(end).state(1,:)))];
+                XmuPred(end).state(1:3) = XmuPred(end).state(1:3) + pose{k}(1:3,4);
+                
+                
+                %XmuPred(end).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuPred(end).state(1:3);1]))...
+                %    + pose{k}(1:3,4);
             end
         end
         for i = ceil(nbrOfBirths/10)+1:nbrOfBirths
@@ -183,8 +192,13 @@ elseif strcmp(birthSpawn, 'uniform')
             if egoMotionOn
                 % Local cam2 -> local cam0 -> local velo -> local IMU ->
                 % global IMU
-                XmuPred(end).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuPred(end).state(1:3);1]))...
-                    + pose{k}(1:3,4);
+                XmuPred(end).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuPred(end).state(1:3);1]));
+                XmuPred(end).state(1:2) = sqrt(XmuPred(end).state(1,:).^2+XmuPred(end).state(2,:).^2).*...
+                                            [cos(heading+atan(XmuPred(end).state(2,:)./XmuPred(end).state(1,:))); ...
+                                            sin(heading+atan(XmuPred(end).state(2,:)./XmuPred(end).state(1,:)))];
+                XmuPred(end).state(1:3) = XmuPred(end).state(1:3) + pose{k}(1:3,4);
+                %XmuPred(end).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuPred(end).state(1:3);1]))...
+                %    + pose{k}(1:3,4);
             end
         end
      end

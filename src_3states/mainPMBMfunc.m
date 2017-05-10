@@ -1,13 +1,13 @@
 clear Xest
 clear Pest
-close all
+%close all
 dbstop error
 addpath('IMU')
 addpath('mtimesx')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0000';
+sequence = '0012';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -152,8 +152,16 @@ while 1
     switch lower(key)  
         case 'a'
             k = k - 1;
+            if k <= 0
+                fprintf('Window closed. Exiting...\n');
+                break
+            end
         case 'l'
             k = k + 1;
+            if k > size(Xest,2)
+                fprintf('Window closed. Exiting...\n');
+                break
+            end
     end
     %pause(1.5)
 %end
@@ -172,8 +180,9 @@ end
 %% Plot birds-eye view
 
 plotConf = false;
+step = false;
 if strcmp(mode,'GTnonlinear')
-    plotBirdsEye(sequence,set,Xest,Pest,plotConf);
+    plotBirdsEye(sequence,set,Xest,Pest,step,plotConf);
 else
     % Not implemented
 end

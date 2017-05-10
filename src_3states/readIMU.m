@@ -136,4 +136,4 @@ set = 'training';
 sequence = '0000';
 base_dir = strcat('../../kittiTracking/data_tracking_oxts/',set);
 %base_dir = strcat('../../kittiTracking/data_tracking_oxts/',set,'/oxts/',sequence,'.txt');
-run_demoVehiclePath(base_dir,2:2)
+run_demoVehiclePath(base_dir,1:1)
