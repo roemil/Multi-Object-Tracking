@@ -120,7 +120,7 @@ elseif strcmp(motionModel,'cvBB')
 end
 
 T = 0.1; % sampling time, 1 fps
-sigmaQ = 35;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 30;         % Process (motion) noise % 20 ok1 || 24 apr 10
 sigmaBB = 2;
 dInit = [0 20];
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
@@ -136,7 +136,7 @@ if strcmp(motionModel,'cv')
 elseif strcmp(motionModel,'ca')
     %Q = Q + 25*diag([1.2 1 0 0]); % 10
         %Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
-    Q = Q + 100*diag([1.3 1.2 .1 .1 -0.3 -0.3])
+    Q = Q + 100*diag([1.3 1.1 .2 .1 0 0])
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
