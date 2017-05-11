@@ -3,32 +3,33 @@ function [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates)
 
 global egoMotionOn
+global simMeas
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Load Detections %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Training 0016 and testing 0001
-if(strcmp(mode,'CNNnonlinear'))
+if(strcmp(mode,'CNNnonlinear')) && ~simMeas
     datapath = strcat('../data/tracking_dist/',set,'/',sequence);
     filename = [datapath,'.txt'];
     formatSpec = '%f%f%f%f%f%f%f%f%f%f';
     f = fopen(filename);
     detections = textscan(f,formatSpec);
     fclose(f);
-elseif(strcmp(mode,'GT')) || (strcmp(mode,'GTnonlinear'))
+elseif(strcmp(mode,'GT')) || (strcmp(mode,'GTnonlinear')) || simMeas
     datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
 end
 
 %detections = textread(filename); % frame, size_x, size_y, class, cx, cy, w, h, conf
 %Z = cell(size(detections,1),5);
 Z = cell(1);
-if (strcmp(mode,'CNNnonlinear'))
+if (strcmp(mode,'CNNnonlinear')) && ~simMeas
     oldFrame = detections{1}(1)+1;
     count = 1;
     Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{10}(1);detections{7}(1);detections{8}(1)]; % cx
     for i = 2 : size(detections{1},1)
         frame = detections{1}(i)+1;
-        if detections{9}(i) > 0.92
+        if detections{9}(i) > 0.9
             if(frame == oldFrame)
                 Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i)]; % cx
                 count = count + 1;
@@ -41,6 +42,24 @@ if (strcmp(mode,'CNNnonlinear'))
     end
 elseif(strcmp(mode,'GT')) || (strcmp(mode,'GTnonlinear'))
     Z = generateGT(set,sequence,datapath, nbrPosStates);
+elseif simMeas
+    Ztmp = generateGT(set,sequence,datapath, nbrPosStates);
+    %Z = cell(size(Ztmp,2));
+    measP = @(d) diag([5 5 (0.161*d/1.959964)^2 5 5]);
+    for k = 1:size(Ztmp,2)
+        ind = 1;
+        if ~isempty(Ztmp{k})
+            for i = 1:size(Ztmp{k},2)
+                detectRnd = unifrnd(0,1);
+                if detectRnd < 0.95
+                    Z{k}(1:5,ind) = Ztmp{k}(1:5,i) + mvnrnd(zeros(5,1),measP(Ztmp{k}(3,i)))';
+                    ind = ind+1;
+                end
+            end
+        else
+            Z{k} = [];
+        end
+    end
 end
 
 P2path = strcat('../../data_tracking_calib/',set,'/','calib/',sequence,'.txt');
@@ -57,7 +76,7 @@ if egoMotionOn
     oxts = loadOxtsliteData(base_dir,seq:seq);
     global pose
     global angles
-    [pose, angles] = egoPosition(oxts);
+    [pose, angles, posAcc] = egoPosition(oxts);
     
     % imu to velo
 %     imu_velo = strcat('../../data_tracking_calib/calib2/calib_imu_to_velo.txt');
@@ -122,9 +141,9 @@ Xupd = cell(1,1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 global FOVsize
-if strcmp(mode,'GT') || (strcmp(mode,'GTnonlinear'))
+if strcmp(mode,'GT') || (strcmp(mode,'GTnonlinear')) || simMeas
     FOVsize = [0,0;1242,375]; % in m
-else
+elseif strcmp(mode,'CNNnonlinear')
     FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
 end
 
@@ -151,12 +170,12 @@ global T
 T = 0.1; % sampling time, 1 fps
 if strcmp(mode,'GTnonlinear')
     global sigmaQ
-    sigmaQ = 10; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
+    sigmaQ = 7; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
     global sigmaBB
     sigmaBB = 2;
 elseif strcmp(mode,'CNNnonlinear')
     global sigmaQ
-    sigmaQ = 10; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
+    sigmaQ = 7; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
     global sigmaBB
     sigmaBB = 2;
 else
@@ -208,16 +227,45 @@ if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
         % Without ego-rotation
 %         H = @(x,egoPos) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*[(x(1:3,:) - egoPos);ones(1,size(x,2))]));
 %             -x(5,:); -x(6,:); x(4,:); x(7:8,:)]);
-
+        
+        % From local IMU to rotated camera 2 coordinates. Rotate velo
+        % according to rotation matrices
+        % MOST RECENT ONE!!! only yaw!
         HtoRotCamCoords = @(x,heading) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*...
-           [([sqrt(x(1,:).^2+x(2,:).^2).*[cos(-heading+atan(x(2,:)./x(1,:))); ...
-           sin(-heading+atan(x(2,:)./x(1,:)))]; x(3,:)]); ones(1,size(x,2))]));
-           -sqrt(x(5,:).^2+x(6,:).^2).*[cos(heading+atan(x(2,:)./x(1,:))); ...
-           sin(heading+atan(x(2,:)./x(1,:)))]; ...
-                    x(4,:); x(7:8,:)]);
-         %Hlocal = @(x) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*[x(1:3);ones(1,size(x,2))]));
-         %    x(4:8,:)]);
-         H = @(x,egoPos,heading) HtoRotCamCoords([x(1:3,:)-egoPos; x(4:end,:)], heading);
+                  [[cos(heading), sin(heading); -sin(heading) cos(heading)]*x(1:2,:); ...
+                  x(3,:); ones(1,size(x,2))]));
+                  [-sin(heading), cos(heading)]*(-x(4:5,:));...
+                  -x(6,:);
+                  [cos(heading), sin(heading)]*(x(4:5,:));...
+                  x(7:8,:)]);
+        
+%         HtoRotCamCoords = @(x,heading) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*...
+%               [[cos(heading), sin(heading); -sin(heading) cos(heading)]*x(1:2,:); ...
+%               x(3,:); ones(1,size(x,2))]));
+%               cos(heading)*(-x(5,:));...
+%               -x(6,:);
+%               cos(heading)*(x(4,:));...
+%               x(7:8,:)]);
+        H = @(x,egoPos,heading) HtoRotCamCoords([x(1:3,:)-egoPos; x(4:end,:)], heading);
+        
+        % FULL ROTATION MATRIX. Might be slightly more accurate, but more
+        % tedious. However pitch and roll are small
+%         Rx = @(roll) [1 0 0; 0 cos(roll) sin(roll); 0 -sin(roll) cos(roll)];
+%         Ry = @(pitch) [cos(pitch) 0 -sin(pitch); 0 1 0; sin(pitch) 0 cos(pitch)]; 
+%         Rz = @(yaw)[cos(yaw) sin(yaw) 0; -sin(yaw) cos(yaw) 0; 0 0 1];
+%         Rrot = @(roll, pitch, yaw) Rz(yaw)*Ry(pitch)*Rx(roll);
+%         RrotRow = @(Rrot,i) Rrot(i,:);
+%         HtoRotCamCoords = @(x,angles,k) Hcam([T02(1:3,:)*(TveloToCam*(TimuToVelo*...
+%                         [Rrot(angles{k}.roll-angles{1}.roll, angles{k}.pitch-angles{1}.pitch, ...
+%                         angles{k}.heading-angles{1}.heading)*x(1:3,:); ones(1,size(x,2))]));
+%                         -RrotRow(Rrot(angles{k}.roll-angles{1}.roll, angles{k}.pitch-angles{1}.pitch, ...
+%                         angles{k}.heading-angles{1}.heading),2)*(x(4:6,:));...
+%                         -RrotRow(Rrot(angles{k}.roll-angles{1}.roll, angles{k}.pitch-angles{1}.pitch, ...
+%                         angles{k}.heading-angles{1}.heading),3)*(x(4:6,:));
+%                         RrotRow(Rrot(angles{k}.roll-angles{1}.roll, angles{k}.pitch-angles{1}.pitch, ...
+%                         angles{k}.heading-angles{1}.heading),1)*(x(4:6,:));...
+%                         x(7:8,:)]);
+%         H = @(x,egoPos,angles,k) HtoRotCamCoords([x(1:3,:)-egoPos; x(4:end,:)], angles,k);
     else
         H = @(x) [H3dFunc(x); Hdistance(x)];
     end
@@ -225,7 +273,7 @@ end
 
 if strcmp(mode,'GTnonlinear')
     R3dTo2d = diag([15 15 15 5 5]);
-    Rdistance = @(x) 8;
+    Rdistance = @(x) 5;
     if egoMotionOn
         Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
         R = @(x) Rcam(x);
@@ -319,7 +367,7 @@ if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
         %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
-        covBirth = 2*diag([1 1 1 2 2 1 20 20]); %0.1 2*Q
+        covBirth = 1*diag([1 1 1 2 2 1 20 20]); %0.1 2*Q
         covBirth(7:8,7:8) = diag([20 20]);
     end
     
@@ -329,7 +377,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
         %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
-        covBirth = 2*diag([1 1 1 2 2 1 20 20]); %0.1 2*Q
+        covBirth = 1*diag([1 1 1 2 2 1 20 20]); %0.1 2*Q
         covBirth(7:8,7:8) = diag([20 20]);
     end
 end
@@ -369,7 +417,7 @@ if strcmp(motionModel,'cvBB') && (strcmp(mode,'GTnonlinear') || strcmp(mode,'CNN
     if egoMotionOn
         heading = angles{1}.heading-angles{1}.heading;
     end
-    for i = 1:ceil(nbrInitBirth/10)
+    for i = 1:ceil(nbrInitBirth/5)
         Zrnd = unifrnd(FOV(1,3), Zinter); % TODO: True angle of view?
         Xrange = min(maxX, Zrnd*tand(xAngle)); % 45? 40.6
         Yrange = min(maxY, Zrnd*tand(yAngle)); % 13
@@ -404,7 +452,7 @@ if strcmp(motionModel,'cvBB') && (strcmp(mode,'GTnonlinear') || strcmp(mode,'CNN
             XuUpd{1}(i).state(1:3) = XuUpd{1}(i).state(1:3) + pose{1}(1:3,4);
         end
     end
-    for i = ceil(nbrInitBirth/10)+1:nbrInitBirth
+    for i = ceil(nbrInitBirth/5)+1:nbrInitBirth
         Zrnd = unifrnd(Zinter, FOV(2,3)); % TODO: True angle of view?
         Xrange = min(maxX, Zrnd*tand(xAngle)); % 45? 40.6
         Yrange = min(maxY, Zrnd*tand(yAngle)); % 13

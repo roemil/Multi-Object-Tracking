@@ -40,7 +40,10 @@ end
 if ~isempty(X{1})
     for i = 1:size(X,2)
         if egoMotionOn
-            tmp = H(X{i}(1:end-1),pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
+            % Only yaw
+             tmp = H(X{i}(1:end-1),pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
+            % Full rotation matrix
+            %tmp = H(X{i}(1:end-1),pose{k}(1:3,4), angles,k);
         else
             tmp = H(X{i}(1:end-1));
         end

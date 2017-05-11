@@ -41,9 +41,13 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
                     %[Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(3,3)]...
                     %    = CKFupdate(Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Hdistance, Rd, Z(3,z), 8);
                     
+                    % Only yaw
                     Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + ...
                         log_mvnpdf(Z(1:nbrMeasStates,z), H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
-                    
+                    % Full Rotation matrix
+%                     Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + ...
+%                         log_mvnpdf(Z(1:nbrMeasStates,z), H(Xpred{j}(i).state,pose{k}(1:3,4),angles,k), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
+
                     Xhypo{j,z}(i).box = Xhypo{j,z}(i).state(nbrPosStates+1:nbrPosStates+2);
                 else
                     disp('Not implemented - generateTargetHypo')
@@ -55,8 +59,8 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
 %                 Xhypo{j,z}(i).S(1:3,1:3)
                 if plotHypoConf
                     [Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:3,z), H(Xpred{j}(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading), Xhypo{j,z}(i).S(1:3,1:3))]
-                    [Z(1:3,z), H(Xpred{j}(i).state,pose{k}(1:3,4)), abs(Z(1:3,z)-H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading))]
-                    [Z(1:3,z), H(Xhypo{j,z}(i).state,pose{k}(1:3,4)), abs(Z(1:3,z)-H(Xhypo{j,z}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading))]
+                    [Z(1:3,z), H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading), abs(Z(1:3,z)-H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading))]
+                    [Z(1:3,z), H(Xhypo{j,z}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading), abs(Z(1:3,z)-H(Xhypo{j,z}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading))]
                      tmp = H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading);
                      tmp2 = H(Xhypo{j,z}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading);
                      figure;

@@ -45,10 +45,16 @@ global pose, global k, global angles
             % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
             % Compute weight
             
+            % Only yaw
             w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading), XmuUpd{z}(i).S);
+            % Full Rotation matrix
+            %w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state,pose{k}(1:3,4), angles,k), XmuUpd{z}(i).S);
             
             % TODO: temp solution
-            Xmutmp(1:3,i) = H(XmuPred(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);%[H3dFunc(XmuPred(i).state); Hdistance(XmuPred(i).state)];
+            % Only yaw
+            Xmutmp(1:3,i) = H(XmuPred(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
+            % Full rotation matrix
+            %Xmutmp(1:3,i) = H(XmuPred(i).state,pose{k}(1:3,4), angles,k);
             Stmp{i} = XmuUpd{z}(i).S;
             
             % --alt 2--

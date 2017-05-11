@@ -1,19 +1,24 @@
 clear Xest
 clear Pest
-close all
+%close all
 dbstop error
 addpath('IMU')
 addpath('mtimesx')
 clc
-mode = 'GTnonlinear';
+mode = 'CNNnonlinear';
 set = 'training';
-sequence = '0002';
+sequence = '0012';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 global egoMotionOn
 egoMotionOn = true; 
+
+% Simulate measurement from GT. Set mode = 'CNNnonlinear' and simMeas =
+% true
+global simMeas
+simMeas = true;
 
 global plotHypoConf
 plotHypoConf = false;
@@ -52,9 +57,8 @@ for t = 1:nbrSim
     [a, MSGID] = lastwarn();
     warning('off', MSGID)
     tic
-    %Z = measGenerateCase2(X, R, FOVsize, K);
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
-        PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
+        PMBMinitFunc(Z{1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
     disp(['Iteration time: ', num2str(toc)])
     rest{1}
     if strcmp(plotOn,'true')
@@ -71,9 +75,9 @@ for t = 1:nbrSim
     end
     
     % Only keep births
-    tmp = XuUpd;
-    clear XuUpd;
-    XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
+    %tmp = XuUpd;
+    %clear XuUpd;
+    %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
     
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
@@ -81,11 +85,11 @@ for t = 1:nbrSim
         tic;
         if ~isempty(Z{k})
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
+                PMBMfunc(Z{k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
         else
             disp('No measurement')
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMpredFunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
+                PMBMpredFunc(Z{k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
         end
         disp(['Iteration time: ', num2str(toc)])
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])

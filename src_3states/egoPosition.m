@@ -30,6 +30,7 @@ scale = latToScale(oxts{1}(1));
 % init pose
 pose     = [];
 heading = [];
+posAcc = [];
 %Tr_0_inv = [];
 
 % for all oxts packets do
@@ -69,7 +70,8 @@ for i=1:size(oxts{1},1)
   %if(k==1)
       %varargout{2} = Tr_0_inv;
   %end
-
+    posAcc{i} = oxts{1}(i,24);
 end
 varargout{1} = pose;
 varargout{2} = angles;
+varargout{3} = posAcc;

@@ -24,8 +24,9 @@ if ~step
                 GT{16}(ind)'];
             GT = TveloToImu(1:3,:)*(TcamToVelo*(T20*[GT;ones(1,size(GT,2))]));
             heading = angles{k}.heading-angles{1}.heading;
-            GT(1:2,:) = sqrt(GT(1,:).^2+GT(2,:).^2).*[cos(heading+atan(GT(2,:)./GT(1,:))); ...
-                        sin(heading+atan(GT(2,:)./GT(1,:)))];
+            GT(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*GT(1:2,:);
+            %GT(1:2,:) = sqrt(GT(1,:).^2+GT(2,:).^2).*[cos(heading+atan(GT(2,:)./GT(1,:))); ...
+            %            sin(heading+atan(GT(2,:)./GT(1,:)))];
             GT = GT+pose{k}(1:3,4);
 %             GT(1,:) = GT(1,:) - ones(1,size(ind,1)).*sin(angles{k}.heading-angles{1}.heading).*...
 %                sqrt(GT(1,:).^2+GT(3,:).^2);
@@ -95,10 +96,12 @@ else
             GT = [GT{14}(ind)';
                 (GT{15}(ind)-GT{11}(ind)/2)';
                 GT{16}(ind)'];
-            GT(1,:) = GT(1,:) - ones(1,size(ind,1)).*sin(angles{k}.heading-angles{1}.heading).*...
-                sqrt(GT(1,:).^2+GT(2,:).^2+GT(3,:).^2);
-            GT = TveloToImu(1:3,:)*(TcamToVelo*(T20*[GT;ones(1,size(GT,2))]))+...
-                + pose{k}(1:3,4);
+            GT = TveloToImu(1:3,:)*(TcamToVelo*(T20*[GT;ones(1,size(GT,2))]));
+            heading = angles{k}.heading-angles{1}.heading;
+            GT(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*GT(1:2,:);
+            %GT(1:2,:) = sqrt(GT(1,:).^2+GT(2,:).^2).*[cos(heading+atan(GT(2,:)./GT(1,:))); ...
+            %            sin(heading+atan(GT(2,:)./GT(1,:)))];
+            GT = GT+pose{k}(1:3,4);
             
         end
         if k == 1
