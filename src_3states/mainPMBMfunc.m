@@ -1,13 +1,13 @@
 clear Xest
 clear Pest
-%close all
+close all
 dbstop error
 addpath('IMU')
 addpath('mtimesx')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0012';
+sequence = '0002';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -26,6 +26,8 @@ nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
+global k
+k = 1;
 
 Xupd = cell(1);
 
@@ -138,8 +140,8 @@ while 1
     frameNbr = sprintf('%06d',k-1);
     if strcmp(mode,'GTnonlinear')
         plotImgEstGT(sequence,set,k,Xest{k});
-    elseif ~strcmp(mode,'GTnonlinear')
-        % Not implemented
+    elseif strcmp(mode,'CNNnonlinear')
+        plotImgEst(sequence,set,k,Xest{k},Z{k})
     end
     title(['k = ', num2str(k)])
     try
@@ -171,20 +173,20 @@ end
 
 plotConf = false;
 %subplot('position', [0.02 0 0.98 1])
-if strcmp(mode,'GTnonlinear')
+if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
     plotEach3Dstate(sequence,set,Xest,Pest,plotConf);
 else
-    % Not implemented
+    disp('Not implemented')
 end
 
 %% Plot birds-eye view
 
 plotConf = false;
 step = false;
-if strcmp(mode,'GTnonlinear')
+if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
     plotBirdsEye(sequence,set,Xest,Pest,step,plotConf);
 else
-    % Not implemented
+    disp('Not implemented')
 end
 
 %% Plot estimates 3D

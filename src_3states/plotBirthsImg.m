@@ -7,6 +7,7 @@ global H
 global egoMotionOn
 global k
 global pose
+global angles
 
 datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
 filename = [datapath,'.txt'];
@@ -35,7 +36,11 @@ cy(1:size(ind,1)) = mean([GT{8}(ind),GT{10}(ind)],2);
 nbrNotInFov = zeros(2,1);
 plot(cx,cy,'g*')
 for i = 1:size(X,2)
-    tmp = H(X(i).state,pose{k}(1:3,4));
+    if egoMotionOn
+        tmp = H(X(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading);
+    else
+        tmp = H(X(i).state);
+    end
     if tmp(1) > FOVsize(2,1) || tmp(1) < FOVsize(1,1)
         nbrNotInFov(1,1) = nbrNotInFov(1,1)+1;
     end
