@@ -50,7 +50,7 @@ function [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xupd, threshold, motio
                 labelsEst = [labelsEst, Xupd{ind}(i).label];
             end
         elseif strcmp(motionModel,'ca')
-                        for i = 1 : size(Xupd{ind},2)
+            for i = 1 : size(Xupd{ind},2)
                 if(Xupd{ind}(i).r > threshold) % if prob. of existence great enough
                     Xest{index} = [Xupd{ind}(i).state; Xupd{ind}(i).box; Xupd{ind}(i).label]; % store mean (i.e states)
                     Pest{index} = Xupd{ind}(i).P;

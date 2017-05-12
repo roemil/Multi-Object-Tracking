@@ -65,7 +65,7 @@ end
 %generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates)
 %%%% Update for previously potentially detected targets %%%%
 [Xhypo, S] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates);    
-
+%if(isempty(Xhypo{1}))keyboard;end
 oldInd = 0;
 m = size(Z,2);
 Wnew = diag(rho);
@@ -207,6 +207,7 @@ else % TODO: Do we wanna do this?!
         end
     end
 end
+if(isempty(Xupd{end}))keyboard;end
 
 % if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
 %     for i = 1:size(Pest,2)
@@ -236,3 +237,4 @@ end
 %disp(['Upd time: ', num2str(timeUpd), 's'])
 %disp(['Nbr global hypo pre murty: ', num2str(size(wGlob,2))])
 %disp(['Nbr global hypo: ', num2str(size(Xupd,2))])
+end

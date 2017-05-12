@@ -61,7 +61,11 @@ elseif(strcmp(mode,'nonlinear'))
         end
     end
 elseif(strcmp(mode,'GT'))
-    Z = generateGT(set,sequence,datapath, nbrPosStates);
+    if(strcmp(motionModel,'ca'))
+        Z = generateGT(set,sequence,datapath, 4);
+    else
+        Z = generateGT(set,sequence,datapath, nbrPosStates);
+    end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -106,17 +110,17 @@ if strcmp(motionModel,'cv')
 elseif strcmp(motionModel,'ca')
         nbrStates = 6; % Total number of states
         nbrMeasStates = 2;
-    elseif strcmp(motionModel,'cvBB')
-        nbrStates = 6;
-        if nbrPosStates == 4
-            nbrMeasStates = 2; % Number of measurements used for weighting
-        elseif nbrPosStates == 6
-            nbrMeasStates = 3;
-        end
+elseif strcmp(motionModel,'cvBB')
+    nbrStates = 6;
+    if nbrPosStates == 4
+        nbrMeasStates = 2; % Number of measurements used for weighting
+    elseif nbrPosStates == 6
+        nbrMeasStates = 3;
+    end
 end
 
 T = 0.1; % sampling time, 1 fps
-sigmaQ = 45;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 30;         % Process (motion) noise % 20 ok1 || 24 apr 10
 sigmaBB = 2;
 dInit = [0 20];
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
@@ -131,14 +135,8 @@ if strcmp(motionModel,'cv')
     end
 elseif strcmp(motionModel,'ca')
     %Q = Q + 25*diag([1.2 1 0 0]); % 10
-    if nbrPosStates == 4
-        Q = Q + 0.15*diag([FOVsize(2,1), 1.2*FOVsize(2,2), 0 0]);
-        F(3,3) = 1.5*F(3,3);
-        F(4,4) = 1.5*F(4,4);
-    elseif nbrPosStates == 6
         %Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
-        Q = Q + 50*diag([1 1 0 0 0 0]);
-    end
+    Q = Q + 100*diag([1.3 1.1 .2 .1 0 0])
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
@@ -156,6 +154,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if ((strcmp(motionModel,'cv')) && (nbrPosStates == 4))
+    R = 0.1*eye(2);
+elseif((strcmp(motionModel,'ca')) && (nbrPosStates == 4))
     R = 0.1*eye(2);
 elseif((strcmp(motionModel,'ca')) && (nbrPosStates == 6))
     R = 0.1*eye(2);
@@ -175,7 +175,11 @@ if(strcmp(mode,'nonlinear'))
 elseif(strcmp(mode,'linear'))
     H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
 elseif(strcmp(mode,'GT'))
-    H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
+    if(strcmp(motionModel,'ca'))
+        H = generateMeasurementModel({},'linear',6, motionModel);
+    else
+        H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
+    end
 end
 
 Pd = 0.95;   % Detection probability % 0.7 ok1
@@ -212,7 +216,7 @@ pctWithinBoarder = 0.2;
 % Weight of the births
 weightBirth = 1;
 % Number of births
-nbrOfBirths = 150; % 600 ok1
+nbrOfBirths = 200; % 600 ok1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%

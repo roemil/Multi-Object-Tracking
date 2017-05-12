@@ -30,13 +30,14 @@ function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, 
                     if strcmp(motionModel,'cv')
                         %[Xhypo(i).state, Xhypo(i).P, Xhypo(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates,z));
                         [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates));
-                        [R,err] = cholcov(Xhypo{j,z}(i).S,0);
-                        if err ~= 0
-                            %error(message('stats:mvnpdf:BadMatrixSigma'));
-                            keyboard;
-                        end
                         Xhypo{j,z}(i).w = Xpred(i).w + log(Xpred(i).r*Pd) + log_mvnpdf(Z(1:nbrMeasStates), H*Xpred(i).state, Xhypo{j}(i).S);
                         Xhypo{j,z}(i).box = 0.4.*Xpred(i).box + 0.6.*Z(nbrMeasStates+1:nbrMeasStates+1); % Take mean bounding box?
+                        %Xhypo{j,z}(i).box = Z(3:4,z);
+                    elseif strcmp(motionModel,'ca')
+                        %[Xhypo(i).state, Xhypo(i).P, Xhypo(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates,z));
+                        [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:nbrMeasStates,z));
+                        Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:nbrMeasStates,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S);
+                        Xhypo{j,z}(i).box = 0.4.*Xpred{j}(i).box + 0.6.*Z(nbrMeasStates+1:nbrMeasStates+2,z); % Take mean bounding box?
                         %Xhypo{j,z}(i).box = Z(3:4,z);
                     elseif strcmp(motionModel,'cvBB')
                         [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:nbrMeasStates+2,z));
@@ -65,7 +66,7 @@ function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, 
         end
     end
 
-S = zeros(nbrOfMeas,1,1,nbrOfGlobHyp);
+S = zeros(nbrOfMeas,nbrOfMeas+size(Xpred{1},2),1,nbrOfGlobHyp);
 indvInd = zeros(nbrOfMeas,2);
 for j = 1:nbrOfGlobHyp
     for z = 1:nbrOfMeas

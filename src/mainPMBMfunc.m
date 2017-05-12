@@ -3,13 +3,17 @@ clear Pest
 close all
 dbstop error
 addpath('mtimesx')
+addpath('evalMOT')
+addpath('../../kittiTracking')
 clc
+
 mode = 'GT';
 set = 'training';
 sequence = '0000';
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 addpath('mtimesx');
+addpath('evalMOT');
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
 
@@ -20,7 +24,7 @@ nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 
 Xupd = cell(1);
 
-K = min(150,size(Z,2)); % Length of sequence
+K = min(123,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -97,28 +101,28 @@ disp(['Total simulation time: ', num2str(simTime)])
 
     
 
-% Plot estimates
+%% Plot estimates
 
-figure('units','normalized','position',[.05 .05 .9 .9]);
-subplot('position', [0.02 0 0.98 1])
-for k = 1:size(Xest,2)
-    frameNbr = sprintf('%06d',k-1);
-    if ~strcmp(mode,'GT')
-        plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
-    else
-        plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize, Z{k},nbrPosStates)
-    end
-    title(['k = ', num2str(k)])
-    waitforbuttonpress
-    %pause(1.5)
-end
+% figure('units','normalized','position',[.05 .05 .9 .9]);
+% subplot('position', [0.02 0 0.98 1])
+% for k = 1:size(Xest,2)
+%     frameNbr = sprintf('%06d',k-1);
+%     if ~strcmp(mode,'GT')
+%         plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
+%     else
+%         plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize, Z{k},nbrPosStates)
+%     end
+%     title(['k = ', num2str(k)])
+%     waitforbuttonpress
+%     %pause(1.5)
+% end
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Plot estimates
+% Plot estimates
 
 figure('units','normalized','position',[.05 .05 .9 .9]);
 subplot('position', [0.02 0 0.98 1])
@@ -144,6 +148,10 @@ while 1
             k = k - 1;
         case 'l'
             k = k + 1;
+        case 'o'
+            k = k + 10;
+        case 'q'
+            k = k - 10;
     end
     %pause(1.5)
 %end
@@ -176,10 +184,11 @@ for k = 1:K
     title(['k = ', num2str(k)])
     waitforbuttonpress
 end
-
-
+% 
+% 
 %% Plot pred and upd
-figure;
+%figure;
+figure('units','normalized','position',[.05 .05 .9 .9]);
 %for k = 2:size(Xest,2)
 k = 2;
 while 1
@@ -201,7 +210,7 @@ while 1
             k = k + 1;
     end
 end
-
+% 
 %% Plot single pred and upd
 i = 1;
 
