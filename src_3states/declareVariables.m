@@ -45,7 +45,7 @@ elseif(strcmp(mode,'GT')) || (strcmp(mode,'GTnonlinear'))
 elseif simMeas
     Ztmp = generateGT(set,sequence,datapath, nbrPosStates);
     %Z = cell(size(Ztmp,2));
-    measP = @(d) diag([5 5 (0.161*d/1.959964)^2 5 5]);
+    measP = @(d) diag([3 3 (0.161*d/1.959964)^2 5 5]);
     for k = 1:size(Ztmp,2)
         ind = 1;
         if ~isempty(Ztmp{k})
@@ -170,7 +170,7 @@ global T
 T = 0.1; % sampling time, 1 fps
 if strcmp(mode,'GTnonlinear')
     global sigmaQ
-    sigmaQ = 7; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
+    sigmaQ = 5; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
     global sigmaBB
     sigmaBB = 2;
 elseif strcmp(mode,'CNNnonlinear')
@@ -272,7 +272,8 @@ if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
 end
 
 if strcmp(mode,'GTnonlinear')
-    R3dTo2d = diag([15 15 15 5 5]);
+    %R3dTo2d = diag([15 15 15 5 5]);
+    R3dTo2d = diag([25 25 15 10 10]);
     Rdistance = @(x) 5;
     if egoMotionOn
         Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
@@ -349,7 +350,7 @@ weightBirth = 1;
 % Number of births
 if strcmp(mode,'GTnonlinear')
     global nbrOfBirths
-    nbrOfBirths = 400; % 250
+    nbrOfBirths = 200; % 250
 elseif strcmp(mode,'CNNnonlinear')
     global nbrOfBirths
     nbrOfBirths = 400; % 250
@@ -367,7 +368,7 @@ if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
         %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
-        covBirth = 1*diag([1 1 1 2 2 1 20 20]); %0.1 2*Q
+        covBirth = diag([1 1 1 2 2 2 20 20]); %0.1 2*Q
         covBirth(7:8,7:8) = diag([20 20]);
     end
     
@@ -377,7 +378,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
         %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
-        covBirth = 1*diag([1 1 1 2 2 1 20 20]); %0.1 2*Q
+        covBirth = 1*diag([1 1 1 2 2 2 20 20]); %0.1 2*Q
         covBirth(7:8,7:8) = diag([20 20]);
     end
 end

@@ -1,11 +1,11 @@
 clear Xest
 clear Pest
-%close all
+close all
 dbstop error
 addpath('IMU')
 addpath('mtimesx')
 clc
-mode = 'CNNnonlinear';
+mode = 'GTnonlinear';
 set = 'training';
 sequence = '0012';
 global motionModel
@@ -18,7 +18,7 @@ egoMotionOn = true;
 % Simulate measurement from GT. Set mode = 'CNNnonlinear' and simMeas =
 % true
 global simMeas
-simMeas = true;
+simMeas = false;
 
 global plotHypoConf
 plotHypoConf = false;
@@ -189,6 +189,15 @@ plotConf = false;
 step = false;
 if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
     plotBirdsEye(sequence,set,Xest,Pest,step,plotConf);
+else
+    disp('Not implemented')
+end
+
+%% Plot birds-eye view pred conf
+
+step = true;
+if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
+    plotBirdsConf(sequence,set,Xpred,step,jEst);
 else
     disp('Not implemented')
 end
