@@ -4,10 +4,11 @@ close all
 dbstop error
 addpath('IMU')
 addpath('mtimesx')
+addpath('evalMOT')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0012';
+sequence = '0002';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -15,8 +16,8 @@ birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 global egoMotionOn
 egoMotionOn = true; 
 
-% Simulate measurement from GT. Set mode = 'CNNnonlinear' and simMeas =
-% true
+% Simulate measurement from GT. Set simMeas = true. Use variables from
+% GTnonlinear or CNNnonlinear by setting mode
 global simMeas
 simMeas = false;
 
@@ -142,9 +143,9 @@ subplot('position', [0.02 0 0.98 1])
 k = 1;
 while 1
     frameNbr = sprintf('%06d',k-1);
-    if strcmp(mode,'GTnonlinear')
+    if strcmp(mode,'GTnonlinear') && ~simMeas
         plotImgEstGT(sequence,set,k,Xest{k});
-    elseif strcmp(mode,'CNNnonlinear')
+    elseif strcmp(mode,'CNNnonlinear') || simMeas
         plotImgEst(sequence,set,k,Xest{k},Z{k})
     end
     title(['k = ', num2str(k)])

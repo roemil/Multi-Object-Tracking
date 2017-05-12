@@ -40,18 +40,21 @@ if (strcmp(mode,'CNNnonlinear')) && ~simMeas
         end
         oldFrame = frame; 
     end
-elseif(strcmp(mode,'GT')) || (strcmp(mode,'GTnonlinear'))
+elseif(strcmp(mode,'GT')) || (strcmp(mode,'GTnonlinear') && ~simMeas) 
     Z = generateGT(set,sequence,datapath, nbrPosStates);
 elseif simMeas
     Ztmp = generateGT(set,sequence,datapath, nbrPosStates);
     %Z = cell(size(Ztmp,2));
-    measP = @(d) diag([3 3 (0.161*d/1.959964)^2 5 5]);
+    % This uses a distance uncertainty similar to Autoliv system
+    %measP = @(d) diag([3 3 (0.161*d/1.959964)^2 5 5]); % Set cov of measurements here
+    % This uses a lower distance uncertainty
+    measP = @(d) diag([3 3 (0.161*d/1.959964)^2/10 40 40]); % Set cov of measurements here
     for k = 1:size(Ztmp,2)
         ind = 1;
         if ~isempty(Ztmp{k})
             for i = 1:size(Ztmp{k},2)
                 detectRnd = unifrnd(0,1);
-                if detectRnd < 0.95
+                if detectRnd < 0.95 % Set missdetection rate here
                     Z{k}(1:5,ind) = Ztmp{k}(1:5,i) + mvnrnd(zeros(5,1),measP(Ztmp{k}(3,i)))';
                     ind = ind+1;
                 end
@@ -274,7 +277,7 @@ end
 if strcmp(mode,'GTnonlinear')
     %R3dTo2d = diag([15 15 15 5 5]);
     R3dTo2d = diag([25 25 15 10 10]);
-    Rdistance = @(x) 5;
+    Rdistance = @(x) 1; % 5
     if egoMotionOn
         Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
         R = @(x) Rcam(x);
@@ -350,7 +353,7 @@ weightBirth = 1;
 % Number of births
 if strcmp(mode,'GTnonlinear')
     global nbrOfBirths
-    nbrOfBirths = 200; % 250
+    nbrOfBirths = 200; % 200
 elseif strcmp(mode,'CNNnonlinear')
     global nbrOfBirths
     nbrOfBirths = 400; % 250
