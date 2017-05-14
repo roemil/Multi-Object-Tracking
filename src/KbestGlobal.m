@@ -47,7 +47,7 @@ K_hyp = max(1,ceil(Nh * wHyp));
 % end
 ind = find(sum(sum(S,2),1) ~= 0);
 %bfTrace = permute(S,[2 1 3]); %For each index in 3D, Transpose S 
-bfTracesTimesC = mtimesx(S(:,:,ind),'T',C); %For each index in 3D, multiply with C
+bfTracesTimesC = mtimesx(S(:,1:m+nj,ind),'T',C); %For each index in 3D, multiply with C
 %d = trace((bfTracesTimesC));
 % Calculate trace of matrix bfTracesTimesC for each index in 3D
 d=bfTracesTimesC(bsxfun(@plus,(0:size(bfTracesTimesC,3)-1)*size(bfTracesTimesC,1)*size(bfTracesTimesC,2),(1:size(bfTracesTimesC,2)+1:size(bfTracesTimesC,1)*size(bfTracesTimesC,2)).'));

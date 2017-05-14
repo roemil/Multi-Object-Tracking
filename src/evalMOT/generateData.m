@@ -36,7 +36,7 @@ if(strcmp(motionModel,'ca'))
         end
         iInd = iInd + 1;
     end
-elseif(strcmp(motionModen,'cvBB'))
+elseif(strcmp(motionModel,'cvBB'))
     %THIS IS FOR CVBB
     for i = 1 : size(Xest,2)
         jInd = 1;
@@ -44,7 +44,20 @@ elseif(strcmp(motionModen,'cvBB'))
             if(~isempty(Xest{i}{j}))
                 result(i).trackerData.idxTracks(jInd) = Xest{i}{j}(end);%
                 result(i).trackerData.target(jInd).bbox = [Xest{i}{j}(1)-Xest{i}{j}(5)*0.5 Xest{i}{j}(2)-Xest{i}{j}(6)*0.5 Xest{i}{j}(5:6)'];%[camera2pixelcoords(Xest{i}{j}(1:3),P)', Xest{i}{j}(7:8)'];
+                jInd = jInd + 1;
+            end
+        end
+    end
+elseif(strcmp(motionModel,'caBB'))
+    for i = 1 : size(Xest,2)
+        jInd = 1;
+        for j = 1 : size(Xest{i},2)
+            if(~isempty(Xest{i}{j}))
+                result(i).trackerData.idxTracks(jInd) = Xest{i}{j}(end);%
+                result(i).trackerData.target(jInd).bbox = [Xest{i}{j}(1)-Xest{i}{j}(7)*0.5 Xest{i}{j}(2)-Xest{i}{j}(8)*0.5 Xest{i}{j}(7:8)'];%[camera2pixelcoords(Xest{i}{j}(1:3),P)', Xest{i}{j}(7:8)'];
+                jInd = jInd + 1;
             end
         end
     end
 end
+

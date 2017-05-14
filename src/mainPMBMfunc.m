@@ -4,13 +4,14 @@ close all
 dbstop error
 addpath('mtimesx')
 addpath('evalMOT')
+addpath('IMU');
 addpath('../../kittiTracking')
 clc
 
 mode = 'GT';
 set = 'training';
 sequence = '0000';
-motionModel = 'ca'; % Choose 'cv' or 'cvBB'
+motionModel = 'caBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 addpath('mtimesx');
 addpath('evalMOT');
@@ -24,7 +25,7 @@ nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 
 Xupd = cell(1);
 
-K = min(123,size(Z,2)); % Length of sequence
+K = min(110,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -63,14 +64,35 @@ for t = 1:nbrSim
     tmp = XuUpd;
     clear XuUpd;
     XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
+    base_dir = strcat('../../kittiTracking/data_tracking_oxts/',set);
+    filenameIMU = [base_dir,sequence,'.txt'];
+
+    oxts = loadOxtsliteData(base_dir,1:1);
     
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
+        [~,vx] = egomotion(oxts{1}(k,:));
+        if(k < 10)
+            fr1 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','00000',num2str(k-1),'.png']);
+            fr2 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','00000',num2str(k),'.png']);
+        elseif(k == 10)
+            fr1 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','00000',num2str(k-1),'.png']);
+            fr2 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','0000',num2str(k),'.png']);
+        elseif(k < 100)
+            fr1 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','0000',num2str(k-1),'.png']);
+            fr2 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','0000',num2str(k),'.png']);
+        elseif(k==100)
+            fr1 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','0000',num2str(k-1),'.png']);
+            fr2 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','000',num2str(k),'.png']);
+        else
+            fr1 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','000',num2str(k-1),'.png']);
+            fr2 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','000',num2str(k),'.png']);
+        end
         if ~isempty(Z{k})
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k);
+                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k,vx,fr1,fr2);
         else
             disp('No measurement')
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
@@ -93,6 +115,7 @@ for t = 1:nbrSim
             pause(0.1)
         end
     end
+    run demo
 end
 simTime = toc(startTime);
 
@@ -163,7 +186,9 @@ type = 'pred';
 j = 1;
 figure('units','normalized','position',[.05 .05 .9 .9]);
 subplot('position', [0.02 0 0.98 1])
-for k = 1:K
+%for k = 1:K
+k = 1;
+while 1
     frameNbr = sprintf('%06d',k-1);
     if ((strcmp(type,'est')) && (~isempty(Xest{k}{1})))
         plotStateConf(set, sequence, frameNbr, Xest{k}, Pest{k}, FOVsize, Z{k})
@@ -182,7 +207,23 @@ for k = 1:K
         plotStateConf(set, sequence, frameNbr, Xtmp, Ptmp, FOVsize, Z{k})
     end
     title(['k = ', num2str(k)])
-    waitforbuttonpress
+    try
+        waitforbuttonpress; 
+    catch
+        fprintf('Window closed. Exiting...\n');
+        break
+    end
+    key = get(gcf,'CurrentCharacter');
+    switch lower(key)  
+        case 'a'
+            k = k - 1;
+        case 'l'
+            k = k + 1;
+        case 'o'
+            k = k + 10;
+        case 'q'
+            k = k - 10;
+    end
 end
 % 
 % 
@@ -213,7 +254,7 @@ end
 % 
 %% Plot single pred and upd
 i = 1;
-
+figure('units','normalized','position',[.05 .05 .9 .9]);
 for k = 2:size(Xest,2)
     k
     frameNbr = sprintf('%06d',k-1);

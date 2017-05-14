@@ -1,4 +1,4 @@
-function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates)
+function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates,fr1,fr2)
 % Create missdetection hypo in index size(Z{k},2)+1
     if(isempty(Xpred)) % If we have no predicted targets, we cannot 
                           % generate hypotheses
@@ -26,7 +26,7 @@ function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, 
             nbrMeasObj = nbrOfMeas+size(Xpred{j},2);
             ind = 1;
             for i = 1:size(Xpred{j},2)
-                if(gating(Z(:,z),H,Xpred{j}(i),R,100)) % 100
+                if(gating(Z(:,z),H(1:2,1:6),Xpred{j}(i),R,100)) % 100
                     if strcmp(motionModel,'cv')
                         %[Xhypo(i).state, Xhypo(i).P, Xhypo(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates,z));
                         [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates));
@@ -35,10 +35,22 @@ function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, 
                         %Xhypo{j,z}(i).box = Z(3:4,z);
                     elseif strcmp(motionModel,'ca')
                         %[Xhypo(i).state, Xhypo(i).P, Xhypo(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates,z));
+                        %[u,v] = calcOptFlow(Xpred{j}(i).state(1:2),fr1,fr2,10);
+                        %meas = [Z(1:nbrMeasStates,z);u;v];
                         [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:nbrMeasStates,z));
-                        Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:nbrMeasStates,z), H*Xpred{j}(i).state, Xhypo{j,z}(i).S);
+                        Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:nbrMeasStates,z), H(1:2,1:6)*Xpred{j}(i).state, Xhypo{j,z}(i).S(1:2,1:2));
                         Xhypo{j,z}(i).box = 0.4.*Xpred{j}(i).box + 0.6.*Z(nbrMeasStates+1:nbrMeasStates+2,z); % Take mean bounding box?
                         %Xhypo{j,z}(i).box = Z(3:4,z);
+                        %Xhypo{j,z}(i).box = Xhypo{j,z}(i).state(nbrPosStates+3:nbrPosStates+4);
+                    elseif strcmp(motionModel,'caBB')
+                        %[Xhypo(i).state, Xhypo(i).P, Xhypo(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates,z));
+                        %[u,v] = calcOptFlow(Xpred{j}(i).state(1:2),fr1,fr2,10);
+                        %meas = [Z(1:nbrMeasStates,z);u;v];
+                        [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:nbrMeasStates+2,z));
+                        Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:nbrMeasStates,z),  H(1:nbrMeasStates,1:nbrMeasStates)*Xpred{j}(i).state(1:nbrMeasStates), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
+                        %Xhypo{j,z}(i).box = 0.4.*Xpred{j}(i).box + 0.6.*Z(nbrMeasStates+1:nbrMeasStates+2,z); % Take mean bounding box?
+                        %Xhypo{j,z}(i).box = Z(3:4,z);
+                        Xhypo{j,z}(i).box = Xhypo{j,z}(i).state(nbrPosStates+3:nbrPosStates+4);
                     elseif strcmp(motionModel,'cvBB')
                         [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred{j}(i).state, H, Xpred{j}(i).P, R, Z(1:nbrMeasStates+2,z));
                         Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + log_mvnpdf(Z(1:nbrMeasStates,z), H(1:nbrMeasStates,1:nbrMeasStates)*Xpred{j}(i).state(1:nbrMeasStates), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
@@ -66,7 +78,7 @@ function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, 
         end
     end
 
-S = zeros(nbrOfMeas,nbrOfMeas+size(Xpred{1},2),1,nbrOfGlobHyp);
+S = zeros(nbrOfMeas,1,1,nbrOfGlobHyp);
 indvInd = zeros(nbrOfMeas,2);
 for j = 1:nbrOfGlobHyp
     for z = 1:nbrOfMeas
