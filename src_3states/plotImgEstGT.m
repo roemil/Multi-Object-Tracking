@@ -20,7 +20,8 @@ imagePath = strcat('../../kittiTracking/',set,'/image_02/',seq,'/',frameNbr,'.pn
 % Read and plot image
 %figure;
 img = imread(imagePath);
-imagesc(img);
+%imagesc(img);
+subimage(img);
 axis('image')
 hold on
 xlim([FOVsize(1,1) FOVsize(2,1)])

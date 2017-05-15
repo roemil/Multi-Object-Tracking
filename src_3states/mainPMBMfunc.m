@@ -8,7 +8,7 @@ addpath('evalMOT')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0002';
+sequence = '0000';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -24,6 +24,9 @@ simMeas = false;
 global plotHypoConf
 plotHypoConf = false;
 
+global gatingOn
+gatingOn = true;
+
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
 
@@ -37,7 +40,7 @@ k = 1;
 
 Xupd = cell(1);
 
-K = min(120,size(Z,2)); % Length of sequence
+K = min(140,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -117,7 +120,7 @@ disp(['Total simulation time: ', num2str(simTime)])
 
     
 
-% Plot estimates
+%% Plot estimates
 
 figure('units','normalized','position',[.05 .05 .9 .9]);
 subplot('position', [0.02 0 0.98 1])
@@ -202,6 +205,15 @@ if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
 else
     disp('Not implemented')
 end
+
+%% Evaluate
+
+clear gt, clear result
+generateData
+
+VOCscore = 0.5;
+dispON  = true;
+ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
 
 %% Plot estimates 3D
 

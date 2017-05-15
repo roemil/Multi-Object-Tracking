@@ -15,7 +15,7 @@
 %
 %%
 
-function [X,P,S] = CKFupdate(Xpred, Ppred, H, Z, R, n)
+function [X,P,S,v] = CKFupdate(Xpred, Ppred, H, Z, R, n)
 global pose, global k, global angles
 
 if isa(R,'function_handle')
@@ -39,3 +39,5 @@ Pxy = Wi*(Xtmp-repmat(Xpred,1,2*n))*(hX-yhatpred)';
 S = Wi*(hX-yhatpred)*(hX-yhatpred)'+R;
 X = Xpred+Pxy/S*(Z-yhatpred(:,1));
 P = Ppred-Pxy/S*Pxy';
+
+v = Z-yhatpred(:,1);
