@@ -2,7 +2,7 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, ...
     Z, newLabel,motionModel, nbrPosStates)
 global Pd, global H3dFunc, global Hdistance, global R3dTo2d, global Rdistance, global Jh
 global c, global nbrStates, global nbrMeasStates, global H, global R,
-global pose, global k
+global pose, global k, global angles
 
     rho = zeros(nbrOfMeas,1);
     
@@ -45,10 +45,16 @@ global pose, global k
             % TODO: DEFINE THESE AS FUNCTIONS AND JUST PASS DIFF z? 
             % Compute weight
             
-            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state,pose{k}(1:3,4)), XmuUpd{z}(i).S);
+            % Only yaw
+            w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading), XmuUpd{z}(i).S);
+            % Full Rotation matrix
+            %w(1,i) = XmuPred(i).w*mvnpdf(Z(1:3,z), H(XmuPred(i).state,pose{k}(1:3,4), angles,k), XmuUpd{z}(i).S);
             
             % TODO: temp solution
-            Xmutmp(1:3,i) = H(XmuPred(i).state,pose{k}(1:3,4));%[H3dFunc(XmuPred(i).state); Hdistance(XmuPred(i).state)];
+            % Only yaw
+            Xmutmp(1:3,i) = H(XmuPred(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
+            % Full rotation matrix
+            %Xmutmp(1:3,i) = H(XmuPred(i).state,pose{k}(1:3,4), angles,k);
             Stmp{i} = XmuUpd{z}(i).S;
             
             % --alt 2--
@@ -78,6 +84,7 @@ global pose, global k
         rho(z) = e+c;
         XpotNew{z}.w = log(e+c); % rho (45) (44)
         XpotNew{z}.r = e/rho(z); % (43) (44)
+        %[XpotNew{z}.w XpotNew{z}.r e]
         XpotNew{z}.S = 0;
         XpotNew{z}.box = Z(nbrMeasStates+1:nbrMeasStates+2,z);
         XpotNew{z}.label = newLabel;

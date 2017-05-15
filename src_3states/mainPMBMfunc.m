@@ -7,20 +7,32 @@ addpath('mtimesx')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0000';
+sequence = '0012';
+global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 global egoMotionOn
 egoMotionOn = true; 
 
+% Simulate measurement from GT. Set mode = 'CNNnonlinear' and simMeas =
+% true
+global simMeas
+simMeas = false;
+
+global plotHypoConf
+plotHypoConf = false;
+
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
 
+global nbrPosStates
 nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
+global k
+k = 1;
 
 Xupd = cell(1);
 
@@ -45,11 +57,10 @@ for t = 1:nbrSim
     [a, MSGID] = lastwarn();
     warning('off', MSGID)
     tic
-    %Z = measGenerateCase2(X, R, FOVsize, K);
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
-        PMBMinitFunc(Z{t,1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
+        PMBMinitFunc(Z{1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
     disp(['Iteration time: ', num2str(toc)])
-
+    rest{1}
     if strcmp(plotOn,'true')
         frameNbr = '000000';
         if ~strcmp(mode,'GT')
@@ -64,9 +75,9 @@ for t = 1:nbrSim
     end
     
     % Only keep births
-    tmp = XuUpd;
-    clear XuUpd;
-    XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
+    %tmp = XuUpd;
+    %clear XuUpd;
+    %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
     
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
@@ -74,11 +85,11 @@ for t = 1:nbrSim
         tic;
         if ~isempty(Z{k})
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
+                PMBMfunc(Z{k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
         else
             disp('No measurement')
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMpredFunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k);
+                PMBMpredFunc(Z{k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
         end
         disp(['Iteration time: ', num2str(toc)])
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
@@ -112,9 +123,9 @@ subplot('position', [0.02 0 0.98 1])
 for k = 1:size(Xest,2)
     frameNbr = sprintf('%06d',k-1);
     if ~strcmp(mode,'GT')
-        plotDetections(set, sequence, frameNbr, Xest{k}, FOVsize)
+        plotImgEstGT(sequence,set,k,Xest{k});
     else
-        plotDetectionsGT(set, sequence, frameNbr, Xest{k}, FOVsize, Z{k},nbrPosStates)
+        plotImgEstGT(sequence,set,k,Xest{k});
     end
     title(['k = ', num2str(k)])
     waitforbuttonpress
@@ -133,8 +144,8 @@ while 1
     frameNbr = sprintf('%06d',k-1);
     if strcmp(mode,'GTnonlinear')
         plotImgEstGT(sequence,set,k,Xest{k});
-    elseif ~strcmp(mode,'GTnonlinear')
-        % Not implemented
+    elseif strcmp(mode,'CNNnonlinear')
+        plotImgEst(sequence,set,k,Xest{k},Z{k})
     end
     title(['k = ', num2str(k)])
     try
@@ -147,8 +158,16 @@ while 1
     switch lower(key)  
         case 'a'
             k = k - 1;
+            if k <= 0
+                fprintf('Window closed. Exiting...\n');
+                break
+            end
         case 'l'
             k = k + 1;
+            if k > size(Xest,2)
+                fprintf('Window closed. Exiting...\n');
+                break
+            end
     end
     %pause(1.5)
 %end
@@ -158,10 +177,29 @@ end
 
 plotConf = false;
 %subplot('position', [0.02 0 0.98 1])
-if strcmp(mode,'GTnonlinear')
+if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
     plotEach3Dstate(sequence,set,Xest,Pest,plotConf);
 else
-    % Not implemented
+    disp('Not implemented')
+end
+
+%% Plot birds-eye view
+
+plotConf = false;
+step = false;
+if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
+    plotBirdsEye(sequence,set,Xest,Pest,step,plotConf);
+else
+    disp('Not implemented')
+end
+
+%% Plot birds-eye view pred conf
+
+step = true;
+if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
+    plotBirdsConf(sequence,set,Xpred,step,jEst);
+else
+    disp('Not implemented')
 end
 
 %% Plot estimates 3D

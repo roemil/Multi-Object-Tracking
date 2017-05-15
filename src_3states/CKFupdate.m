@@ -16,7 +16,7 @@
 %%
 
 function [X,P,S] = CKFupdate(Xpred, Ppred, H, Z, R, n)
-global pose, global k
+global pose, global k, global angles
 
 if isa(R,'function_handle')
     R = R(Z(3));
@@ -30,7 +30,10 @@ for i = 1:n
     Xtmp(:,i) = Xpred+sqrt(n)*Psqrt(:,i);
     Xtmp(:,i+n) = Xpred-sqrt(n)*Psqrt(:,i);
 end
-hX = H(Xtmp,pose{k}(1:3,4));
+% Only yaw
+hX = H(Xtmp,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
+% Full rotation matrix
+%hX = H(Xtmp,pose{k}(1:3,4), angles,k);
 yhatpred = repmat(Wi*sum(hX,2),1,2*n);
 Pxy = Wi*(Xtmp-repmat(Xpred,1,2*n))*(hX-yhatpred)';
 S = Wi*(hX-yhatpred)*(hX-yhatpred)'+R;

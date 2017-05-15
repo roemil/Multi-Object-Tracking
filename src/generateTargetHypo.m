@@ -42,15 +42,10 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, m
                 %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H*Xhypo{j,z}(i).state, Xhypo{j,z}(i).S)]
                 %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H(1:2,:)*Xpred{j}(i).state, Xhypo{j,z}(i).S(1:2,1:2))]
                 %Xpred{j}(i).label
-                %[Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H(1:2,1:2)*Xpred{j}(i).state(1:2), Xhypo{j,z}(i).S(1:2,1:2))]
-                %Xhypo{j,z}(i).w
+%                 [Xhypo{j,z}(i).w Xhypo{j,end}(i).w log_mvnpdf(Z(1:2,z), H(1:2,1:2)*Xpred{j}(i).state(1:2), Xhypo{j,z}(i).S(1:2,1:2))]
+%                 Xhypo{j,z}(i).S(1:2,1:2)
                 %[Z(1:2,z), H*Xpred{j}(i).state]
                 %[Z(1:2,z), H*Xhypo{j,z}(i).state]
-                %Xhypo{j,end}(i).w
-                %Xhypo{j,z}(i).w = Xhypo{j,z}(i).w+0.2;
-                %if c == 13
-                %    keyboard
-                %end
 %                 tmp = H(1:2,1:4)*Xpred{j}(i).state(1:4);
 %                 tmp2 = H(1:2,1:4)*Xhypo{j,z}(i).state(1:4);
 %                 figure;
@@ -66,6 +61,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, m
 %                 x = repmat(tmp2,1,n)+sqrtm(Xhypo{j,z}(i).S(1:2,1:2))*[cos(phi);sin(phi)];
 %                 plot(x(1,:),x(2,:),'-c','LineWidth',2)
 %                 legend('Z','Pred','Upd','3\sigma','\sigma')
+%                 title(['z = ', num2str(z), ' i = ', num2str(i), ' j = ', num2str(j)])
 %                 waitforbuttonpress
 %                 if isnan(Xhypo{j,z}(i).w)
 %                    keyboard

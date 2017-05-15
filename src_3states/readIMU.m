@@ -132,4 +132,8 @@ filenameIMU = [base_dir,sequence,'.txt'];
 
 oxts = loadOxtsliteData(base_dir,1:1);
 %%
-run_demoVehiclePath(base_dir)
+set = 'training';
+sequence = '0000';
+base_dir = strcat('../../kittiTracking/data_tracking_oxts/',set);
+%base_dir = strcat('../../kittiTracking/data_tracking_oxts/',set,'/oxts/',sequence,'.txt');
+run_demoVehiclePath(base_dir,1:1)

@@ -1,4 +1,7 @@
 function [est, true] = estGTdiff(seq,set,k,X,plotOn3D,plotOnImg)
+global RcamToVelo, global TcamToVelo, global R20, global T20,
+global RimuToVelo, global TimuToVelo, global pose, global egoMotionOn
+global TveloToImu
 
 if nargin == 4
     plotOn3D = false;
@@ -15,6 +18,14 @@ fclose(f);
 ind = find(GT{1} == k-1 & GT{2} ~= -1);
 
 true = [GT{14}(ind)'; (GT{15}(ind)-GT{11}(ind)/2)'; GT{16}(ind)'];
+
+if egoMotionOn
+    truelabel = GT{2}(ind);
+    GT = [GT{14}(ind)';
+        (GT{15}(ind)-GT{11}(ind)/2)';
+        GT{16}(ind)'];
+    true = TveloToImu(1:3,:)*TcamToVelo*T20*[GT;ones(1,size(GT,2))]+pose{k}(1:3,4);
+end
 %true = [GT{14}(ind)'; GT{15}(ind)'; GT{16}(ind)'];
 
 labels = zeros(1,size(X,2));
@@ -57,21 +68,51 @@ end
 if plotOn3D
     figure;
     if size(est,2) <= 10
-        p1 = plot3(est(1,:),est(3,:),est(2,:),'r+','markersize',20);
+        if ~egoMotionOn
+            p1 = plot3(est(1,:),est(3,:),est(2,:),'r+','markersize',20);
+        else
+            p1 = plot3(est(1,:),est(2,:),est(3,:),'r+','markersize',20);
+        end
     else
-        p1 = plot3(est(1,:),est(3,:),est(2,:),'r+');
+        if ~egoMotionOn
+            p1 = plot3(est(1,:),est(3,:),est(2,:),'r+');
+        else
+             p1 = plot3(est(1,:),est(2,:),est(3,:),'r+');
+        end
     end
     hold on
-    p2 = plot3(true(1,:),true(3,:),true(2,:),'g*','markersize',20);
+    if ~egoMotionOn
+        p2 = plot3(true(1,:),true(3,:),true(2,:),'g*','markersize',20,'lineWidth',1);
+        for i = 1:size(true,2)
+            text(true(1,i), true(3,i), true(2,i), num2str(truelabel(i)),'Fontsize',18,'Color','green')
+        end
+    else
+        p2 = plot3(true(1,:),true(2,:),true(3,:),'g*','markersize',10,'lineWidth',2);
+        for i = 1:size(true,2)
+            text(true(1,i), true(2,i), true(3,i), num2str(truelabel(i)),'Fontsize',18,'Color','green')
+        end
+    end
     if labels(1) ~= 0
-        for i = 1:size(est,2)
-            text(est(1,i), est(3,i), est(2,i), num2str(labels(1,i)),'Fontsize',18,'Color','red')
+        if ~egoMotionOn
+            for i = 1:size(est,2)
+                text(est(1,i), est(3,i), est(2,i), num2str(labels(1,i)),'Fontsize',18,'Color','red')
+            end
+        else
+            for i = 1:size(est,2)
+                text(est(1,i), est(2,i), est(3,i), num2str(labels(1,i)),'Fontsize',18,'Color','red')
+            end
         end
     end
     legend([p1, p2],'Estimate','GT')
-    xlabel('x')
-    zlabel('y')
-    ylabel('z')
+    if ~egoMotionOn
+        xlabel('x')
+        zlabel('y')
+        ylabel('z')
+    else
+        xlabel('x')
+        ylabel('y')
+        zlabel('z')
+    end
 end
 
 if plotOnImg

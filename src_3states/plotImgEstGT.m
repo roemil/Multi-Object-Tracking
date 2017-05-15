@@ -5,7 +5,7 @@ global H3dTo2d
 global H
 global egoMotionOn
 global k
-global pose
+global pose, global angles
 
 datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
 filename = [datapath,'.txt'];
@@ -29,14 +29,21 @@ ylim([FOVsize(1,2) FOVsize(2,2)])
 ind = find(GT{1} == k-1 & GT{2} ~= -1);
 boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];
 
+cx(1:size(ind,1)) = mean([GT{7}(ind),GT{9}(ind)],2);
+cy(1:size(ind,1)) = mean([GT{8}(ind),GT{10}(ind)],2);
+
 for i = 1:size(boxes,1)
     rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
+    plot(cx(i),cy(i),'g*')
 end
 
 if ~isempty(X{1})
     for i = 1:size(X,2)
         if egoMotionOn
-            tmp = H(X{i}(1:end-1),pose{k}(1:3,4));
+            % Only yaw
+             tmp = H(X{i}(1:end-1),pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
+            % Full rotation matrix
+            %tmp = H(X{i}(1:end-1),pose{k}(1:3,4), angles,k);
         else
             tmp = H(X{i}(1:end-1));
         end

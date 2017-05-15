@@ -11,6 +11,7 @@ clc
 mode = 'GT';
 set = 'training';
 sequence = '0000';
+
 motionModel = 'caBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 addpath('mtimesx');

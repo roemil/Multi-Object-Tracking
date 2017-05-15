@@ -202,7 +202,7 @@ c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Threshold existence probability keep for next iteration
-threshold = 1e-2;    % 0.01 ok1
+threshold = 1e-3;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration

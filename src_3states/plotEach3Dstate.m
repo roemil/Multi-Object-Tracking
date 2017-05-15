@@ -1,6 +1,7 @@
 function plotEach3Dstate(seq,set,X,P,plotConf)
 global egoMotionOn, global pose, global R20, global T20, global RcamToVelo,
-global TcamToVelo, global RimuToVelo, global TimuToVelo
+global TcamToVelo, global RimuToVelo, global TimuToVelo,
+global RveloToImu, global TveloToImu, global angles
 
 figure('units','normalized','position',[.05 .05 .9 .9]);
 hold on
@@ -18,7 +19,12 @@ for k = 1:size(X,2)
         GT = [GT{14}(ind)';
             (GT{15}(ind)-GT{11}(ind)/2)';
             GT{16}(ind)'];
-        GT = RcamToVelo*(R20*GT+repmat(T20,1,size(GT,2)))+repmat(TcamToVelo,1,size(GT,2))+RimuToVelo*pose{k}(1:3,4)+TimuToVelo;
+        GT(1,:) = GT(1,:) - ones(1,size(ind,1)).*sin(angles{k}.heading-angles{1}.heading).*...
+                sqrt(GT(1,:).^2+GT(2,:).^2+GT(3,:).^2);
+        GT = TveloToImu(1:3,:)*(TcamToVelo*(T20*[GT;ones(1,size(GT,2))]))+...
+                + pose{k}(1:3,4);
+        %GT = TveloToImu(1:3,:)*(TcamToVelo*(T20*[GT;ones(1,size(GT,2))]))+...
+        %    + pose{k}(1:3,4);
     end
     ktmp = k*ones(size(ind));
     subplot(3,1,1)
