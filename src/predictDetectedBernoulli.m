@@ -7,7 +7,9 @@
 %
 %
 %
-function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)    
+function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps, egoPos,fr1,fr2)
+    %egoMotion = [0;0;egoPos*155;0;0;0];
+    %egoMotion = zeros(6,1);
     if(isempty(XupdPrev))
         Xpred = [];
     else
@@ -31,8 +33,11 @@ function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)
             for i = 1:size(XupdPrev{j},2)
                 %[Fnew, Qnew] = updateMotionModel(F,Q,XupdPrev{j}(i));
                 % Bernoulli
+                %XupdPrev{j}(i).state = XupdPrev{j}(i).state - egoMotion;
                 Xpred{j}(i).w = XupdPrev{j}(i).w;      % Pred weight
+                %XupdPrev{j}(i).state(3:4) = calcOptFlow(XupdPrev{j}(i).state(1:2),fr1,fr2,20);
                 [Xpred{j}(i).state, Xpred{j}(i).P] = KFPred(XupdPrev{j}(i).state, F, XupdPrev{j}(i).P ,Q);    % Pred state
+                %Xpred{j}(i).state(3:4) = calcOptFlow(XupdPrev{j}(i).state(1:2),fr1,fr2,XupdPrev{j}(i).box);
                 Xpred{j}(i).r = Ps*XupdPrev{j}(i).r;   % Pred prob. of existence
                 Xpred{j}(i).box = XupdPrev{j}(i).box;
                 Xpred{j}(i).label = XupdPrev{j}(i).label;

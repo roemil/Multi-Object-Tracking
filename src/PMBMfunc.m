@@ -1,6 +1,6 @@
 %%%%% PMBM %%%%%
 function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
-    PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k)
+    PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k, egoPos,fr1,fr2)
 
 load('simVariables')
 Wold = 0;
@@ -39,7 +39,7 @@ XuUpdTmp = updatePoisson(XmuPred,Pd);
 % Disp
 %size(XuUpdTmp,2)
 % Predict states for old potential targets
-Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps);
+Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps, egoPos,fr1,fr2);
 
 %timePred = toc(startPred);
 %startUpd = tic;
@@ -64,7 +64,7 @@ end
 
 %generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates)
 %%%% Update for previously potentially detected targets %%%%
-[Xhypo, S] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates);    
+[Xhypo, S] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates,fr1,fr2);    
 %if(isempty(Xhypo{1}))keyboard;end
 oldInd = 0;
 m = size(Z,2);

@@ -110,6 +110,9 @@ if strcmp(motionModel,'cv')
 elseif strcmp(motionModel,'ca')
         nbrStates = 6; % Total number of states
         nbrMeasStates = 2;
+elseif strcmp(motionModel,'caBB')
+    nbrStates = 8; % Total number of states
+    nbrMeasStates = 2;
 elseif strcmp(motionModel,'cvBB')
     nbrStates = 6;
     if nbrPosStates == 4
@@ -120,7 +123,7 @@ elseif strcmp(motionModel,'cvBB')
 end
 
 T = 0.1; % sampling time, 1 fps
-sigmaQ = 30;         % Process (motion) noise % 20 ok1 || 24 apr 10
+sigmaQ = 35;         % Process (motion) noise % 20 ok1 || 24 apr 10
 sigmaBB = 2;
 dInit = [0 20];
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
@@ -136,7 +139,13 @@ if strcmp(motionModel,'cv')
 elseif strcmp(motionModel,'ca')
     %Q = Q + 25*diag([1.2 1 0 0]); % 10
         %Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
-    Q = Q + 100*diag([1.3 1.1 .2 .1 0 0])
+    %Q = Q + 100*diag([1.3 1.2 0 0 0 0])
+    Q = Q + 100*diag([1.3 1.1 0.1 0.1 0 0])
+elseif strcmp(motionModel,'caBB')
+    %Q = Q + 25*diag([1.2 1 0 0]); % 10
+        %Q = Q + 0.1*diag([FOVsize(2,1), FOVsize(2,2), 10*dInit(2) 0 0 0]);
+    %Q = Q + 100*diag([1.3 1.2 0 0 0 0])
+    Q = Q + 100*diag([1.3 1.1 0.1 0.01 0 0 0 0])
 elseif strcmp(motionModel, 'cvBB')
     %Q = Q + 25*diag([1.2 1 0 0 0 0]); % 10
     if nbrPosStates == 4
@@ -157,8 +166,10 @@ if ((strcmp(motionModel,'cv')) && (nbrPosStates == 4))
     R = 0.1*eye(2);
 elseif((strcmp(motionModel,'ca')) && (nbrPosStates == 4))
     R = 0.1*eye(2);
-elseif((strcmp(motionModel,'ca')) && (nbrPosStates == 6))
-    R = 0.1*eye(2);
+    %R(3,3) = 70;
+    %R(4,4) = 70;
+elseif((strcmp(motionModel,'caBB')))
+    R = 0.1*eye(4);
 elseif ((strcmp(motionModel,'cvBB')) && (nbrPosStates == 4))
     R = 0.1*eye(4);    % Measurement noise % 0.01 ok1 || 0.001
 elseif ((strcmp(motionModel,'cv')) && (nbrPosStates == 6))
@@ -257,6 +268,20 @@ elseif strcmp(motionModel,'ca')
             unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),...
             unifrnd(-2,2), unifrnd(2,2)]';      % Pred state
         XuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
+    end
+elseif strcmp(motionModel,'caBB')
+    for i = 1:nbrInitBirth
+        XmuUpd{1}(i).w = wInit;    % Pred weight
+        XmuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),...
+            unifrnd(-2,2), unifrnd(2,2) 0 0]';      % Pred state
+        XmuUpd{1}(i).P = covBirth*eye(8);      % Pred cov
+
+        XuUpd{1}(i).w = wInit;    % Pred weight
+        XuUpd{1}(i).state = [unifrnd(FOVinit(1,1), FOVinit(2,1)), ...
+            unifrnd(FOVinit(1,2), FOVinit(2,2)), unifrnd(-vinit,vinit), unifrnd(-vinit,vinit),...
+            unifrnd(-2,2), unifrnd(2,2) 0 0]';      % Pred state
+        XuUpd{1}(i).P = covBirth*eye(8);      % Pred cov
     end
 elseif strcmp(motionModel,'cvBB')
     for i = 1:nbrInitBirth

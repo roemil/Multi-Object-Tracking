@@ -5,33 +5,31 @@
 % 3D point in the i'th frame and projects it into the oxts
 % coordinates of the first frame.
 
-function [varargout] = egoPosition(varargin)
+function [pose] = egoPosition(oxts)
 
 %oxts, k,Tr_0_inv
-if nargin == 3 
-    oxts = varargin{1};
-    k = varargin{2};
-    Tr_0_inv = varargin{3};
-elseif nargin == 2 
-    oxts = varargin{1};
-    k = varargin{2};
-    Tr_0_inv = [];
-else
-    disp('Wrong number of input arguments. Should be 2 or 3');
-    return;
-end
+% if nargin == 3 
+%     oxts = varargin{1};
+%     k = varargin{2};
+%     Tr_0_inv = varargin{3};
+% elseif nargin == 2 
+%     oxts = varargin{1};
+%     k = varargin{2};
+%     Tr_0_inv = [];
+% else
+%     disp('Wrong number of input arguments. Should be 2 or 3');
+%     return;
+% end
 
 % compute scale from first lat value
 scale = latToScale(oxts{1}(1));
 
 % init pose
 pose     = [];
-%Tr_0_inv = [];
+Tr_0_inv = [];
 
 % for all oxts packets do
-%for i=1:size(oxts{1},1)
-for i = 1 : 1
-    i = k;
+for i=1:size(oxts{1},1)
   % if there is no data => no pose
   if isempty(oxts{1}(i,1))
     pose{i} = [];
@@ -52,15 +50,15 @@ for i = 1 : 1
   R  = Rz*Ry*Rx;
   
   %normalize translation and rotation (start at 0/0/0)
-  if isempty(Tr_0_inv) && k == 1
+  if isempty(Tr_0_inv)
    Tr_0_inv = inv([R t;0 0 0 1]);
   end
       
   % add pose
-  %pose{i} = Tr_0_inv*[R t;0 0 0 1];
-  varargout{1} = Tr_0_inv*[R t;0 0 0 1];
+  pose{i} = Tr_0_inv*[R t;0 0 0 1];
+  %varargout{1} = Tr_0_inv*[R t;0 0 0 1];
   %if(k==1)
-      varargout{2} = Tr_0_inv;
+      %varargout{2} = Tr_0_inv;
   %end
 
 end
