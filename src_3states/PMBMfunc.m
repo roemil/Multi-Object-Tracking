@@ -1,6 +1,7 @@
 %%%%% PMBM %%%%%
 function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
     PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k)
+global gatingOn
 
 load('simVariables')
 Wold = 0;
@@ -61,65 +62,80 @@ end
 [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Z, ...
     newLabel, motionModel,nbrPosStates);
 
-%%%% Update for previously potentially detected targets %%%%
-Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Z, motionModel, ...
-    nbrPosStates);    
+if ~gatingOn
+    %%%% Update for previously potentially detected targets %%%%
+    Xhypo = generateTargetHypo(Xpred, nbrOfMeas, nbrOfGlobHyp, Z, motionModel, ...
+        nbrPosStates);    
 
-oldInd = 0;
-m = size(Z,2);
-Wnew = diag(rho);
-nbrTargetInd = 1;
-nbrVec = 0;
-for j = 1:max(1,nbrOfGlobHyp)
-    clear Amat; clear S;
-    %disp(['Error: ', num2str(1)])
-    %findA(j) = tic;
-    if ~isempty(Xhypo{j})
-        nbrOldTargets = size(Xhypo{j,1},2);
-        if sum(nbrOldTargets == nbrVec) > 0
-           tInd = find(nbrOldTargets == nbrVec);
-           Amat = Atot{tInd};
-           for i = 1:size(Stot,2)
-               if isempty(Stot{tInd,i})
-                   break
+    oldInd = 0;
+    m = size(Z,2);
+    Wnew = diag(rho);
+    nbrTargetInd = 1;
+    nbrVec = 0;
+    for j = 1:max(1,nbrOfGlobHyp)
+        clear Amat; clear S;
+        %disp(['Error: ', num2str(1)])
+        %findA(j) = tic;
+        if ~isempty(Xhypo{j})
+            nbrOldTargets = size(Xhypo{j,1},2);
+            if sum(nbrOldTargets == nbrVec) > 0
+               tInd = find(nbrOldTargets == nbrVec);
+               Amat = Atot{tInd};
+               for i = 1:size(Stot,2)
+                   if isempty(Stot{tInd,i})
+                       break
+                   end
+                   S(:,:,i) = Stot{tInd,i};
                end
-               S(:,:,i) = Stot{tInd,i};
-           end
+            else
+               [S, Amat] = generateGlobalIndv2(m, nbrOldTargets); %TODO: THIS IS CURRENTLY THE BEST ONE
+               Atot{nbrTargetInd} = Amat;
+               for i = 1:size(S,3)
+                   Stot{nbrTargetInd,i} = S(:,:,i);
+               end
+               nbrVec(nbrTargetInd) = nbrOldTargets;
+               nbrTargetInd = nbrTargetInd+1;
+            end
         else
-           [S, Amat] = generateGlobalIndv2(m, nbrOldTargets); %TODO: THIS IS CURRENTLY THE BEST ONE
-           Atot{nbrTargetInd} = Amat;
-           for i = 1:size(S,3)
-               Stot{nbrTargetInd,i} = S(:,:,i);
-           end
-           nbrVec(nbrTargetInd) = nbrOldTargets;
-           nbrTargetInd = nbrTargetInd+1;
+            nbrOldTargets = 0;
+            Amat = 1:m;
+            S = zeros(m,m,1);
+            S(:,:,1) = eye(m);
         end
-    else
-        nbrOldTargets = 0;
-        Amat = 1:m;
-        S = zeros(m,m,1);
-        S(:,:,1) = eye(m);
+        %disp(['Error: ', num2str(2)])
+        % Display nbr old targets and measurements 
+        %disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
+        %disp(['Nbr measurements: ', num2str(m)])
+
+        %timeA(j) = toc(findA(j));
+        %%%%% MURTY %%%%%%
+        %startMurt(j) = tic;
+        ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, j, maxKperGlobal);
+        %murtTime(j) = toc(startMurt(j));
+        %%%%% Find new global hypotheses %%%%%
+        %startGlob(j) = tic;
+        %disp(['Error: ', num2str(3)])
+        [newGlob, newInd] = generateGlobalHypo5(Xhypo(j,:), XpotNew(:), Z, oldInd, Amat, ass, nbrOldTargets);
+        %globTime(j) = toc(startGlob(j));
+        %disp(['Error: ', num2str(4)])
+        for jnew = oldInd+1:newInd
+            Xtmp{jnew} = newGlob{jnew-oldInd};
+        end
+        oldInd = newInd;
     end
-    %disp(['Error: ', num2str(2)])
-    % Display nbr old targets and measurements 
-    %disp(['Nbr of old targets: ', num2str(nbrOldTargets)])
-    %disp(['Nbr measurements: ', num2str(m)])
-    
-    %timeA(j) = toc(findA(j));
-    %%%%% MURTY %%%%%%
-    %startMurt(j) = tic;
-    ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S, Pd, j, maxKperGlobal);
-    %murtTime(j) = toc(startMurt(j));
-    %%%%% Find new global hypotheses %%%%%
-    %startGlob(j) = tic;
-    %disp(['Error: ', num2str(3)])
-    [newGlob, newInd] = generateGlobalHypo5(Xhypo(j,:), XpotNew(:), Z, oldInd, Amat, ass, nbrOldTargets);
-    %globTime(j) = toc(startGlob(j));
-    %disp(['Error: ', num2str(4)])
-    for jnew = oldInd+1:newInd
-        Xtmp{jnew} = newGlob{jnew-oldInd};
+else
+    oldInd = 0;
+    Wnew = diag(rho);
+    [Xhypo, S] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates); 
+    for j = 1:max(1,nbrOfGlobHyp)
+        ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S(:,:,:,j), Pd, j, maxKperGlobal);
+        nbrOldTargets = size(Xhypo{j,1},2);
+        [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S(:,:,:,j), ass, nbrOldTargets);
+        for jnew = oldInd+1:newInd
+            Xtmp{jnew} = newGlob{jnew-oldInd};
+        end
+        oldInd = newInd;
     end
-    oldInd = newInd;
 end
 %disp(['Error: ', num2str(5)])
 % Find global hypotheses weights and weight sum for normalization

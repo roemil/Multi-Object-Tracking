@@ -4,10 +4,11 @@ close all
 dbstop error
 addpath('IMU')
 addpath('mtimesx')
+addpath('evalMOT')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0012';
+sequence = '0000';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -15,13 +16,16 @@ birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 global egoMotionOn
 egoMotionOn = true; 
 
-% Simulate measurement from GT. Set mode = 'CNNnonlinear' and simMeas =
-% true
+% Simulate measurement from GT. Set simMeas = true. Use variables from
+% GTnonlinear or CNNnonlinear by setting mode
 global simMeas
 simMeas = false;
 
 global plotHypoConf
 plotHypoConf = false;
+
+global gatingOn
+gatingOn = true;
 
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
@@ -36,7 +40,7 @@ k = 1;
 
 Xupd = cell(1);
 
-K = min(120,size(Z,2)); % Length of sequence
+K = min(140,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -116,7 +120,7 @@ disp(['Total simulation time: ', num2str(simTime)])
 
     
 
-% Plot estimates
+%% Plot estimates
 
 figure('units','normalized','position',[.05 .05 .9 .9]);
 subplot('position', [0.02 0 0.98 1])
@@ -142,9 +146,9 @@ subplot('position', [0.02 0 0.98 1])
 k = 1;
 while 1
     frameNbr = sprintf('%06d',k-1);
-    if strcmp(mode,'GTnonlinear')
+    if strcmp(mode,'GTnonlinear') && ~simMeas
         plotImgEstGT(sequence,set,k,Xest{k});
-    elseif strcmp(mode,'CNNnonlinear')
+    elseif strcmp(mode,'CNNnonlinear') || simMeas
         plotImgEst(sequence,set,k,Xest{k},Z{k})
     end
     title(['k = ', num2str(k)])
@@ -201,6 +205,15 @@ if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
 else
     disp('Not implemented')
 end
+
+%% Evaluate
+
+clear gt, clear result
+generateData
+
+VOCscore = 0.5;
+dispON  = true;
+ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
 
 %% Plot estimates 3D
 
