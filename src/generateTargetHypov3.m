@@ -97,10 +97,6 @@ for j = 1:nbrOfGlobHyp
                 indvInd(indI-1,1) = indvInd(indI-1,1)+1;
             end
         end
-        %sumCol = sum(S(:,:,ind,j));
-        if sum(sum(S(:,:,ind,j))) == 0
-            keyboard
-        end
         if isempty(find(sum(S(:,:,ind,j)) > 1,1))
             ind = ind+1;
         end

@@ -10,9 +10,9 @@ clc
 
 mode = 'GT';
 set = 'training';
-sequence = '0000';
+sequence = '0010';
 
-motionModel = 'caBB'; % Choose 'cv' or 'cvBB'
+motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 addpath('mtimesx');
 addpath('evalMOT');
@@ -26,7 +26,7 @@ nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 
 Xupd = cell(1);
 
-K = min(110,size(Z,2)); % Length of sequence
+K = min(300,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -70,7 +70,7 @@ for t = 1:nbrSim
 
     oxts = loadOxtsliteData(base_dir,1:1);
     
-    for k = 2:K % For each time step
+    for k = 1:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;

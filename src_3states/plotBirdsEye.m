@@ -185,9 +185,11 @@ elseif ~auto
         end
     end
 else
-    xlim([0 80])
-    ylim([-10 30])
+%     xlim([0 80])
+%     ylim([-10 30])
     global k
+    xlim([pose{k}(1,4) pose{k}(1,4)+80])
+    ylim([pose{k}(2,4)-30 pose{k}(2,4)+30])
     datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
     filename = [datapath,'.txt'];
     formatSpec = '%f%f%s%f%f%f%f%f%f%f%f%f%f%f%f%f%f';

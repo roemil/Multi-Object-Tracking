@@ -8,7 +8,7 @@ addpath('evalMOT')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0000';
+sequence = '0010';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -40,7 +40,7 @@ k = 1;
 
 Xupd = cell(1);
 
-K = min(140,size(Z,2)); % Length of sequence
+K = min(300,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -83,7 +83,7 @@ for t = 1:nbrSim
     %clear XuUpd;
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
     
-    for k = 2:K % For each time step
+    for k = 1:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
