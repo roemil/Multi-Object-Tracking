@@ -121,7 +121,7 @@ elseif strcmp(birthSpawn, 'uniform')
                     unifrnd(-2,2), unifrnd(-2,2)]';
                 XmuPred(end).P = covBirth*eye(6);
             end
-elseif strcmp(motionModel, 'caBB')
+        elseif strcmp(motionModel, 'caBB')
             for i = 1:nbrOfBirths
                 XmuPred(end+1).w = weightBirth;
                 XmuPred(end).state = [unifrnd(FOVsize(1,1), FOVsize(2,1)), ...

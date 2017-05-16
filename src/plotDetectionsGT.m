@@ -7,7 +7,7 @@
 %                       [x,y,vx,vy,width,height]^T
 %
 
-function plotDetectionsGT(set, sequence, frameNbr, Xest, FOVsize, Z, nbrPosStates)
+function b = plotDetectionsGT(set, sequence, frameNbr, Xest, FOVsize, Z, nbrPosStates)
 
 % Frame || Height || Width || Target id || center x || center y || Bounding
 % width || Bounding height || Confidence
@@ -31,7 +31,7 @@ end
 % Read and plot image
 img = imread(imagePath);
 %figure;
-imagesc(img);
+b = imagesc(img);
 axis('image')
 hold on
 xlim([FOVsize(1,1) FOVsize(2,1)])

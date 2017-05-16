@@ -26,7 +26,7 @@ function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, 
             nbrMeasObj = nbrOfMeas+size(Xpred{j},2);
             ind = 1;
             for i = 1:size(Xpred{j},2)
-                if(gating(Z(:,z),H(1:2,1:6),Xpred{j}(i),R,100)) % 100
+                if(gating(Z(:,z),H(1:2,1:6),Xpred{j}(i),R,50)) % 100
                     if strcmp(motionModel,'cv')
                         %[Xhypo(i).state, Xhypo(i).P, Xhypo(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates,z));
                         [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S] = KFUpd(Xpred(i).state, H, Xpred(i).P, R, Z(1:nbrMeasStates));

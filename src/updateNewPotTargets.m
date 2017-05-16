@@ -45,6 +45,9 @@ function [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Pd, 
         if strcmp(motionModel,'cvBB')
             XpotNew{z}.state(nbrPosStates+1:nbrPosStates+2) = Z(nbrMeasStates+1:nbrMeasStates+2,z);
             XpotNew{z}.P(nbrPosStates+1:nbrPosStates+2,nbrPosStates+1:nbrPosStates+2) = R(end-1:end,end-1:end);
+        elseif strcmp(motionModel,'caBB')
+            XpotNew{z}.state(nbrPosStates+3:nbrPosStates+4) = Z(nbrMeasStates+1:nbrMeasStates+2,z);
+            XpotNew{z}.P(nbrPosStates+1:nbrPosStates+2,nbrPosStates+1:nbrPosStates+2) = R(end-1:end,end-1:end);
         end
         %XmuUpd{k,z}.w = e+c; % rho
         %XmuUpd{k,z}.r = e/XmuUpd{k,z}.w;

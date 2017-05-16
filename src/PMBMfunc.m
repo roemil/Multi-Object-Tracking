@@ -64,7 +64,10 @@ end
 
 %generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates)
 %%%% Update for previously potentially detected targets %%%%
+startHypov3 = tic;
 [Xhypo, S] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates,fr1,fr2);    
+timeHypov3 = toc(startHypov3);
+disp(num2str(timeHypov3))
 %if(isempty(Xhypo{1}))keyboard;end
 oldInd = 0;
 m = size(Z,2);
@@ -109,13 +112,18 @@ for j = 1:max(1,nbrOfGlobHyp)
     %timeA(j) = toc(findA(j));
     %%%%% MURTY %%%%%%
     %startMurt(j) = tic;
+    startMurty(j) = tic;
     ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S(:,:,:,j), Pd, H, j, maxKperGlobal);
+    timeMurty(j) = toc(startMurty(j));
     %murtTime(j) = toc(startMurt(j));
     %%%%% Find new global hypotheses %%%%%
     %startGlob(j) = tic;
     %disp(['Error: ', num2str(3)])
     nbrOldTargets = size(Xhypo{j,1},2);
+    globStart(j) = tic;
     [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S(:,:,:,j), ass, nbrOldTargets);
+    globTime(j) = toc(globStart(j));
+    
     %globTime(j) = toc(startGlob(j));
     %disp(['Error: ', num2str(4)])
     for jnew = oldInd+1:newInd
@@ -153,6 +161,7 @@ end
 minTmp = min(size(wGlob,2), Nh);
 
 [keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
+
 %disp('Error: Murty')
 %ind = find(diff(C) > 100);
 %if ~isempty(ind)
@@ -226,7 +235,9 @@ for i = 1:size(XuUpdTmp,2)
         ind = ind+1;
     end
 end
-
+%disp(num2str(sim(timeHypo)))
+disp(num2str(sum(globTime)))
+disp(num2str(sum(timeMurty)))
 % DISP
 %size(XuUpd,2)
 

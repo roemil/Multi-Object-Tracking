@@ -8,9 +8,9 @@ addpath('IMU');
 addpath('../../kittiTracking')
 clc
 
-mode = 'GT';
+mode = 'GT'; 
 set = 'training';
-sequence = '0000';
+sequence = '0010';
 
 motionModel = 'caBB'; % Choose 'cv' or 'cvBB'
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
@@ -26,7 +26,7 @@ nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 
 Xupd = cell(1);
 
-K = min(110,size(Z,2)); % Length of sequence
+K = min(225,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -74,7 +74,7 @@ for t = 1:nbrSim
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
-        [~,vx] = egomotion(oxts{1}(k,:));
+%        [~,vx] = egomotion(oxts{1}(k,:));
         if(k < 10)
             fr1 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','00000',num2str(k-1),'.png']);
             fr2 = imread(['../../kittiTracking/',set,'/image_02/',sequence,'/','00000',num2str(k),'.png']);
@@ -93,7 +93,7 @@ for t = 1:nbrSim
         end
         if ~isempty(Z{k})
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k,vx,fr1,fr2);
+                PMBMfunc(Z{t,k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, k,1,1,1);
         else
             disp('No measurement')
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
