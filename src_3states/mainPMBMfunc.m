@@ -8,7 +8,7 @@ addpath('evalMOT')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0010';
+sequence = '0000';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -19,7 +19,7 @@ egoMotionOn = true;
 % Simulate measurement from GT. Set simMeas = true. Use variables from
 % GTnonlinear or CNNnonlinear by setting mode
 global simMeas
-simMeas = false;
+simMeas = true;
 
 global plotHypoConf
 plotHypoConf = false;
@@ -64,7 +64,7 @@ for t = 1:nbrSim
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
         PMBMinitFunc(Z{1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
     disp(['Iteration time: ', num2str(toc)])
-    rest{1}
+    %rest{1}
     if strcmp(plotOn,'true')
         frameNbr = '000000';
         if ~strcmp(mode,'GT')
@@ -83,7 +83,7 @@ for t = 1:nbrSim
     %clear XuUpd;
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
     
-    for k = 1:K % For each time step
+    for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
@@ -188,11 +188,12 @@ else
 end
 
 %% Plot birds-eye view
-
+labels = [];
 plotConf = false;
-step = false;
+step = true;
+auto = false;
 if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
-    plotBirdsEye(sequence,set,Xest,Pest,step,plotConf);
+    plotBirdsEye(sequence,set,Xest,Pest,step,auto, labels, plotConf);
 else
     disp('Not implemented')
 end

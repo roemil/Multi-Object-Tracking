@@ -58,7 +58,7 @@ function [Xhypo, S] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, 
                     Xhypo{j,z}(i).S = 0; %eye(size(Xpred{1}(1).P));
                     Xhypo{j,z}(i).w = -1000;
                     Xhypo{j,z}(i).box = [313;313];
-                    Xhypo{j,z}(i).r = 1;
+                    Xhypo{j,z}(i).r = 1; %TODO: should this really be 1??
                     Xhypo{j,z}(i).label = 313313;
                     Xhypo{j,z}(i).nbrMeasAss = 0; % TAGass
                 end

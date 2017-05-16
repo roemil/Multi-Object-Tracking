@@ -24,6 +24,10 @@ for k = 1:size(Xest,2)
         a = subplot(2,1,1);
         plotImgEstGT(sequence,set,k,Xest{k});
     elseif strcmp(mode,'CNNnonlinear') || simMeas
+        if k > 1
+            cla(a)
+        end
+        a = subplot(2,1,1);
         plotImgEst(sequence,set,k,Xest{k},Z{k})
     end
     title(['k = ', num2str(k)])
@@ -36,7 +40,7 @@ for k = 1:size(Xest,2)
     %pause(0.1)
     print(fig,['img',num2str(k)],'-djpeg')
 end
-
+%%
 outputVideo = VideoWriter('video1.avi');
 outputVideo.FrameRate = 10;
 open(outputVideo)

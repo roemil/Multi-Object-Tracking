@@ -185,11 +185,11 @@ elseif ~auto
         end
     end
 else
-%     xlim([0 80])
-%     ylim([-10 30])
+    xlim([0 80])
+    ylim([-10 30])
     global k
-    xlim([pose{k}(1,4) pose{k}(1,4)+80])
-    ylim([pose{k}(2,4)-30 pose{k}(2,4)+30])
+    %xlim([pose{k}(1,4) pose{k}(1,4)+120])
+    %ylim([pose{k}(2,4)-35 pose{k}(2,4)+35])
     datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
     filename = [datapath,'.txt'];
     formatSpec = '%f%f%s%f%f%f%f%f%f%f%f%f%f%f%f%f%f';
@@ -230,17 +230,17 @@ else
         for i = 1:size(X{k},2)
             if legEstOn
                est = plot(X{k}{i}(1),X{k}{i}(2),'r*','Markersize',8,'linewidth',1); %sum(ismember(X{k}{i}(9),labels)) == 0
-               if isempty(find(labels == X{k}{i}(9)))
-                   %text(X{k}{i}(1)-1,X{k}{i}(2)+1,num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
-                   labels = [labels, X{k}{i}(9)];
-               end
+               %if isempty(find(labels == X{k}{i}(9)))
+                   text(X{k}{i}(1)-1,X{k}{i}(2)+3,num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
+               %    labels = [labels, X{k}{i}(9)];
+               %end
                legEstOn = false;
             else
                 plot(X{k}{i}(1),X{k}{i}(2),'r*','Markersize',8,'linewidth',1)
-                if isempty(find(labels == X{k}{i}(9)))
-                   %text(X{k}{i}(1)-1,X{k}{i}(2)+1,num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
-                   labels = [labels, X{k}{i}(9)];
-                end
+               % if isempty(find(labels == X{k}{i}(9)))
+                   text(X{k}{i}(1)-1,X{k}{i}(2)+3,num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
+               %    labels = [labels, X{k}{i}(9)];
+               % end
             end
         end
     end
