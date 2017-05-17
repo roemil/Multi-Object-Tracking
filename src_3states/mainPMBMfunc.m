@@ -8,7 +8,7 @@ addpath('evalMOT')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0000';
+sequence = '0014';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -19,7 +19,7 @@ egoMotionOn = true;
 % Simulate measurement from GT. Set simMeas = true. Use variables from
 % GTnonlinear or CNNnonlinear by setting mode
 global simMeas
-simMeas = true;
+simMeas = false;
 
 global plotHypoConf
 plotHypoConf = false;

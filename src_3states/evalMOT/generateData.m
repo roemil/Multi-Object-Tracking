@@ -10,6 +10,12 @@ global pose
 global angles
 gt = cell(1);
 result = [];
+
+if ~strcmp(mode,'GTnonlinear')
+    datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
+    Z = generateGT(set,sequence,datapath, nbrPosStates);
+end
+
 for i = 1 : size(Xest,2)
     for j = 1 : size(Z{i},2)
         gt{i}(j,1) = Z{i}(end,j);             % label
