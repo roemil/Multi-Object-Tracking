@@ -10,8 +10,8 @@ nbrOldTargetsPrev = 1e4;
 % Init undetected targets
 XuUpdTmp = [XuInit, XmuInit];
 
-XmuPred = generateBirthHypo(XuUpdTmp,  motionModel, nbrPosStates, mode, 1);
-
+%XmuPred = generateBirthHypo(XuUpdTmp,  motionModel, nbrPosStates, mode, 1);
+XmuPred = generateUniformBirthHypo(Z, mode);
 XuUpdTmp = updatePoisson(XmuPred,Pd);
 
 %%%%%%%%%%%%%%%%%%
@@ -23,7 +23,9 @@ nbrOfMeas = size(Z,2);
 nbrOfGlobHyp = 0;
 
 % Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas,...
+% [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas,...
+%     Z, newLabel, motionModel, nbrPosStates);
+[XpotNew, rho, newLabel] = updateNewPotTargetsUniform(XmuPred, nbrOfMeas,...
     Z, newLabel, motionModel, nbrPosStates);
  
 m = size(Z,2);

@@ -1,7 +1,7 @@
 %%%%% PMBM %%%%%
 function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
     PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k)
-global gatingOn
+global gatingOn, global FOVsize
 
 load('simVariables')
 Wold = 0;
@@ -32,7 +32,8 @@ end
 %     XmuPred(end).P = covBirth*eye(4);
 % end
 
-XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
+%XmuPred = generateUniformBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
+XmuPred = generateUniformBirthHypo(Z, mode);
 
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
@@ -59,7 +60,9 @@ end
 %disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
-[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Z, ...
+%[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Z, ...
+%   newLabel, motionModel,nbrPosStates);
+[XpotNew, rho, newLabel] = updateNewPotTargetsUniform(XmuPred, nbrOfMeas, Z, ...
     newLabel, motionModel,nbrPosStates);
 
 if ~gatingOn
