@@ -11,7 +11,7 @@
 
 
 function [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xupd, threshold, motionModel)
-    M = -1e3;
+    M = -1e10;
     Xest = cell(1);
     Pest = cell(1);
     rest = [];

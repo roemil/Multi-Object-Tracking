@@ -8,7 +8,7 @@ addpath('evalMOT')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0014';
+sequence = '0000';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -19,7 +19,7 @@ egoMotionOn = true;
 % Simulate measurement from GT. Set simMeas = true. Use variables from
 % GTnonlinear or CNNnonlinear by setting mode
 global simMeas
-simMeas = false;
+simMeas = true;
 
 global plotHypoConf
 plotHypoConf = false;
@@ -40,7 +40,7 @@ k = 1;
 
 Xupd = cell(1);
 
-K = min(300,size(Z,2)); % Length of sequence
+K = min(1000,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -82,7 +82,7 @@ for t = 1:nbrSim
     %tmp = XuUpd;
     %clear XuUpd;
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
-    
+
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
@@ -118,27 +118,21 @@ simTime = toc(startTime);
 disp('--------------- Simulation Complete ---------------')
 disp(['Total simulation time: ', num2str(simTime)])
 
-    
-
-%% Plot estimates
-
-figure('units','normalized','position',[.05 .05 .9 .9]);
-subplot('position', [0.02 0 0.98 1])
-for k = 1:size(Xest,2)
-    frameNbr = sprintf('%06d',k-1);
-    if ~strcmp(mode,'GT')
-        plotImgEstGT(sequence,set,k,Xest{k});
-    else
-        plotImgEstGT(sequence,set,k,Xest{k});
-    end
-    title(['k = ', num2str(k)])
-    waitforbuttonpress
-    %pause(1.5)
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Evaluate
+
+clear gt, clear result, clear resultZ
+generateData
+
+VOCscore = 0.5;
+dispON  = true;
+ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
+ClearMOTZ = evaluateMOT(gt,resultZ,VOCscore,false);
+disp(['Z, MOTP: ', num2str(ClearMOTZ.MOTP)])
+
 %% Plot estimates Img-plane
 
 figure('units','normalized','position',[.05 .05 .9 .9]);
@@ -207,14 +201,22 @@ else
     disp('Not implemented')
 end
 
-%% Evaluate
 
-clear gt, clear result
-generateData
+%% Plot estimates
 
-VOCscore = 0.5;
-dispON  = true;
-ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
+figure('units','normalized','position',[.05 .05 .9 .9]);
+subplot('position', [0.02 0 0.98 1])
+for k = 1:size(Xest,2)
+    frameNbr = sprintf('%06d',k-1);
+    if ~strcmp(mode,'GT')
+        plotImgEstGT(sequence,set,k,Xest{k});
+    else
+        plotImgEstGT(sequence,set,k,Xest{k});
+    end
+    title(['k = ', num2str(k)])
+    waitforbuttonpress
+    %pause(1.5)
+end
 
 %% Plot estimates 3D
 
