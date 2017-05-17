@@ -32,7 +32,7 @@ end
 %     XmuPred(end).P = covBirth*eye(4);
 % end
 
-%XmuPred = generateUniformBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
+%XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
 XmuPred = generateUniformBirthHypo(Z, mode);
 
 % Update the poisson components
@@ -129,11 +129,11 @@ if ~gatingOn
 else
     oldInd = 0;
     Wnew = diag(rho);
-    [Xhypo, S] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates); 
+    [Xhypo] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates); 
     for j = 1:max(1,nbrOfGlobHyp)
-        ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S(:,:,:,j), Pd, j, maxKperGlobal);
+        S = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, Pd, j, maxKperGlobal);
         nbrOldTargets = size(Xhypo{j,1},2);
-        [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S(:,:,:,j), ass, nbrOldTargets);
+        [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S, nbrOldTargets);
         for jnew = oldInd+1:newInd
             Xtmp{jnew} = newGlob{jnew-oldInd};
         end

@@ -56,6 +56,7 @@ elseif simMeas
                 detectRnd = unifrnd(0,1);
                 if detectRnd < 1 % Set missdetection rate here
                     Z{k}(1:5,ind) = max(0, Ztmp{k}(1:5,i) + mvnrnd(zeros(5,1),measP(Ztmp{k}(3,i)))');
+                    Z{k}(6,ind) = Ztmp{k}(6,i);
                     ind = ind+1;
                 end
             end
@@ -331,7 +332,7 @@ thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
-Nhconst = 100;
+Nhconst = 5;
 % Max nbr of globals for each old global
 maxKperGlobal = 20;
 % Max nbr globals to pass to next iteration
@@ -356,7 +357,7 @@ if strcmp(mode,'GTnonlinear')
     nbrOfBirths = 300; % 200
 elseif strcmp(mode,'CNNnonlinear')
     global nbrOfBirths
-    nbrOfBirths = 400; % 250
+    nbrOfBirths = 300; % 400
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
@@ -366,7 +367,7 @@ global vinit
 vinit = 0;
 global covBirth
 if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
-    nbrInitBirth = 800; % 1500
+    nbrInitBirth = 400; % 800
     if ~egoMotionOn
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
@@ -376,12 +377,12 @@ if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
     end
     
 elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
-    nbrInitBirth = 800; % 1500
+    nbrInitBirth = 400; % 800
     if ~egoMotionOn
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
         %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
-        covBirth = 1*diag([1 1 1 2 2 2 20 20]); %0.1 2*Q
+        covBirth = 2*diag([1 1 1 2 2 2 20 20]); %0.1 2*Q
         covBirth(7:8,7:8) = diag([20 20]);
     end
 end

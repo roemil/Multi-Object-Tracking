@@ -12,7 +12,7 @@
 %
 %
 
-function [newGlob, newInd] = generateGlobalHypo6(Xhypo, Xnew, Z, oldInd, S, hypoInd, nbrOldTargets)
+function [newGlob, newInd] = generateGlobalHypo6(Xhypo, Xnew, Z, oldInd, S, nbrOldTargets)
 
 % Number of measurements
 m = size(Z,2);
@@ -40,12 +40,12 @@ end
 % detections and that the global hypothesis does not consider the newly
 % detected potential target
 
-for j = 1:size(hypoInd,1)
+for j = 1:size(S,3)
     % Initiate
     newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0); % TAGass
     for col = 1:size(S,1)
         % Find combination
-        newGlob{j}(find(S(col,:,hypoInd(j)) == 1)) = Xtmp{col}(find(S(col,:,hypoInd(j)) == 1));
+        newGlob{j}(find(S(col,:,j) == 1)) = Xtmp{col}(find(S(col,:,j) == 1));
     end
     for target = 1:size(newGlob{j},2)
         if isempty(newGlob{j}(target).state)

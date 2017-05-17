@@ -1,7 +1,7 @@
 %%% Ellipsoidal gating
 %%% Input: Measurement Z, Measurement Model H, Predicted states Xest
 %%% Output: Subset Z
-function [ind] = gatingv2(Z, v, S,threshold)
+function [ind] = gatingv2(v, S,threshold)
 
 d = v'/S*v; % Mahalanobis distance
 

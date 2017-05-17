@@ -8,15 +8,41 @@
 global H
 global pose
 global angles
+global simMeas
 gt = cell(1);
 result = [];
+
+if ~strcmp(mode,'GTnonlinear') || simMeas
+    datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
+    Ztmp = generateGT(set,sequence,datapath, nbrPosStates);
+
+    iInd = 1;
+    for i = 1 : size(Xest,2)
+        jInd = 1;
+        for j = 1 : size(Z{i},2)
+            if(~isempty(Z{i}))
+                resultZ(iInd).trackerData.idxTracks(jInd) = Z{i}(6,j);%
+                heading = angles{i}.heading-angles{1}.heading;
+                resultZ(iInd).trackerData.target(jInd).bbox = [Z{i}(1,j)-Z{i}(4,j)*0.5 Z{i}(2,j)-Z{i}(5,j)*0.5, Z{i}(4:5,j)'];
+                jInd = jInd + 1;
+            else
+                iInd = iInd - 1;
+                continue;
+            end
+        end
+        iInd = iInd+1;
+    end
+else
+    Ztmp = Z;
+end
+
 for i = 1 : size(Xest,2)
-    for j = 1 : size(Z{i},2)
-        gt{i}(j,1) = Z{i}(end,j);             % label
-        gt{i}(j,2) = Z{i}(1,j)-Z{i}(4,j)*0.5; % Top left corner
-        gt{i}(j,3) = Z{i}(2,j)-Z{i}(5,j)*0.5; % Top right corner
-        gt{i}(j,4) = Z{i}(4,j);               % width
-        gt{i}(j,5) = Z{i}(5,j);               % height
+    for j = 1 : size(Ztmp{i},2)
+        gt{i}(j,1) = Ztmp{i}(end,j);             % label
+        gt{i}(j,2) = Ztmp{i}(1,j)-Ztmp{i}(4,j)*0.5; % Top left corner
+        gt{i}(j,3) = Ztmp{i}(2,j)-Ztmp{i}(5,j)*0.5; % Top right corner
+        gt{i}(j,4) = Ztmp{i}(4,j);               % width
+        gt{i}(j,5) = Ztmp{i}(5,j);               % height
     end
 end
 
