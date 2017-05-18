@@ -57,8 +57,17 @@ numFrames =min( length(groundtruth),length(result) );
 
 for i=1:numFrames;
    %% Getting tracking data
-   idxTracks=result(i).trackerData.idxTracks;
-   target=result(i).trackerData.target;
+   if ~isempty(result(i).trackerData)
+       idxTracks=result(i).trackerData.idxTracks;
+       target=result(i).trackerData.target;
+       lastInd = i;
+   else
+       idxTracks= result(lastInd).trackerData.idxTracks;
+       target= result(lastInd).trackerData.target;
+       for j = 1:size(result(lastInd))
+        target(j).bbox= 10*target(j).bbox;
+       end
+   end
    %% Getting annottions data
    bboxes = groundtruth{i};
    

@@ -1,6 +1,7 @@
 %%%%% PMBM %%%%%
 function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
     PMBMpredFunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k)
+global uniformBirths
 
 load('simVariables')
 Wold = 0;
@@ -31,10 +32,12 @@ end
 %     XmuPred(end).P = covBirth*eye(4);
 % end
 
-XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
+if ~uniformBirths
+    XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
 
-% Update the poisson components
-XuUpdTmp = updatePoisson(XmuPred,Pd);
+    % Update the poisson components
+    XuUpdTmp = updatePoisson(XmuPred,Pd);
+end
 % Disp
 %size(XuUpdTmp,2)
 % Predict states for old potential targets
@@ -125,12 +128,16 @@ else % TODO: Do we wanna do this?!
 end
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight
-ind = 1;
-for i = 1:size(XuUpdTmp,2)
-    if XuUpdTmp(i).w > poissThresh
-        XuUpd(ind) = XuUpdTmp(i);
-        ind = ind+1;
+if ~uniformBirths
+    ind = 1;
+    for i = 1:size(XuUpdTmp,2)
+        if XuUpdTmp(i).w > poissThresh
+            XuUpd(ind) = XuUpdTmp(i);
+            ind = ind+1;
+        end
     end
+else
+    XuUpd = [];
 end
 
 % DISP

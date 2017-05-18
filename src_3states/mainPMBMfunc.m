@@ -6,7 +6,7 @@ addpath('IMU')
 addpath('mtimesx')
 addpath('evalMOT')
 clc
-mode = 'GTnonlinear';
+mode = 'CNNnonlinear';
 set = 'training';
 sequence = '0020';
 global motionModel
@@ -15,6 +15,8 @@ global birthSpawn
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 global egoMotionOn
 egoMotionOn = true; 
+global uniformBirths
+uniformBirths = true;
 
 % Simulate measurement from GT. Set simMeas = true. Use variables from
 % GTnonlinear or CNNnonlinear by setting mode
@@ -26,6 +28,12 @@ plotHypoConf = false;
 
 global gatingOn
 gatingOn = true;
+
+% TODO: Fix P2 in pixel2cameracoords
+% TODO: Remove update undetected hypo or keep passing it?
+% TODO: cars to the right in 0016 is not estimated, why? Why such large
+% difference in prob of exi?
+% TODO: Random object spawning. Something wrong in the births? Clutter?
 
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
@@ -58,8 +66,10 @@ for t = 1:nbrSim
     disp(['--------------- k = ', num2str(1), ' ---------------'])
     global k
     k = 1;
-    [a, MSGID] = lastwarn();
-    warning('off', MSGID)
+    if ~isempty(lastwarn())
+        [a, MSGID] = lastwarn();
+        warning('off', MSGID)
+    end
     tic
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
         PMBMinitFunc(Z{1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
@@ -132,7 +142,10 @@ dispON  = true;
 ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
 if ~strcmp(mode,'GTnonlinear') || simMeas
     ClearMOTZ = evaluateMOT(gt,resultZ,VOCscore,false);
-    disp(['Z, MOTP: ', num2str(ClearMOTZ.MOTP)])
+    disp('----------------------------')
+    disp('CNN output')
+    disp(['MOTP = ', num2str(ClearMOTZ.MOTP)])
+    disp('----------------------------')
 end
 
 %% Plot estimates Img-plane

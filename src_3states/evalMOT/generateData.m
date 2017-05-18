@@ -12,7 +12,7 @@ global simMeas
 gt = cell(1);
 result = [];
 
-if ~strcmp(mode,'GTnonlinear') || simMeas
+if simMeas
     datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
     Ztmp = generateGT(set,sequence,datapath, nbrPosStates);
 
@@ -22,7 +22,25 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
         for j = 1 : size(Z{i},2)
             if(~isempty(Z{i}))
                 resultZ(iInd).trackerData.idxTracks(jInd) = Z{i}(6,j);%
-                heading = angles{i}.heading-angles{1}.heading;
+                resultZ(iInd).trackerData.target(jInd).bbox = [Z{i}(1,j)-Z{i}(4,j)*0.5 Z{i}(2,j)-Z{i}(5,j)*0.5, Z{i}(4:5,j)'];
+                jInd = jInd + 1;
+            else
+                iInd = iInd - 1;
+                continue;
+            end
+        end
+        iInd = iInd+1;
+    end
+elseif strcmp(mode,'CNNnonlinear')
+    datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
+    Ztmp = generateGT(set,sequence,datapath, nbrPosStates);
+
+    iInd = 1;
+    for i = 1 : size(Xest,2)
+        jInd = 1;
+        for j = 1 : size(Z{i},2)
+            if(~isempty(Z{i}))
+                resultZ(iInd).trackerData.idxTracks(jInd) = j;%
                 resultZ(iInd).trackerData.target(jInd).bbox = [Z{i}(1,j)-Z{i}(4,j)*0.5 Z{i}(2,j)-Z{i}(5,j)*0.5, Z{i}(4:5,j)'];
                 jInd = jInd + 1;
             else
