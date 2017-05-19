@@ -5,10 +5,11 @@ dbstop error
 addpath('IMU')
 addpath('mtimesx')
 addpath('evalMOT')
+addpath('../../kittiTracking/')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0000';
+sequence = '0010';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -35,6 +36,7 @@ nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
+global P2;
 global k
 k = 1;
 
@@ -58,8 +60,10 @@ for t = 1:nbrSim
     disp(['--------------- k = ', num2str(1), ' ---------------'])
     global k
     k = 1;
-    [a, MSGID] = lastwarn();
-    warning('off', MSGID)
+    if(~isempty(lastwarn()))
+        [a, MSGID] = lastwarn();
+        warning('off', MSGID)
+    end
     tic
     [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
         PMBMinitFunc(Z{1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);

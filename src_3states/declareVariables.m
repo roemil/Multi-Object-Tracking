@@ -66,7 +66,7 @@ elseif simMeas
 end
 
 P2path = strcat('../../data_tracking_calib/',set,'/','calib/',sequence,'.txt');
-
+global P2;
 P2 = readCalibration(P2path,2);
 % P2 =[7.215377e+02 0.000000e+00 6.095593e+02 4.485728e+01;
 %     0.000000e+00 7.215377e+02 1.728540e+02 2.163791e-01; 
@@ -385,7 +385,6 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
         covBirth(7:8,7:8) = diag([20 20]);
     end
 end
-
 global wInit
 wInit = 1;%0.2;
 

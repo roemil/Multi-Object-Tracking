@@ -10,8 +10,8 @@ function x = camera2pixelcoords(X,P)
   %for i = 1 : size(X,2)
     x = P * [X(1:3); 1];
   % scale projected points
-    x(1,:) = x(1,:)./x(3,:);
-    x(2,:) = x(2,:)./x(3,:);
+    x(1) = x(1)./x(3);
+    x(2) = x(2)./x(3);
     %x(3,:) = [];
   %end
 end

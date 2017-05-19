@@ -1,7 +1,7 @@
 %%%%% PMBM %%%%%
 function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
     PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k)
-global gatingOn, global FOVsize
+global gatingOn, global FOVsize, global P2
 
 load('simVariables')
 Wold = 0;
@@ -34,7 +34,7 @@ end
 
 %XmuPred = generateUniformBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
 XmuPred = generateUniformBirthHypo(Z, mode);
-
+%estGTdiff('0000','training',k,XmuPred,true,false)
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
 % Disp
