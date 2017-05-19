@@ -34,12 +34,14 @@ end
 
 if ~uniformBirths
     XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
+    % Update the poisson components
+    XuUpdTmp = updatePoisson(XmuPred,Pd);
 else
-    XmuPred = generateUniformBirthHypo(Z, mode);
+    XmuPred = generateUniformBirthHypov2(Z, mode);
+    %XmuPred = [];
 end
 
-% Update the poisson components
-XuUpdTmp = updatePoisson(XmuPred,Pd);
+
 % Disp
 %size(XuUpdTmp,2)
 % Predict states for old potential targets

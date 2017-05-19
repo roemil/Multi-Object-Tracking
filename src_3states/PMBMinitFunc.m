@@ -12,10 +12,12 @@ XuUpdTmp = [XuInit, XmuInit];
 
 if ~uniformBirths
     XmuPred = generateBirthHypo(XuUpdTmp,  motionModel, nbrPosStates, mode, 1);
+    XuUpdTmp = updatePoisson(XmuPred,Pd);
 else
-    XmuPred = generateUniformBirthHypo(Z, mode);
+    %XmuPred = generateUniformBirthHypo(Z, mode);
+    XmuPred = generateUniformBirthHypov2(Z, mode);
+    %XmuPred = []; if updPotNewv2
 end
-XuUpdTmp = updatePoisson(XmuPred,Pd);
 
 %%%%%%%%%%%%%%%%%%
 %%%%% Update %%%%%

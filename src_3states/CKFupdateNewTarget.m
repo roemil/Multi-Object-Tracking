@@ -15,51 +15,31 @@
 %
 %%
 
-function [X,P,S,v] = CKFupdate(Xpred, Ppred, H, Z, R, n)
+function [S] = CKFupdateNewTarget(Xpred, Ppred, n)%, H, Z, R, n)
 global pose, global k, global angles
-
-if isa(R,'function_handle')
-    R = R(Z(3));
-end
 
 Xtmp = zeros(size(Xpred,1),2*n);
 Wi = 1/(2*n);
-
-%dMax = 10;
-%Ppred = Ppred./(max(1,dMax-Z(3)));
 
 for i = 1:n
     Psqrt = chol(Ppred)';
     Xtmp(:,i) = Xpred+sqrt(n)*Psqrt(:,i);
     Xtmp(:,i+n) = Xpred-sqrt(n)*Psqrt(:,i);
+    
+    zApprox = pix2coordtest(Xtmp(1:2,i),Xtmp(3,i));
+    hX(:,i) = pixel2cameracoords(Xtmp(1:2,i),zApprox);
+    
+    zApprox = pix2coordtest(Xtmp(1:2,i+n),Xtmp(3,i+n));
+    hX(:,i+n) = pixel2cameracoords(Xtmp(1:2,i+n),zApprox);
 end
-% Only yaw
-hX = H(Xtmp,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
-% Full rotation matrix
-%hX = H(Xtmp,pose{k}(1:3,4), angles,k);
-
-% % TEST!! Limit the values to FOVsize
-% global FOVsize
-% for i = 1:size(hX,2)
-%     if hX(1,i) < 0
-%         hX(1,i) = 0;
-%     elseif hX(1,i) > FOVsize(2,1)
-%         hX(1,i) = FOVsize(2,1);
-%     end
-%     if hX(2,i) < 0
-%         hX(2,i) = 0;
-%     elseif hX(2,i) > FOVsize(2,2)
-%         hX(2,i) = FOVsize(2,2);
-%     end
-% end
 
 yhatpred = repmat(Wi*sum(hX,2),1,2*n);
 Pxy = Wi*(Xtmp-repmat(Xpred,1,2*n))*(hX-yhatpred)';
-S = Wi*(hX-yhatpred)*(hX-yhatpred)'+R;
-X = Xpred+Pxy/S*(Z-yhatpred(:,1));
+S = Wi*(hX-yhatpred)*(hX-yhatpred)';
+%X = Xpred+Pxy/S*(Z-yhatpred(:,1));
 
 %Ppred = Ppred.*(max(1,dMax-Z(3)));
 
-P = Ppred-Pxy/S*Pxy';
+%P = Ppred-Pxy/S*Pxy';
 
-v = Z-yhatpred(:,1);
+%v = Z-yhatpred(:,1);

@@ -1,10 +1,13 @@
-function XmuPred = generateUniformBirthHypo(Z, mode)
+function XmuPred = generateUniformBirthHypov2(Z, mode)
+
 global nbrOfBirths, global FOV, global boarder, global pctWithinBoarder
 global covBirth, global vinit, global weightBirth, global birthSpawn,
 global pose, global egoMotionOn, global TcamToVelo
 global T20, global TveloToImu, global k,
 global maxX, global maxY, global Zinter, global TcamToVelo, global xAngle, global yAngle
-global angles
+global angles, global R, global Rdistance
+
+% Find the corresponding 3D covariance
 
 if strcmp(birthSpawn, 'boarders')
     if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
@@ -20,7 +23,13 @@ elseif strcmp(birthSpawn, 'uniform')
              XmuPred(z).state(1:3,1) = pixel2cameracoords(Z(1:2,z),zApprox);
              XmuPred(z).state(4:6,1) = zeros(3,1);
              XmuPred(z).state(7:8,1) = Z(4:5,z);
-             XmuPred(z).P = covBirth;%(Z(3,z));      % Pred cov
+             
+             Pbirth = diag([50 50 Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+             XmuPred(z).P = zeros(8,8);
+             XmuPred(z).P(1:3,1:3) = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
+             XmuPred(z).P(4:6,4:6) = 2*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
+             XmuPred(z).P(7:8,7:8) = diag([20 20]); % TODO: Move to declareVariables
+             %XmuPred(z).P % TODO: CONT HERE. TUNE. ROTATE P TO IMU
              XmuPred(z).w = weightBirth;
                 if egoMotionOn
                     % Local cam2 -> local cam0 -> local velo -> local IMU ->
@@ -35,6 +44,27 @@ elseif strcmp(birthSpawn, 'uniform')
      end
 end
 
+
+
+%% Plot 3sigma for XY in 3D
+
+global R
+global pose
+global c
+global H
+global Pd
+for i = 1:size(Z,2)
+    n = 100;
+    phi = linspace(0,2*pi,n);
+    x = repmat(XmuPred(i).state(1:2),1,n)+3*sqrtm(XmuPred(i).P(1:2,1:2))*[cos(phi);sin(phi)];
+    figure;
+    hold on
+    plot(XmuPred(i).state(1),XmuPred(i).state(2),'r*')
+    plot(x(1,:),x(2,:),'-k','LineWidth',2)
+end
+keyboard
+
+%% Plot 3sigma for pix and distance
 % global R
 % global pose
 % global c
@@ -43,7 +73,7 @@ end
 % %Rtmp = @(x) R(x)*3;
 % for i = 1:size(Z,2)
 %     tmp = H(XmuPred(i).state,pose{1}(1:3,4),angles{k}.heading-angles{1}.heading);
-%     [~, ~,S] = CKFupdate(XmuPred(i).state, XmuPred(i).P, H, Z(1:3,i), R, 8);
+%     [~, ~,S] = CKFupdate(XmuPred(i).state, XmuPred(i).P, H, Z(1:3,i), R, 6);
 %     n = 100;
 %     phi = linspace(0,2*pi,n);
 %     x = repmat(tmp(1:2),1,n)+3*sqrtm(S(1:2,1:2))*[cos(phi);sin(phi)];

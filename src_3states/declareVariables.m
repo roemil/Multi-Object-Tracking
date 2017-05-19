@@ -175,7 +175,7 @@ global T
 T = 0.1; % sampling time, 1 fps
 if strcmp(mode,'GTnonlinear')
     global sigmaQ
-    sigmaQ = 5; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
+    sigmaQ = 2; % 2 seems ok, 19may % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
     global sigmaBB
     sigmaBB = 10;
 elseif strcmp(mode,'CNNnonlinear')
@@ -278,8 +278,8 @@ end
 
 if strcmp(mode,'GTnonlinear')
     %R3dTo2d = diag([15 15 15 5 5]);
-    R3dTo2d = 2*diag([25 25 15 25 25]);
-    Rdistance = @(x) 2*(0.161*x/1.959964)^2;% 1; % 5 % 
+    R3dTo2d = diag([25 25 15 25 25]); %*2
+    Rdistance = @(x) (0.161*x/1.959964)^2; % *2
     if egoMotionOn
         Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
         R = @(x) Rcam(x);
@@ -373,8 +373,11 @@ if strcmp(motionModel,'cvBB') && strcmp(mode,'GTnonlinear')
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
         %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
-        covBirth = diag([1 1 1 2 2 2 20 20]); %0.1 2*Q
+        covBirth = 2*diag([1 1 1 4 4 4 20 20]); %0.1 2*Q
         covBirth(7:8,7:8) = diag([20 20]);
+        %covMax = diag([2 2 2 4 4 4 20 20]);
+        %dMax = 20;
+        %covBirth = @(d) covMax./(max(1,dMax-d));
     end
     
 elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')

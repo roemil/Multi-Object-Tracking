@@ -6,9 +6,9 @@ addpath('IMU')
 addpath('mtimesx')
 addpath('evalMOT')
 clc
-mode = 'CNNnonlinear';
+mode = 'GTnonlinear';
 set = 'training';
-sequence = '0020';
+sequence = '0003';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -29,8 +29,6 @@ plotHypoConf = false;
 global gatingOn
 gatingOn = true;
 
-% TODO: Fix P2 in pixel2cameracoords
-% TODO: Remove update undetected hypo or keep passing it?
 % TODO: cars to the right in 0016 is not estimated, why? Why such large
 % difference in prob of exi?
 % TODO: Random object spawning. Something wrong in the births? Clutter?
@@ -45,6 +43,10 @@ nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
 global k
 k = 1;
+
+%for kz = 20:30
+%    Z{kz} = [];
+%end
 
 Xupd = cell(1);
 

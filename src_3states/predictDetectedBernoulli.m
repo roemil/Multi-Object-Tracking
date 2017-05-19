@@ -30,7 +30,8 @@ function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)
 
         for j = 1:size(XupdPrev,2)
             for i = 1:size(XupdPrev{j},2)
-                Qnew = updateMotionModel(XupdPrev{j}(i));
+                %Qnew = updateMotionModel(XupdPrev{j}(i));
+                Qnew = Q;
                 % Bernoulli
                 Xpred{j}(i).w = XupdPrev{j}(i).w;      % Pred weight
                 [Xpred{j}(i).state, Xpred{j}(i).P] = KFPred(XupdPrev{j}(i).state, F, XupdPrev{j}(i).P ,Qnew);    % Pred state

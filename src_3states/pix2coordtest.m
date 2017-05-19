@@ -9,6 +9,6 @@ global FOVsize
 
 
 % Approx distance in xz-plane
-theta = pi/2 / FOVsize(2,1)*(x(1)-FOVsize(2,1)/2);
+theta = pi/2 ./ FOVsize(2,1).*(x(1,:)-FOVsize(2,1)/2);
 
-z = d*cos(theta);
+z = d.*cos(theta);
