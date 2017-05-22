@@ -16,17 +16,25 @@ global birthSpawn
 birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
 global egoMotionOn
 egoMotionOn = true; 
+global uniformBirths
+uniformBirths = true;
 
 % Simulate measurement from GT. Set simMeas = true. Use variables from
 % GTnonlinear or CNNnonlinear by setting mode
 global simMeas
-simMeas = true;
+simMeas = false;
 
 global plotHypoConf
 plotHypoConf = false;
 
 global gatingOn
 gatingOn = true;
+
+% TODO: Fix P2 in pixel2cameracoords
+% TODO: Remove update undetected hypo or keep passing it?
+% TODO: cars to the right in 0016 is not estimated, why? Why such large
+% difference in prob of exi?
+% TODO: Random object spawning. Something wrong in the births? Clutter?
 
 XmuUpd = cell(1,1);
 XuUpd = cell(1,1);
@@ -42,7 +50,7 @@ k = 1;
 
 Xupd = cell(1);
 
-K = min(300,size(Z,2)); % Length of sequence
+K = min(1000,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -86,7 +94,7 @@ for t = 1:nbrSim
     %tmp = XuUpd;
     %clear XuUpd;
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
-    
+
     for k = 2:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
@@ -122,27 +130,26 @@ simTime = toc(startTime);
 disp('--------------- Simulation Complete ---------------')
 disp(['Total simulation time: ', num2str(simTime)])
 
-    
-
-%% Plot estimates
-
-figure('units','normalized','position',[.05 .05 .9 .9]);
-subplot('position', [0.02 0 0.98 1])
-for k = 1:size(Xest,2)
-    frameNbr = sprintf('%06d',k-1);
-    if ~strcmp(mode,'GT')
-        plotImgEstGT(sequence,set,k,Xest{k});
-    else
-        plotImgEstGT(sequence,set,k,Xest{k});
-    end
-    title(['k = ', num2str(k)])
-    waitforbuttonpress
-    %pause(1.5)
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Evaluate
+
+clear gt, clear result, clear resultZ
+generateData
+
+VOCscore = 0.5;
+dispON  = true;
+ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
+if ~strcmp(mode,'GTnonlinear') || simMeas
+    ClearMOTZ = evaluateMOT(gt,resultZ,VOCscore,false);
+    disp('----------------------------')
+    disp('CNN output')
+    disp(['MOTP = ', num2str(ClearMOTZ.MOTP)])
+    disp('----------------------------')
+end
+
 %% Plot estimates Img-plane
 
 figure('units','normalized','position',[.05 .05 .9 .9]);
@@ -211,14 +218,22 @@ else
     disp('Not implemented')
 end
 
-%% Evaluate
 
-clear gt, clear result
-generateData
+%% Plot estimates
 
-VOCscore = 0.5;
-dispON  = true;
-ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
+figure('units','normalized','position',[.05 .05 .9 .9]);
+subplot('position', [0.02 0 0.98 1])
+for k = 1:size(Xest,2)
+    frameNbr = sprintf('%06d',k-1);
+    if ~strcmp(mode,'GT')
+        plotImgEstGT(sequence,set,k,Xest{k});
+    else
+        plotImgEstGT(sequence,set,k,Xest{k});
+    end
+    title(['k = ', num2str(k)])
+    waitforbuttonpress
+    %pause(1.5)
+end
 
 %% Plot estimates 3D
 

@@ -37,8 +37,8 @@ for k = 1:size(Xest,2)
         cla(b)
     end
     labels = plotBirdsEye(sequence,set,Xest,Pest,step,auto,labels,plotConf);
-    %pause(0.1)
-    print(fig,['img',num2str(k)],'-djpeg')
+    pause(0.1)
+    %print(fig,['img',num2str(k)],'-djpeg')
 end
 %%
 outputVideo = VideoWriter('video1.avi');
@@ -51,3 +51,4 @@ for ii = 1:size(Xest,2)
    delete(['img',num2str(ii),'.jpg']);
 end
 close(outputVideo)
+disp('Video complete')

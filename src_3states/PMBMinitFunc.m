@@ -1,7 +1,7 @@
 %%%%% PMBM %%%%%
 function [XuUpd, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
     PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel,birthSpawn,mode)
-
+global uniformBirths
 load('simVariables')
 Wold = 0;
 C = [];
@@ -10,8 +10,11 @@ nbrOldTargetsPrev = 1e4;
 % Init undetected targets
 XuUpdTmp = [XuInit, XmuInit];
 
-%XmuPred = generateBirthHypo(XuUpdTmp,  motionModel, nbrPosStates, mode, 1);
-XmuPred = generateUniformBirthHypo(Z, mode);
+if ~uniformBirths
+    XmuPred = generateBirthHypo(XuUpdTmp,  motionModel, nbrPosStates, mode, 1);
+else
+    XmuPred = generateUniformBirthHypo(Z, mode);
+end
 XuUpdTmp = updatePoisson(XmuPred,Pd);
 
 %%%%%%%%%%%%%%%%%%
@@ -23,10 +26,13 @@ nbrOfMeas = size(Z,2);
 nbrOfGlobHyp = 0;
 
 % Find newly detected potential targets
-% [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas,...
-%     Z, newLabel, motionModel, nbrPosStates);
-[XpotNew, rho, newLabel] = updateNewPotTargetsUniform(XmuPred, nbrOfMeas,...
-    Z, newLabel, motionModel, nbrPosStates);
+if ~uniformBirths
+    [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas,...
+        Z, newLabel, motionModel, nbrPosStates);
+else
+    [XpotNew, rho, newLabel] = updateNewPotTargetsUniform(XmuPred, nbrOfMeas,...
+        Z, newLabel, motionModel, nbrPosStates);
+end
  
 m = size(Z,2);
 
@@ -65,8 +71,11 @@ end
 %        Pest{i} = 3*Pest{i}+diag([30 10 0 0 0 0]);
 %    end
 %end
-
-XuUpd = XuUpdTmp;
+if ~uniformBirths
+    XuUpd = XuUpdTmp;
+else
+    XuUpd = [];
+end
 % Prune poisson components with low weight
 %ind = 1;
 %for i = 1:size(XuUpdTmp,2)

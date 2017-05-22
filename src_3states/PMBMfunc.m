@@ -1,7 +1,9 @@
 %%%%% PMBM %%%%%
 function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
     PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k)
-global gatingOn, global FOVsize, global P2
+
+global gatingOn, global FOVsize, global uniformBirths, global P2
+
 
 load('simVariables')
 Wold = 0;
@@ -32,9 +34,12 @@ end
 %     XmuPred(end).P = covBirth*eye(4);
 % end
 
-%XmuPred = generateUniformBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
-XmuPred = generateUniformBirthHypo(Z, mode);
-%estGTdiff('0000','training',k,XmuPred,true,false)
+if ~uniformBirths
+    XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
+else
+    XmuPred = generateUniformBirthHypo(Z, mode);
+end
+
 % Update the poisson components
 XuUpdTmp = updatePoisson(XmuPred,Pd);
 % Disp
@@ -60,10 +65,13 @@ end
 %disp(['Nbr of old globals: ', num2str(nbrOfGlobHyp)])
 
 % Find newly detected potential targets
-%[XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Z, ...
-%   newLabel, motionModel,nbrPosStates);
-[XpotNew, rho, newLabel] = updateNewPotTargetsUniform(XmuPred, nbrOfMeas, Z, ...
-    newLabel, motionModel,nbrPosStates);
+if ~uniformBirths
+    [XpotNew, rho, newLabel] = updateNewPotTargets(XmuPred, nbrOfMeas, Z, ...
+       newLabel, motionModel,nbrPosStates);
+else
+    [XpotNew, rho, newLabel] = updateNewPotTargetsUniform(XmuPred, nbrOfMeas, Z, ...
+        newLabel, motionModel,nbrPosStates);
+end
 
 if ~gatingOn
     %%%% Update for previously potentially detected targets %%%%
@@ -129,11 +137,11 @@ if ~gatingOn
 else
     oldInd = 0;
     Wnew = diag(rho);
-    [Xhypo, S] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates); 
+    [Xhypo] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates); 
     for j = 1:max(1,nbrOfGlobHyp)
-        ass = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, S(:,:,:,j), Pd, j, maxKperGlobal);
+        S = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, Pd, j, maxKperGlobal);
         nbrOldTargets = size(Xhypo{j,1},2);
-        [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S(:,:,:,j), ass, nbrOldTargets);
+        [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S, nbrOldTargets);
         for jnew = oldInd+1:newInd
             Xtmp{jnew} = newGlob{jnew-oldInd};
         end
@@ -232,12 +240,16 @@ end
 
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight
-ind = 1;
-for i = 1:size(XuUpdTmp,2)
-    if XuUpdTmp(i).w > poissThresh
-        XuUpd(ind) = XuUpdTmp(i);
-        ind = ind+1;
+if ~uniformBirths
+    ind = 1;
+    for i = 1:size(XuUpdTmp,2)
+        if XuUpdTmp(i).w > poissThresh
+            XuUpd(ind) = XuUpdTmp(i);
+            ind = ind+1;
+        end
     end
+else
+    XuUpd = [];
 end
 
 % DISP
