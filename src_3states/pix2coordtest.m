@@ -1,4 +1,4 @@
-function z = pix2coordtest(x,d)
+function [z, theta] = pix2coordtest(x,d)
 global FOVsize
 
 % True distance, but this is worse?

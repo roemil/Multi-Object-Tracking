@@ -8,7 +8,7 @@ addpath('evalMOT')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0000';
+sequence = '0003';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -67,14 +67,20 @@ for t = 1:nbrSim
     
     disp(['--------------- k = ', num2str(1), ' ---------------'])
     global k
-    k = 1;
+    global kInit
+    for z = 1:size(Z,2)
+        if ~isempty(Z{z})
+            kInit = z;
+            break
+        end
+    end
     if ~isempty(lastwarn())
         [a, MSGID] = lastwarn();
         warning('off', MSGID)
     end
     tic
-    [XuUpd{t,1}, Xupd{t,1}, Xest{t,1}, Pest{t,1}, rest{t,1}, west{t,1}, labelsEst{t,1}, newLabel, jEst(1)] = ...
-        PMBMinitFunc(Z{1}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
+    [XuUpd{t,kInit}, Xupd{t,kInit}, Xest{t,kInit}, Pest{t,kInit}, rest{t,kInit}, west{t,kInit}, labelsEst{t,kInit}, newLabel, jEst(kInit)] = ...
+        PMBMinitFunc(Z{kInit}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
     disp(['Iteration time: ', num2str(toc)])
     %rest{1}
     if strcmp(plotOn,'true')
@@ -95,7 +101,7 @@ for t = 1:nbrSim
     %clear XuUpd;
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
 
-    for k = 2:K % For each time step
+    for k = kInit+1:K % For each time step
         disp(['--------------- k = ', num2str(k), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
@@ -162,7 +168,7 @@ end
 
 figure('units','normalized','position',[.05 .05 .9 .9]);
 subplot('position', [0.02 0 0.98 1])
-k = 1;
+k = kInit;
 while 1
     frameNbr = sprintf('%06d',k-1);
     if strcmp(mode,'GTnonlinear') && ~simMeas

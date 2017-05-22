@@ -19,17 +19,25 @@ elseif strcmp(birthSpawn, 'uniform')
             heading = angles{k}.heading-angles{1}.heading;
         end
         for z = 1 : size(Z,2)
-            zApprox = pix2coordtest(Z(1:2,z),Z(3,z));
+            [zApprox, theta] = pix2coordtest(Z(1:2,z),Z(3,z));
             XmuPred(z).state(1:3,1) = pixel2cameracoords(Z(1:2,z),zApprox);
             XmuPred(z).state(4:6,1) = zeros(3,1);
             XmuPred(z).state(7:8,1) = Z(4:5,z);
-
-            Pbirth = diag([0.1*FOVsize(2,1) 0.3*FOVsize(2,2) max(4,Rdistance(Z(3,z)))]); % TODO: Move to declareVariables
+            
+            Pbirth = diag([0.1*FOVsize(2,1) 0.3*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
             XmuPred(z).P = zeros(8,8);
             [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
+            
+            % TAG: Shall we do this?
+            angleThresh = 30*pi/180; % TODO: Move to declareVariables
+            distThresh = 10; % TODO: Move to declareVariables
+            if abs(theta) > angleThresh && Z(3,z) < distThresh
+               XmuPred(z).P(1:3,1:3) = 10*XmuPred(z).P(1:3,1:3);
+           %    XmuPred(z).P(1:3,1:3) = [10 10 10;10 20 10; 10 10 10].*XmuPred(z).P(1:3,1:3);
+            end
+            
             XmuPred(z).P(4:6,4:6) = 4*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
             XmuPred(z).P(7:8,7:8) = diag([20 20]); % TODO: Move to declareVariables
-            %XmuPred(z).P % TODO: CONT HERE. TUNE. ROTATE P TO IMU
             XmuPred(z).w = weightBirth;
             if egoMotionOn
                 % Local cam2 -> local cam0 -> local velo -> local IMU ->

@@ -86,8 +86,10 @@ if ~step
         ylabel('y')
     end
 else
-    k = 2;
+    global kInit
+    k = kInit+1;
     gt = [];
+    gtPrev = [];
     pred = [];
     conf = [];
     lab = [];
@@ -102,8 +104,12 @@ else
         fclose(f);
 
         ind = find(GT{1} == k-1 & GT{2} ~= -1);
+        indPrev = find(GT{1} == k-2 & GT{2} ~= -1);
 
         if egoMotionOn
+            GTPrev = [GT{14}(indPrev)';
+                (GT{15}(indPrev)-GT{11}(indPrev)/2)';
+                GT{16}(indPrev)'];
             GT = [GT{14}(ind)';
                 (GT{15}(ind)-GT{11}(ind)/2)';
                 GT{16}(ind)'];
@@ -112,8 +118,12 @@ else
             GT(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*GT(1:2,:);
             %GT(1:2,:) = sqrt(GT(1,:).^2+GT(2,:).^2).*[cos(heading+atan(GT(2,:)./GT(1,:))); ...
             %            sin(heading+atan(GT(2,:)./GT(1,:)))];
-            GT = GT+pose{k}(1:3,4);
+            GT = GT+pose{k-1}(1:3,4);
             
+            GTPrev = TveloToImu(1:3,:)*(TcamToVelo*(T20*[GTPrev;ones(1,size(GTPrev,2))]));
+            heading = angles{k}.heading-angles{1}.heading;
+            GTPrev(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*GTPrev(1:2,:);
+            GTPrev = GTPrev+pose{k}(1:3,4);
         end
         %if k == 2
         %    if ~egoMotionOn
@@ -126,6 +136,7 @@ else
                 plot(ktmp,GT{14}(ind),'g*');
             else
                 gt = plot(GT(1,:),GT(2,:),'g*');
+                gtPrev = plot(GTPrev(1,:), GTPrev(2,:),'g+','Linewidth',1);
             end
         %end
         hold on
@@ -178,6 +189,8 @@ else
                 conf = [];
                 delete(lab)
                 lab = [];
+                delete(gtPrev)
+                gtPrev = [];
                 if k <= 0
                     fprintf('Window closed. Exiting...\n');
                     break
@@ -192,6 +205,8 @@ else
                 conf = [];
                 delete(lab)
                 lab = [];
+                delete(gtPrev)
+                gtPrev = [];
                 if k > size(X,2)
                     fprintf('Window closed. Exiting...\n');
                     break

@@ -33,7 +33,7 @@ for z = 1:nbrOfMeas
             if strcmp(motionModel,'cvBB')
                 % Bounding box center
                 [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates), v]...
-                    = CKFupdate(Xpred{j}(i).state,Xpred{j}(i).P, H, Z(1:nbrMeasStates,z), R, 6);
+                    = UKFupdate(Xpred{j}(i).state,Xpred{j}(i).P, H, Z(1:nbrMeasStates,z), R, 6);
             end
             % Enable if gating
             % Check within threshold
