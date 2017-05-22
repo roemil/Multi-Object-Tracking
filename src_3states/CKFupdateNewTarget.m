@@ -15,7 +15,7 @@
 %
 %%
 
-function [S] = CKFupdateNewTarget(Xpred, Ppred, n)%, H, Z, R, n)
+function [S, X3D] = CKFupdateNewTarget(Xpred, Ppred, n)%, H, Z, R, n)
 global pose, global k, global angles
 
 Xtmp = zeros(size(Xpred,1),2*n);
@@ -33,9 +33,18 @@ for i = 1:n
     hX(:,i+n) = pixel2cameracoords(Xtmp(1:2,i+n),zApprox);
 end
 
+global T02, global TcamToVelo, global TveloToImu
+hX = TveloToImu(1:3,:)*TcamToVelo*T02*[hX; ones(1,size(hX,2))];
 yhatpred = repmat(Wi*sum(hX,2),1,2*n);
 Pxy = Wi*(Xtmp-repmat(Xpred,1,2*n))*(hX-yhatpred)';
 S = Wi*(hX-yhatpred)*(hX-yhatpred)';
+
+X3D = mean(hX,2);
+
+% yhatpred = repmat(Wi*sum(hX,2),1,2*n);
+% Pxy = Wi*(Xtmp-repmat(Xpred,1,2*n))*(hX-yhatpred)';
+% S = Wi*(hX-yhatpred)*(hX-yhatpred)';
+
 %X = Xpred+Pxy/S*(Z-yhatpred(:,1));
 
 %Ppred = Ppred.*(max(1,dMax-Z(3)));

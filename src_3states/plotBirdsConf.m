@@ -129,8 +129,8 @@ else
             end
         %end
         hold on
-        if ~isempty(X{k-1})
-            for i = 1:size(X{k-1}{jEst(k-1)},2)
+        if ~isempty(X{k})
+            for i = 1:size(X{k}{jEst(k-1)},2)
                 %if k == 2
                 %   est = plot(X{k-1}{jEst(k-1)}(i).state(1),X{k-1}{jEst(k-1)}(i).state(2),'r*'); %sum(ismember(X{k}{i}(9),labels)) == 0
                 %   x = repmat(X{k-1}{jEst(k-1)}(i).state(1:2),1,n)+3*sqrtm(X{k-1}{jEst(k-1)}(i).P(1:2,1:2))*[cos(phi);sin(phi)];
@@ -140,11 +140,11 @@ else
                 %       labels = [labels, X{k-1}{jEst(k-1)}(i).label];
                 %   end
                 %else
-                   pred = [pred, plot(X{k-1}{jEst(k-1)}(i).state(1),X{k-1}{jEst(k-1)}(i).state(2),'r*')]; %sum(ismember(X{k}{i}(9),labels)) == 0
-                   x = repmat(X{k-1}{jEst(k-1)}(i).state(1:2),1,n)+3*sqrtm(X{k-1}{jEst(k-1)}(i).P(1:2,1:2))*[cos(phi);sin(phi)];
+                   pred = [pred, plot(X{k}{jEst(k-1)}(i).state(1),X{k}{jEst(k-1)}(i).state(2),'r*')]; %sum(ismember(X{k}{i}(9),labels)) == 0
+                   x = repmat(X{k}{jEst(k-1)}(i).state(1:2),1,n)+3*sqrtm(X{k}{jEst(k-1)}(i).P(1:2,1:2))*[cos(phi);sin(phi)];
                    conf = [conf, plot(x(1,:),x(2,:),'-r','LineWidth',1)];
                    %if isempty(find(labels == X{k-1}{jEst(k-1)}(i).label))
-                       lab = [lab, text(X{k-1}{jEst(k-1)}(i).state(1),X{k-1}{jEst(k-1)}(i).state(2),num2str(X{k-1}{jEst(k-1)}(i).label),'Fontsize',18,'Color','red')];
+                       lab = [lab, text(X{k}{jEst(k-1)}(i).state(1),X{k}{jEst(k-1)}(i).state(2),num2str(X{k}{jEst(k-1)}(i).label),'Fontsize',18,'Color','red')];
                    %    labels = [labels, X{k-1}{jEst(k-1)}(i).label];
                    %end
                 %end

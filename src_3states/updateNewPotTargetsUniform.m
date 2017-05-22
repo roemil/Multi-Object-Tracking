@@ -37,7 +37,11 @@ global pose, global k, global angles, global FOVsize
             % --alt 2--
             
             % Current, do update on pix center and distance simultaneously
-            [XmuUpd{z}.state, XmuUpd{z}.P, XmuUpd{z}.S]...
+            %[XmuUpd{z}.state, XmuUpd{z}.P, XmuUpd{z}.S]...
+            %     = CKFupdate(XmuPred(z).state, XmuPred(z).P, H, Z(1:3,z), R, 6);
+            
+            % Just obtain S? and Dont update state?
+            [~, ~, XmuUpd{z}.S]...
                  = CKFupdate(XmuPred(z).state, XmuPred(z).P, H, Z(1:3,z), R, 6);
             
             % FOR CHECK
@@ -74,8 +78,9 @@ global pose, global k, global angles, global FOVsize
         XpotNew{z}.S = 0;
         XpotNew{z}.box = Z(nbrMeasStates+1:nbrMeasStates+2,z);
         XpotNew{z}.label = newLabel;
-        XpotNew{z}.state = XmuUpd{z}.state;
-        XpotNew{z}.P = XmuUpd{z}.P;
+        %XpotNew{z}.state = XmuUpd{z}.state;
+        XpotNew{z}.state = XmuPred(z).state;
+        XpotNew{z}.P = XmuPred(z).P;
         newLabel = newLabel+1;
         XpotNew{z}.nbrMeasAss = 1; % TAGass Nbr meas assignments
         if strcmp(motionModel,'cvBB')

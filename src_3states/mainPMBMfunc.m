@@ -8,7 +8,7 @@ addpath('evalMOT')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0003';
+sequence = '0000';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -134,6 +134,14 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Plot birds-eye view pred conf
+
+step = true;
+if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
+    plotBirdsConf(sequence,set,Xpred,step,jEst);
+else
+    disp('Not implemented')
+end
 %% Evaluate
 
 clear gt, clear result, clear resultZ

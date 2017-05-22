@@ -280,6 +280,8 @@ if strcmp(mode,'GTnonlinear')
     %R3dTo2d = diag([15 15 15 5 5]);
     R3dTo2d = diag([25 25 15 25 25]); %*2
     Rdistance = @(x) (0.161*x/1.959964)^2; % *2
+    %R3dTo2d = diag([0.1*1242 0.3*375 15 50 25]); %*2
+    %Rdistance = @(x) max(4,(0.161*x/1.959964)^2); % *2
     if egoMotionOn
         Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
         R = @(x) Rcam(x);
