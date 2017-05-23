@@ -7,9 +7,9 @@ addpath('mtimesx')
 addpath('evalMOT')
 addpath('../../kittiTracking/')
 clc
-mode = 'CNNnonlinear';
+mode = 'GTnonlinear';
 set = 'training';
-sequence = '0012';
+sequence = '0018';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -51,7 +51,7 @@ k = 1;
 
 Xupd = cell(1);
 
-K = min(140,size(Z,2)); % Length of sequence
+K = min(1000,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
