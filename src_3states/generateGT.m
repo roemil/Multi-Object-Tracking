@@ -85,9 +85,9 @@ elseif(nbrOfStates == 6)
     % ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);GT{zInd}(3);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
     % This is [px py d]
     d = sqrt(GT{14}(ind)^2+(GT{15}(ind)-GT{11}(ind)/2)^2+GT{16}(ind)^2);
-    ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);d;bbsize(1);bbsize(2);GT{trackID}(ind)]; % cx
-    count = 2;
     oldFrame = GT{1}(ind)+1;
+    ZGT{oldFrame}(:,1) = [pxCoords(1);pxCoords(2);d;bbsize(1);bbsize(2);GT{trackID}(ind)]; % cx
+    count = 2;
     for i = (ind+1) : size(GT{1},1)
         frame = GT{1}(i)+1;
         if(frame == oldFrame && (GT{trackID}(i) ~= -1))

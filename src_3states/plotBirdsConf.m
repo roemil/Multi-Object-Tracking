@@ -86,11 +86,14 @@ if ~step
         ylabel('y')
     end
 else
-    k = 2;
+    global kInit
+    k = kInit+1;
     gt = [];
+    gtPrev = [];
     pred = [];
     conf = [];
     lab = [];
+    ego = [];
     %xlim([0 150])
     %ylim([-30 30])
     while 1
@@ -102,8 +105,12 @@ else
         fclose(f);
 
         ind = find(GT{1} == k-1 & GT{2} ~= -1);
+        indPrev = find(GT{1} == k-2 & GT{2} ~= -1);
 
         if egoMotionOn
+            GTPrev = [GT{14}(indPrev)';
+                (GT{15}(indPrev)-GT{11}(indPrev)/2)';
+                GT{16}(indPrev)'];
             GT = [GT{14}(ind)';
                 (GT{15}(ind)-GT{11}(ind)/2)';
                 GT{16}(ind)'];
@@ -114,6 +121,10 @@ else
             %            sin(heading+atan(GT(2,:)./GT(1,:)))];
             GT = GT+pose{k}(1:3,4);
             
+            GTPrev = TveloToImu(1:3,:)*(TcamToVelo*(T20*[GTPrev;ones(1,size(GTPrev,2))]));
+            heading = angles{k-1}.heading-angles{1}.heading;
+            GTPrev(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*GTPrev(1:2,:);
+            GTPrev = GTPrev+pose{k-1}(1:3,4);
         end
         %if k == 2
         %    if ~egoMotionOn
@@ -126,11 +137,13 @@ else
                 plot(ktmp,GT{14}(ind),'g*');
             else
                 gt = plot(GT(1,:),GT(2,:),'g*');
+                gtPrev = plot(GTPrev(1,:), GTPrev(2,:),'g+','Linewidth',1);
+                ego = plot(pose{k}(1,4), pose{k}(2,4),'k+','Linewidth',1);
             end
         %end
         hold on
-        if ~isempty(X{k-1})
-            for i = 1:size(X{k-1}{jEst(k-1)},2)
+        if ~isempty(X{k})
+            for i = 1:size(X{k}{jEst(k-1)},2)
                 %if k == 2
                 %   est = plot(X{k-1}{jEst(k-1)}(i).state(1),X{k-1}{jEst(k-1)}(i).state(2),'r*'); %sum(ismember(X{k}{i}(9),labels)) == 0
                 %   x = repmat(X{k-1}{jEst(k-1)}(i).state(1:2),1,n)+3*sqrtm(X{k-1}{jEst(k-1)}(i).P(1:2,1:2))*[cos(phi);sin(phi)];
@@ -140,11 +153,11 @@ else
                 %       labels = [labels, X{k-1}{jEst(k-1)}(i).label];
                 %   end
                 %else
-                   pred = [pred, plot(X{k-1}{jEst(k-1)}(i).state(1),X{k-1}{jEst(k-1)}(i).state(2),'r*')]; %sum(ismember(X{k}{i}(9),labels)) == 0
-                   x = repmat(X{k-1}{jEst(k-1)}(i).state(1:2),1,n)+3*sqrtm(X{k-1}{jEst(k-1)}(i).P(1:2,1:2))*[cos(phi);sin(phi)];
+                   pred = [pred, plot(X{k}{jEst(k-1)}(i).state(1),X{k}{jEst(k-1)}(i).state(2),'r*')]; %sum(ismember(X{k}{i}(9),labels)) == 0
+                   x = repmat(X{k}{jEst(k-1)}(i).state(1:2),1,n)+3*sqrtm(X{k}{jEst(k-1)}(i).P(1:2,1:2))*[cos(phi);sin(phi)];
                    conf = [conf, plot(x(1,:),x(2,:),'-r','LineWidth',1)];
                    %if isempty(find(labels == X{k-1}{jEst(k-1)}(i).label))
-                       lab = [lab, text(X{k-1}{jEst(k-1)}(i).state(1),X{k-1}{jEst(k-1)}(i).state(2),num2str(X{k-1}{jEst(k-1)}(i).label),'Fontsize',18,'Color','red')];
+                       lab = [lab, text(X{k}{jEst(k-1)}(i).state(1),X{k}{jEst(k-1)}(i).state(2),num2str(X{k}{jEst(k-1)}(i).label),'Fontsize',18,'Color','red')];
                    %    labels = [labels, X{k-1}{jEst(k-1)}(i).label];
                    %end
                 %end
@@ -178,6 +191,10 @@ else
                 conf = [];
                 delete(lab)
                 lab = [];
+                delete(gtPrev)
+                gtPrev = [];
+                delete(ego)
+                ego = [];
                 if k <= 0
                     fprintf('Window closed. Exiting...\n');
                     break
@@ -192,6 +209,10 @@ else
                 conf = [];
                 delete(lab)
                 lab = [];
+                delete(gtPrev)
+                gtPrev = [];
+                delete(ego)
+                ego = [];
                 if k > size(X,2)
                     fprintf('Window closed. Exiting...\n');
                     break
