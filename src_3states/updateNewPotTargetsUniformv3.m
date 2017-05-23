@@ -35,9 +35,9 @@ for z = 1:nbrOfMeas
     angleThresh = 30*pi/180; % TODO: Move to declareVariables
     distThresh = 10; % TODO: Move to declareVariables
     if Z(3,z) < distThresh % && abs(theta) > angleThresh
-       Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) 4*Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+        Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) 6*Rdistance(Z(3,z))]); % TODO: Move to declareVariables
     else
-        Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+        Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
     end
 
     e = Pd*mvnpdf(Z(1:3,z), Z(1:3,z), Pbirth);

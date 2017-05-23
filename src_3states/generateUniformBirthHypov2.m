@@ -62,12 +62,12 @@ elseif strcmp(birthSpawn, 'uniform')
             distThresh = 10; % TODO: Move to declareVariables
             XmuPred(z).P = zeros(8,8);
             if Z(3,z) < distThresh % && abs(theta) > angleThresh
-                Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+                Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
             
                 XmuPred(z).P(4:6,4:6) = 200*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
             else
-                Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+                Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
                 XmuPred(z).P(4:6,4:6) = 1*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
             end
