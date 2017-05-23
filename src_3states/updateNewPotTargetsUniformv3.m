@@ -8,13 +8,33 @@ global pose, global k, global angles, global FOVsize
     
     for z = 1:nbrOfMeas
         
-        % TAG: Shall we do this?
+          % Test 1! This works ok
+%         % TAG: Shall we do this?
+%         theta = pi/2 / FOVsize(2,1)*(Z(1,z)-FOVsize(2,1)/2);
+%         Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) Rdistance(Z(3,z))]);
+%         angleThresh = 30*pi/180; % TODO: Move to declareVariables
+%         distThresh = 10; % TODO: Move to declareVariables
+%         if abs(theta) > angleThresh && Z(3,z) < distThresh
+%            Pbirth = 5*Pbirth;
+%         end
+
+        % TEST 2
+%         theta = pi/2 / FOVsize(2,1)*(Z(1,z)-FOVsize(2,1)/2);
+%         Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) Rdistance(Z(3,z))]);
+%         angleThresh = 30*pi/180; % TODO: Move to declareVariables
+%         distThresh = 10; % TODO: Move to declareVariables
+%         if Z(3,z) < distThresh % && abs(theta) > angleThresh
+%            Pbirth = 1*Pbirth;
+%         end
+        
+        % TEST 3
         theta = pi/2 / FOVsize(2,1)*(Z(1,z)-FOVsize(2,1)/2);
-        Pbirth = diag([0.1*FOVsize(2,1) 0.3*FOVsize(2,2) Rdistance(Z(3,z))]);
         angleThresh = 30*pi/180; % TODO: Move to declareVariables
         distThresh = 10; % TODO: Move to declareVariables
-        if abs(theta) > angleThresh && Z(3,z) < distThresh
-           Pbirth = 5*Pbirth;
+        if Z(3,z) < distThresh % && abs(theta) > angleThresh
+           Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) 4*Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+        else
+            Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
         end
         
         e = Pd*mvnpdf(Z(1:3,z), Z(1:3,z), Pbirth);

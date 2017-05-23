@@ -22,6 +22,14 @@ if isa(R,'function_handle')
     R = R(Z(3));
 end
 
+% global FOVsize
+% theta = pi/2 / FOVsize(2,1)*(Z(1)-FOVsize(2,1)/2);
+% angleThresh = 30*pi/180; % TODO: Move to declareVariables
+% distThresh = 10; % TODO: Move to declareVariables
+% if abs(theta) > angleThresh && Z(3) < distThresh
+%     R(3,3) = 2*R(3,3);
+% end
+
 Xtmp = zeros(size(Xpred,1),2*n);
 
 W0 = 1/(2*n+1);
@@ -51,3 +59,19 @@ X = Xpred+Pxy/S*(Z-yhatpred(:,1));
 P = Ppred-Pxy/S*Pxy';
 
 v = Z-yhatpred(:,1);
+
+% Plot conf
+% seq = '0003';
+% imagePath = strcat('../../kittiTracking/','training','/image_02/',seq,'/','000001','.png');
+% img = imread(imagePath);
+% figure;
+% imagesc(img);
+% axis('image')
+% hold on
+% plot(hX(1,:),hX(2,:),'r*')
+% plot(yhatpred(1),yhatpred(2),'r+','linewidth',1)
+% plot(Z(1),Z(2),'g+','linewidth',1)
+% phi = linspace(0,2*pi,100);
+% x = repmat(yhatpred(1:2,1),1,100)+3*sqrtm(S(1:2,1:2))*[cos(phi);sin(phi)];
+% plot(x(1,:),x(2,:),'-y','LineWidth',1)
+% waitforbuttonpress

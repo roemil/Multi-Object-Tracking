@@ -175,7 +175,7 @@ global T
 T = 0.1; % sampling time, 1 fps
 if strcmp(mode,'GTnonlinear')
     global sigmaQ
-    sigmaQ = 2; % 2 seems ok, 19may % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
+    sigmaQ = 7; % 2 seems ok, 19/23may! % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
     global sigmaBB
     sigmaBB = 10;
 elseif strcmp(mode,'CNNnonlinear')
@@ -278,7 +278,7 @@ end
 
 if strcmp(mode,'GTnonlinear')
     %R3dTo2d = diag([15 15 15 5 5]);
-    R3dTo2d = diag([25 25 15 25 25]); %*2
+    R3dTo2d = diag([25 25 15 15 15]); %*2
     Rdistance = @(x) (0.161*x/1.959964)^2; % *2
     %R3dTo2d = diag([0.1*1242 0.3*375 15 50 25]); %*2
     %Rdistance = @(x) max(4,(0.161*x/1.959964)^2); % *2
@@ -322,14 +322,14 @@ end
 global Ps
 Ps = 0.99;   % Survival probability % 0.98 ok1
 global c
-c = 0.00001;    % clutter intensity % 0.00001
+c = 1e-7;    % clutter intensity % 0.00001
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Thresholds and Murty %%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Threshold existence probability keep for next iteration
-threshold = 1e-5;    % 0.01 ok1
+threshold = 1e-3;    % 0.01 ok1
 % Threshold existence probability use estimate
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration

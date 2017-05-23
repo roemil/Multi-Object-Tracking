@@ -93,6 +93,7 @@ else
     pred = [];
     conf = [];
     lab = [];
+    ego = [];
     %xlim([0 150])
     %ylim([-30 30])
     while 1
@@ -118,12 +119,12 @@ else
             GT(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*GT(1:2,:);
             %GT(1:2,:) = sqrt(GT(1,:).^2+GT(2,:).^2).*[cos(heading+atan(GT(2,:)./GT(1,:))); ...
             %            sin(heading+atan(GT(2,:)./GT(1,:)))];
-            GT = GT+pose{k-1}(1:3,4);
+            GT = GT+pose{k}(1:3,4);
             
             GTPrev = TveloToImu(1:3,:)*(TcamToVelo*(T20*[GTPrev;ones(1,size(GTPrev,2))]));
-            heading = angles{k}.heading-angles{1}.heading;
+            heading = angles{k-1}.heading-angles{1}.heading;
             GTPrev(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*GTPrev(1:2,:);
-            GTPrev = GTPrev+pose{k}(1:3,4);
+            GTPrev = GTPrev+pose{k-1}(1:3,4);
         end
         %if k == 2
         %    if ~egoMotionOn
@@ -137,6 +138,7 @@ else
             else
                 gt = plot(GT(1,:),GT(2,:),'g*');
                 gtPrev = plot(GTPrev(1,:), GTPrev(2,:),'g+','Linewidth',1);
+                ego = plot(pose{k}(1,4), pose{k}(2,4),'k+','Linewidth',1);
             end
         %end
         hold on
@@ -191,6 +193,8 @@ else
                 lab = [];
                 delete(gtPrev)
                 gtPrev = [];
+                delete(ego)
+                ego = [];
                 if k <= 0
                     fprintf('Window closed. Exiting...\n');
                     break
@@ -207,6 +211,8 @@ else
                 lab = [];
                 delete(gtPrev)
                 gtPrev = [];
+                delete(ego)
+                ego = [];
                 if k > size(X,2)
                     fprintf('Window closed. Exiting...\n');
                     break
