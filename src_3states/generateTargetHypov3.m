@@ -1,13 +1,25 @@
 function [Xhypo] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates)
  global Pd, global R, global nbrMeasStates, global H3dTo2d, global H3dFunc, ...
  global Hdistance, global R3dTo2d, global Rdistance, global H, global R,
- global pose, global k, global plotHypoConf, global angles
+ global pose, global k, global plotHypoConf, global angles, global imgpath,...
+ global color
 
 % Create missdetection hypo in index size(Z{k},2)+1
 if(isempty(Xpred)) % If we have no predicted targets, we cannot 
                       % generate hypotheses
     Xhypo{1} = [];
     return;
+end
+if(k-1 < 10)
+    framenbr = num2str(['00000',num2str(k-1)]);
+elseif(k-1 < 100)
+    framenbr = num2str(['0000',num2str(k-1)]);
+elseif(k-1 < 1000)
+    framenbr = num2str(['000',num2str(k-1)]);
+end
+
+if(color)
+    img = imread([imgpath,framenbr,'.png']);
 end
 for j = 1:nbrOfGlobHyp
     for i = 1:size(Xpred{j},2)
@@ -19,6 +31,9 @@ for j = 1:nbrOfGlobHyp
         Xhypo{j,nbrOfMeas+1}(i).label = Xpred{j}(i).label;
         Xhypo{j,nbrOfMeas+1}(i).S = 0;
         Xhypo{j,nbrOfMeas+1}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss; % TAGass
+        Xhypo{j,nbrOfMeas+1}(i).red = Xpred{j}(i).red;
+        Xhypo{j,nbrOfMeas+1}(i).green = Xpred{j}(i).green;
+        Xhypo{j,nbrOfMeas+1}(i).blue = Xpred{j}(i).blue;
     end
 end
 %          
@@ -48,6 +63,15 @@ for z = 1:nbrOfMeas
                     % Only yaw
                     Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + ...
                         log_mvnpdf(Z(1:nbrMeasStates,z), H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
+                    if(color)
+                        Zbox = [Z(1,z) - Z(nbrMeasStates+1,z)*0.5,Z(2,z)-Z(nbrMeasStates+2,z)*0.5,...
+                            Z(nbrMeasStates+1,z),Z(nbrMeasStates+2,z)]; % Corners of Z box
+                        [ZRed, ZGreen, ZBlue] = colorhist(img,Zbox);
+                        Xhypo{j,z}(i).w = Xhypo{j,z}(i).w + log(1-colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue));
+                    end
+                    Xhypo{j,z}(i).red = Xpred{j}(i).red;
+                    Xhypo{j,z}(i).green = Xpred{j}(i).green;
+                    Xhypo{j,z}(i).blue = Xpred{j}(i).blue;
                 end
                 Xhypo{j,z}(i).r = 1;
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
@@ -65,7 +89,11 @@ for z = 1:nbrOfMeas
                Xhypo{j,z}(i).r = 0; %TODO: should this really be 1??
                Xhypo{j,z}(i).label = 313313;
                Xhypo{j,z}(i).nbrMeasAss = 0; % TAGass
+               Xhypo{j,z}(i).red = 0;
+               Xhypo{j,z}(i).green = 0;
+               Xhypo{j,z}(i).blue = 0;
             end % Enable if gating
+            
         end
         %Stmp{z,j}(end+1,1:nbrMeasObj) = 0;
         %Stmp{z,j}(end,size(Xpred{j},2)+z) = 1;

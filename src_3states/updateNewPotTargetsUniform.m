@@ -78,6 +78,9 @@ global pose, global k, global angles, global FOVsize
         XpotNew{z}.P = XmuUpd{z}.P;
         newLabel = newLabel+1;
         XpotNew{z}.nbrMeasAss = 1; % TAGass Nbr meas assignments
+        XpotNew{z}.red = 0;
+        XpotNew{z}.green = 0;
+        XpotNew{z}.blue = 0;
         if strcmp(motionModel,'cvBB')
             XpotNew{z}.state(nbrPosStates+1:nbrPosStates+2) = Z(nbrMeasStates+1:nbrMeasStates+2,z);
             XpotNew{z}.P(nbrPosStates+1:nbrPosStates+2,nbrPosStates+1:nbrPosStates+2) = R3dTo2d(end-1:end,end-1:end);

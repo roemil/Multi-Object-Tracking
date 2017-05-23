@@ -38,6 +38,9 @@ function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)
                 Xpred{j}(i).box = XupdPrev{j}(i).box;
                 Xpred{j}(i).label = XupdPrev{j}(i).label;
                 Xpred{j}(i).nbrMeasAss = XupdPrev{j}(i).nbrMeasAss; % TAGass
+                Xpred{j}(i).red = XupdPrev{j}(i).red;
+                Xpred{j}(i).green = XupdPrev{j}(i).green;
+                Xpred{j}(i).blue = XupdPrev{j}(i).blue;
             end
         end
     end

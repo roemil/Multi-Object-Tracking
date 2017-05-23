@@ -4,6 +4,7 @@ function [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, ...
 
 global egoMotionOn
 global simMeas
+global color;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Load Detections %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -118,6 +119,11 @@ if egoMotionOn
     global T20
     T20 = inv(T02);
 end
+
+if(color)
+    global imgpath;
+    imgpath = strcat('../../kittiTracking/',set,'/','image_02/',sequence,'/');
+end;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initiate cells %%%%%%%%%%%%%%%%%%%

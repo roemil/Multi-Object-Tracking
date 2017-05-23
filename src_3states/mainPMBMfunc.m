@@ -47,10 +47,11 @@ nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 global P2;
 global k
 k = 1;
-
+global color;
+color = true;
 Xupd = cell(1);
 
-K = min(1000,size(Z,2)); % Length of sequence
+K = min(140,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -131,9 +132,9 @@ disp('--------------- Simulation Complete ---------------')
 disp(['Total simulation time: ', num2str(simTime)])
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Evaluate
 
 clear gt, clear result, clear resultZ

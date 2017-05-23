@@ -2,6 +2,11 @@
 function [XuUpd, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
     PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel,birthSpawn,mode)
 global uniformBirths
+global imgpath
+global H
+global pose
+global k
+global angles
 load('simVariables')
 Wold = 0;
 C = [];
@@ -62,6 +67,11 @@ for i = 1:size(Xtmp{1},2)
         %    Xupd{1}(iInd).P = 3*Xupd{1}(iInd).P+diag([30 10 0 0 0 0]);
         %end
         Xupd{1}(iInd).w = norm_weights(iInd);
+        tmp = H(Xtmp{1}(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
+        img = imread([imgpath,'000000.png']);
+        [Xupd{1}(iInd).red,Xupd{1}(iInd).green, Xupd{1}(iInd).blue] = colorhist(img,...
+            [tmp(1)-Xtmp{1}(i).box(1)/2, tmp(2)-Xtmp{1}(i).box(2)/2,...
+            Xtmp{1}(i).box']);
         iInd = iInd+1;
     end
 end
