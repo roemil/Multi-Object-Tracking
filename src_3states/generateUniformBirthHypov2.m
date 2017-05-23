@@ -32,7 +32,7 @@ elseif strcmp(birthSpawn, 'uniform')
             angleThresh = 30*pi/180; % TODO: Move to declareVariables
             distThresh = 10; % TODO: Move to declareVariables
             if abs(theta) > angleThresh && Z(3,z) < distThresh
-               XmuPred(z).P(1:3,1:3) = 10*XmuPred(z).P(1:3,1:3);
+               XmuPred(z).P(1:3,1:3) = 5*XmuPred(z).P(1:3,1:3);
            %    XmuPred(z).P(1:3,1:3) = [10 10 10;10 20 10; 10 10 10].*XmuPred(z).P(1:3,1:3);
             end
             

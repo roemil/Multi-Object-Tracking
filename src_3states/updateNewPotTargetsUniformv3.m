@@ -14,7 +14,7 @@ global pose, global k, global angles, global FOVsize
         angleThresh = 30*pi/180; % TODO: Move to declareVariables
         distThresh = 10; % TODO: Move to declareVariables
         if abs(theta) > angleThresh && Z(3,z) < distThresh
-           Pbirth = 10*Pbirth;
+           Pbirth = 5*Pbirth;
         end
         
         e = Pd*mvnpdf(Z(1:3,z), Z(1:3,z), Pbirth);
