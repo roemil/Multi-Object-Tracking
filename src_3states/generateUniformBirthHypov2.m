@@ -72,6 +72,19 @@ elseif strcmp(birthSpawn, 'uniform')
                 XmuPred(z).P(4:6,4:6) = 1*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
             end
             
+            % Initiate velo?
+            distThresh2 = 7;
+            angleThresh2 = 30*pi/180;
+            if ((Z(3,z) < distThresh2) && (abs(theta) > angleThresh2))
+                if k > 1
+                    global T
+                    XmuPred(z).state(4:6) = (pose{k}(1:3,4)-pose{k-1}(1:3,4))/T;
+                elseif k == 1
+                    global T
+                    XmuPred(z).state(4:6) = 0.7*(pose{k+1}(1:3,4)-pose{k}(1:3,4))/T;
+                end
+            end
+            
             XmuPred(z).P(7:8,7:8) = diag([20 20]); % TODO: Move to declareVariables
             XmuPred(z).w = weightBirth;
             if egoMotionOn
@@ -83,7 +96,7 @@ elseif strcmp(birthSpawn, 'uniform')
             end
             
             if color
-                Zbox = [Z(1,z) - Z(nbrMeasStates+1,z)*0.5,Z(2,z)-Z(nbrMeasStates+2,z)*0.5,...
+                Zbox = 0.5*[Z(1,z) - Z(nbrMeasStates+1,z)*0.5,Z(2,z)-Z(nbrMeasStates+2,z)*0.5,...
                         Z(nbrMeasStates+1,z),Z(nbrMeasStates+2,z)]; % Corners of Z box
                 [ZRed, ZGreen, ZBlue] = colorhist(img,Zbox);
                 XmuPred(z).red = ZRed;

@@ -51,5 +51,10 @@ if ~isempty(X{1})
         box = [tmp(1)-X{i}(end-2)/2, tmp(2)-X{i}(end-1)/2, X{i}(end-2), X{i}(end-1)];
         rectangle('Position',box,'EdgeColor','r','LineWidth',1,'LineStyle','--')
         text(box(1), box(2)-10, num2str(X{i}(end)),'Fontsize',18,'Color','red')
+        
+        % color box
+        fact = 0.5;
+        box = [tmp(1)-fact*X{i}(end-2)/2, tmp(2)-fact*X{i}(end-1)/2, fact*X{i}(end-2), fact*X{i}(end-1)];
+        rectangle('Position',box,'EdgeColor','r','LineWidth',1,'LineStyle','--')
     end
 end

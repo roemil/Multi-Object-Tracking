@@ -53,11 +53,12 @@ K_hyp = max(1,ceil(Nh * wHyp));
 if ~isempty(row)
     ass = ass(row,:);
 end
-%disp(['Nbr globs = ', num2str([size(ass,1)])]),%,tmp,size(Xhypo{j},2)])])
+%disp(['Nbr globs = ', num2str([size(ass,1),wHyp,K_hyp,size(Xhypo{j},2)])])
 S = zeros(nbrOfMeas,nbrOfMeas+size(Xhypo{j},2),size(ass,1));
 
 ass2 = [repmat((1:nbrOfMeas)',size(ass,1),1), reshape(ass',size(ass,2)*size(ass,1),1), floor(round(1:1/size(ass,2):size(ass,1)+1-1/size(ass,2),1))'];
 %ass2 = reshape([(1:nbrOfMeas).*size(ass), ass, (1:size(ass,1))'.*size(ass)],nbrOfMeas,2*nbrOfMeas);
 
 S(sub2ind(size(S),ass2(:,1),ass2(:,2),ass2(:,3))) = 1;
+
 

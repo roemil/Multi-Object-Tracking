@@ -60,12 +60,12 @@ for z = 1:nbrOfMeas
                     Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + ...
                         log_mvnpdf(Z(1:nbrMeasStates,z), H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
                     if(color)
-                        Zbox = [Z(1,z) - Z(nbrMeasStates+1,z)*0.5,Z(2,z)-Z(nbrMeasStates+2,z)*0.5,...
+                        Zbox = 0.5*[Z(1,z) - Z(nbrMeasStates+1,z)*0.5,Z(2,z)-Z(nbrMeasStates+2,z)*0.5,...
                             Z(nbrMeasStates+1,z),Z(nbrMeasStates+2,z)]; % Corners of Z box
                         [ZRed, ZGreen, ZBlue] = colorhist(img,Zbox);
                         %logsig(colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue))
                         %waitforbuttonpress
-                        Xhypo{j,z}(i).w = Xhypo{j,z}(i).w + logsig(colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue));
+                        Xhypo{j,z}(i).w = Xhypo{j,z}(i).w - log(colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue));
                         Xhypo{j,z}(i).red = ZRed;
                         Xhypo{j,z}(i).green = ZGreen;
                         Xhypo{j,z}(i).blue = ZBlue;

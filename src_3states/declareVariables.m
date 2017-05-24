@@ -399,7 +399,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
     end
 end
 global wInit
-wInit = 1;%0.2;
+wInit = 0.1;%0.2;
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];
