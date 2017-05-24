@@ -20,7 +20,7 @@ elseif strcmp(birthSpawn, 'uniform')
              XmuPred(z).state(1:3,1) = pixel2cameracoords(Z(1:2,z),zApprox);
              XmuPred(z).state(4:6,1) = zeros(3,1);
              XmuPred(z).state(7:8,1) = Z(4:5,z);
-             XmuPred(z).P = covBirth;      % Pred cov
+             XmuPred(z).P = covBirth;%(Z(3,z));      % Pred cov
              XmuPred(z).w = weightBirth;
                 if egoMotionOn
                     % Local cam2 -> local cam0 -> local velo -> local IMU ->
@@ -43,10 +43,9 @@ end
 % %Rtmp = @(x) R(x)*3;
 % for i = 1:size(Z,2)
 %     tmp = H(XmuPred(i).state,pose{1}(1:3,4),angles{k}.heading-angles{1}.heading);
-%     [~, ~,S] = CKFupdate(XmuPred(i).state, XmuPred(i).P, H, Z(1:3,i), R, 6);
+%     [~, ~,S] = CKFupdate(XmuPred(i).state, XmuPred(i).P, H, Z(1:3,i), R, 8);
 %     n = 100;
 %     phi = linspace(0,2*pi,n);
-%     tmp2 = tmp;
 %     x = repmat(tmp(1:2),1,n)+3*sqrtm(S(1:2,1:2))*[cos(phi);sin(phi)];
 %     figure;
 %     plot(Z(1,i),Z(2,i),'g*','markersize',10)

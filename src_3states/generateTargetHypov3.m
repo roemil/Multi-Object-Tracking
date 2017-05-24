@@ -10,15 +10,9 @@ if(isempty(Xpred)) % If we have no predicted targets, we cannot
     Xhypo{1} = [];
     return;
 end
-if(k-1 < 10)
-    framenbr = num2str(['00000',num2str(k-1)]);
-elseif(k-1 < 100)
-    framenbr = num2str(['0000',num2str(k-1)]);
-elseif(k-1 < 1000)
-    framenbr = num2str(['000',num2str(k-1)]);
-end
 
 if(color)
+    framenbr = sprintf('%06d',k-1);
     img = imread([imgpath,framenbr,'.png']);
 end
 for j = 1:nbrOfGlobHyp
@@ -31,9 +25,11 @@ for j = 1:nbrOfGlobHyp
         Xhypo{j,nbrOfMeas+1}(i).label = Xpred{j}(i).label;
         Xhypo{j,nbrOfMeas+1}(i).S = 0;
         Xhypo{j,nbrOfMeas+1}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss; % TAGass
-        Xhypo{j,nbrOfMeas+1}(i).red = Xpred{j}(i).red;
-        Xhypo{j,nbrOfMeas+1}(i).green = Xpred{j}(i).green;
-        Xhypo{j,nbrOfMeas+1}(i).blue = Xpred{j}(i).blue;
+        if color
+            Xhypo{j,nbrOfMeas+1}(i).red = Xpred{j}(i).red;
+            Xhypo{j,nbrOfMeas+1}(i).green = Xpred{j}(i).green;
+            Xhypo{j,nbrOfMeas+1}(i).blue = Xpred{j}(i).blue;
+        end
     end
 end
 %          
@@ -48,7 +44,7 @@ for z = 1:nbrOfMeas
             if strcmp(motionModel,'cvBB')
                 % Bounding box center
                 [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates), v]...
-                    = CKFupdate(Xpred{j}(i).state,Xpred{j}(i).P, H, Z(1:nbrMeasStates,z), R, 6);
+                    = UKFupdate(Xpred{j}(i).state,Xpred{j}(i).P, H, Z(1:nbrMeasStates,z), R, 6);
             end
             % Enable if gating
             % Check within threshold
@@ -67,11 +63,13 @@ for z = 1:nbrOfMeas
                         Zbox = [Z(1,z) - Z(nbrMeasStates+1,z)*0.5,Z(2,z)-Z(nbrMeasStates+2,z)*0.5,...
                             Z(nbrMeasStates+1,z),Z(nbrMeasStates+2,z)]; % Corners of Z box
                         [ZRed, ZGreen, ZBlue] = colorhist(img,Zbox);
-                        Xhypo{j,z}(i).w = Xhypo{j,z}(i).w + log(1-colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue));
+                        %logsig(colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue))
+                        %waitforbuttonpress
+                        Xhypo{j,z}(i).w = Xhypo{j,z}(i).w + logsig(colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue));
+                        Xhypo{j,z}(i).red = ZRed;
+                        Xhypo{j,z}(i).green = ZGreen;
+                        Xhypo{j,z}(i).blue = ZBlue;
                     end
-                    Xhypo{j,z}(i).red = Xpred{j}(i).red;
-                    Xhypo{j,z}(i).green = Xpred{j}(i).green;
-                    Xhypo{j,z}(i).blue = Xpred{j}(i).blue;
                 end
                 Xhypo{j,z}(i).r = 1;
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
@@ -89,9 +87,11 @@ for z = 1:nbrOfMeas
                Xhypo{j,z}(i).r = 0; %TODO: should this really be 1??
                Xhypo{j,z}(i).label = 313313;
                Xhypo{j,z}(i).nbrMeasAss = 0; % TAGass
-               Xhypo{j,z}(i).red = 0;
-               Xhypo{j,z}(i).green = 0;
-               Xhypo{j,z}(i).blue = 0;
+               if color
+                   Xhypo{j,z}(i).red = 0;
+                   Xhypo{j,z}(i).green = 0;
+                   Xhypo{j,z}(i).blue = 0;
+               end
             end % Enable if gating
             
         end

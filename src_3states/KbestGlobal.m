@@ -27,9 +27,12 @@ end
 %    wHypSum = 1;
 %end
 if ~isempty(Xhypo{j})
-    %[~, wHypSum] = normalizeLogWeights(Wold);
-    %wHyp = exp(wHyp - wHypSum); % shall I normalize?
-    wHyp = exp(wHyp/size(Xhypo{j},2));
+    [~, wHypSum] = normalizeLogWeights(Wold);
+    wHyp = exp(wHyp - wHypSum); % shall I normalize?
+    %tmp = wHyp;
+    %wHyp = exp(wHyp/size(Xhypo{j},2));
+    %wHyp = exp(wHyp);
+    %wHyp = wHyp*size(Xhypo{j},2);
     C = -[Wold, log(Wnew)];
 else
     C = -log(Wnew);
@@ -45,12 +48,12 @@ end
 % TODO: max(2, ...)?? 
 K_hyp = max(1,ceil(Nh * wHyp));
 
-[ass, ~] = murty(C,min(maxKperGlobal,K_hyp));
+[ass, cost] = murty(C,min(maxKperGlobal,K_hyp));
 [row, ~] = find(ass(:,1)~=0);
 if ~isempty(row)
     ass = ass(row,:);
 end
-
+%disp(['Nbr globs = ', num2str([size(ass,1)])]),%,tmp,size(Xhypo{j},2)])])
 S = zeros(nbrOfMeas,nbrOfMeas+size(Xhypo{j},2),size(ass,1));
 
 ass2 = [repmat((1:nbrOfMeas)',size(ass,1),1), reshape(ass',size(ass,2)*size(ass,1),1), floor(round(1:1/size(ass,2):size(ass,1)+1-1/size(ass,2),1))'];
