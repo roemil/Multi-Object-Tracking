@@ -26,6 +26,7 @@ function [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xupd, threshold, motio
                 wGlob = 0;
             else
                 for i = 1 : size(Xupd{j},2) % find index of which global hyp is
+                    wGlob = wGlob + Xupd{j}(i).w;
                 end
             end
             if(wGlob >= M)

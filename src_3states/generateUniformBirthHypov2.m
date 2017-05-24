@@ -96,8 +96,9 @@ elseif strcmp(birthSpawn, 'uniform')
             end
             
             if color
-                Zbox = 0.5*[Z(1,z) - Z(nbrMeasStates+1,z)*0.5,Z(2,z)-Z(nbrMeasStates+2,z)*0.5,...
-                        Z(nbrMeasStates+1,z),Z(nbrMeasStates+2,z)]; % Corners of Z box
+                rescaleFact = 0.8;
+                Zbox = [Z(1,z) - rescaleFact*Z(nbrMeasStates+1,z)*0.5,Z(2,z)-rescaleFact*Z(nbrMeasStates+2,z)*0.5,...
+                        rescaleFact*Z(nbrMeasStates+1,z),rescaleFact*Z(nbrMeasStates+2,z)]; % Corners of Z box
                 [ZRed, ZGreen, ZBlue] = colorhist(img,Zbox);
                 XmuPred(z).red = ZRed;
                 XmuPred(z).green = ZGreen;
