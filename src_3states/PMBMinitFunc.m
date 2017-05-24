@@ -1,5 +1,5 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
+function [XuUpd, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst, normGlobWeights] = ...
     PMBMinitFunc(Z, XmuInit, XuInit, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel,birthSpawn,mode)
 global uniformBirths
 global imgpath
@@ -64,6 +64,7 @@ end
 iInd = 1;
 [norm_weights, ~] = normalizeLogWeights(wGlob);
 frameNbr = sprintf('%06d',k-1);
+globWeight = 0;
 for i = 1:size(Xtmp{1},2)
     if Xtmp{1}(i).r > threshold
         Xupd{1}(iInd) = Xtmp{1}(i);
@@ -71,6 +72,7 @@ for i = 1:size(Xtmp{1},2)
         %    Xupd{1}(iInd).P = 3*Xupd{1}(iInd).P+diag([30 10 0 0 0 0]);
         %end
         Xupd{1}(iInd).w = norm_weights(iInd);
+        globWeight = globWeight+norm_weights(iInd);
 %         if color
 %             tmp = H(Xtmp{1}(i).state,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
 %             img = imread(strcat(imgpath,frameNbr,'.png'));
@@ -81,6 +83,8 @@ for i = 1:size(Xtmp{1},2)
         iInd = iInd+1;
     end
 end
+
+normGlobWeights = normalizeLogWeights(globWeight);
 
 %if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
 %    for i = 1:size(Pest,2)

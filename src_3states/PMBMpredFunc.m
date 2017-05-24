@@ -1,6 +1,6 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
-    PMBMpredFunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k)
+function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst, normGlobWeights] = ...
+    PMBMpredFunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, normGlobWeightsOld, k)
 global uniformBirths
 
 load('simVariables')
@@ -13,17 +13,6 @@ nbrOldTargetsPrev = 1e4;
 %%%%% Prediction %%%%%
 %%%%%%%%%%%%%%%%%%%%%%
 
-% Poisson prediction
-for i = 1:size(XuUpdPrev,2) % For each single target component i
-    [XuPred(i).state, XuPred(i).P] = KFPred(XuUpdPrev(i).state,F, XuUpdPrev(i).P, Q);
-
-    XmuPred(i).w = XuUpdPrev(i).w;    % Pred weight
-    XmuPred(i).state = XuPred(i).state;      % Pred state
-    XmuPred(i).P = XuPred(i).P;      % Pred cov    
-
-    % MIGHT HAVE MIXED UP PREDICTION STEPS
-end
-
 % Add hypotheses for births
 % for i = 1:nbrOfBirths
 %     XmuPred(end+1).w = 1/nbrOfBirths;
@@ -33,6 +22,17 @@ end
 % end
 
 if ~uniformBirths
+    % Poisson prediction
+    for i = 1:size(XuUpdPrev,2) % For each single target component i
+        [XuPred(i).state, XuPred(i).P] = KFPred(XuUpdPrev(i).state,F, XuUpdPrev(i).P, Q);
+
+        XmuPred(i).w = XuUpdPrev(i).w;    % Pred weight
+        XmuPred(i).state = XuPred(i).state;      % Pred state
+        XmuPred(i).P = XuPred(i).P;      % Pred cov    
+
+        % MIGHT HAVE MIXED UP PREDICTION STEPS
+    end
+
     XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
 
     % Update the poisson components
@@ -94,6 +94,7 @@ if sum(keepGlobs ~= 0) ~= 0
             if jEst == keepGlobs(j)
                 jEst = jInd;
             end
+            globWeight(jInd) = 0;
             iInd = 1;
             [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
@@ -101,9 +102,11 @@ if sum(keepGlobs ~= 0) ~= 0
                 if Xtmp{keepGlobs(j)}(i).r > threshold
                     Xupd{jInd}(iInd) = Xtmp{keepGlobs(j)}(i);
                     Xupd{jInd}(iInd).w = weights(iInd);
+                    globWeight(jInd) = globWeight(jInd)+weights(iInd);
                     iInd = iInd+1;
                 end
             end
+            jInd = jInd+1;
         end
     end
 else % TODO: Do we wanna do this?!
@@ -113,6 +116,7 @@ else % TODO: Do we wanna do this?!
             if j == jEst
                 jEst = jInd;
             end
+            globWeight(jInd) = 0;
             iInd = 1;
             [weights, ~] = normalizeLogWeights(wSum{j});
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
@@ -120,12 +124,17 @@ else % TODO: Do we wanna do this?!
                 if Xtmp{j}(i).r > threshold
                     Xupd{j}(iInd) = Xtmp{j}(i);
                     Xupd{j}(iInd).w = weights(iInd);
+                    globWeight(jInd) = globWeight(jInd)+weights(iInd);
                     iInd = iInd+1;
                 end
             end
+            jInd = jInd+1;
         end
     end
 end
+
+normGlobWeights = normalizeLogWeights(globWeight);
+
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight
 if ~uniformBirths

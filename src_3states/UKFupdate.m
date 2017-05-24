@@ -61,17 +61,20 @@ P = Ppred-Pxy/S*Pxy';
 v = Z-yhatpred(:,1);
 
 % Plot conf
-% seq = '0003';
-% imagePath = strcat('../../kittiTracking/','training','/image_02/',seq,'/','000001','.png');
-% img = imread(imagePath);
-% figure;
-% imagesc(img);
-% axis('image')
-% hold on
-% plot(hX(1,:),hX(2,:),'r*')
-% plot(yhatpred(1),yhatpred(2),'r+','linewidth',1)
-% plot(Z(1),Z(2),'g+','linewidth',1)
-% phi = linspace(0,2*pi,100);
-% x = repmat(yhatpred(1:2,1),1,100)+3*sqrtm(S(1:2,1:2))*[cos(phi);sin(phi)];
-% plot(x(1,:),x(2,:),'-y','LineWidth',1)
-% waitforbuttonpress
+% if k == 60
+%     seq = '0003';
+%     frameNbr = sprintf('%06d',k-1);
+%     imagePath = strcat('../../kittiTracking/','training','/image_02/',seq,'/',frameNbr,'.png');
+%     img = imread(imagePath);
+%     figure;
+%     imagesc(img);
+%     axis('image')
+%     hold on
+%     plot(hX(1,:),hX(2,:),'r*')
+%     plot(yhatpred(1),yhatpred(2),'r+','linewidth',1)
+%     plot(Z(1),Z(2),'g+','linewidth',1)
+%     phi = linspace(0,2*pi,100);
+%     x = repmat(yhatpred(1:2,1),1,100)+3*sqrtm(S(1:2,1:2))*[cos(phi);sin(phi)];
+%     plot(x(1,:),x(2,:),'-y','LineWidth',1)
+%     waitforbuttonpress
+% end
