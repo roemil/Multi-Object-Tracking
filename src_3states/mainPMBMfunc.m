@@ -7,9 +7,9 @@ addpath('mtimesx')
 addpath('evalMOT')
 addpath('../../kittiTracking/')
 clc
-mode = 'CNNnonlinear';
+mode = 'GTnonlinear';
 set = 'training';
-sequence = '0010';
+sequence = '0003';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn

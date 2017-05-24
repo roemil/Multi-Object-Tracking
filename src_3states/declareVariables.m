@@ -319,16 +319,21 @@ end
 if strcmp(mode,'GTnonlinear')
     global Pd
     Pd = 0.95;   % Detection probability % 0.7 ok1
+    global Ps
+    Ps = 0.99;   % Survival probability % 0.98 ok1
+    global c
+    c = 1e-7;    % clutter intensity % 0.00001
 elseif strcmp(mode,'CNNnonlinear')
     global Pd
     Pd = 0.95;   % Detection probability % 0.7 ok1
+    global Ps
+    Ps = 0.99;   % Survival probability % 0.98 ok1
+    global c
+    c = 1e-7;    % clutter intensity % 0.00001
 else
     disp('Pd not implemented for this mode')
 end
-global Ps
-Ps = 0.85;   % Survival probability % 0.98 ok1
-global c
-c = 1e-7;    % clutter intensity % 0.00001
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Thresholds and Murty %%%%%%%%%%%%%%%
@@ -399,7 +404,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
     end
 end
 global wInit
-wInit = 1;%0.2;
+wInit = 0.1;%0.2;
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];

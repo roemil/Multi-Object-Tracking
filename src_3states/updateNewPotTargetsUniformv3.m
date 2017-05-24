@@ -3,6 +3,7 @@ function [XpotNew, rho, newLabel] = updateNewPotTargetsUniform(XmuPred, nbrOfMea
 global Pd, global H3dFunc, global Hdistance, global R3dTo2d, global Rdistance, global Jh
 global c, global nbrStates, global nbrMeasStates, global H, global R,
 global pose, global k, global angles, global FOVsize, global color, global imgpath
+global wInit
 
 rho = zeros(nbrOfMeas,1);
 if(color)
@@ -35,12 +36,12 @@ for z = 1:nbrOfMeas
     angleThresh = 30*pi/180; % TODO: Move to declareVariables
     distThresh = 10; % TODO: Move to declareVariables
     if Z(3,z) < distThresh % && abs(theta) > angleThresh
-       Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) 4*Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+        Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) 6*Rdistance(Z(3,z))]); % TODO: Move to declareVariables
     else
-        Pbirth = diag([0.3*FOVsize(2,1) 0.3*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+        Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
     end
 
-    e = Pd*mvnpdf(Z(1:3,z), Z(1:3,z), Pbirth);
+    e = wInit*Pd*mvnpdf(Z(1:3,z), Z(1:3,z), Pbirth);
     rho(z) = e+c;
     XpotNew{z}.w = log(e+c); % rho (45) (44)
     XpotNew{z}.r = e/rho(z); % (43) (44)
@@ -55,8 +56,8 @@ for z = 1:nbrOfMeas
     XpotNew{z}.nbrMeasAss = 1; % TAGass Nbr meas assignments
 
     if color
-        XpotNew{z}.red = 0;
-        XpotNew{z}.green = 0;
-        XpotNew{z}.blue = 0;
+        XpotNew{z}.red = XmuPred(z).red;
+        XpotNew{z}.green =  XmuPred(z).green;
+        XpotNew{z}.blue =  XmuPred(z).blue;
     end
 end
