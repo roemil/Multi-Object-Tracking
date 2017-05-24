@@ -7,9 +7,9 @@ addpath('mtimesx')
 addpath('evalMOT')
 addpath('../../kittiTracking/')
 clc
-mode = 'GTnonlinear';
+mode = 'CNNnonlinear';
 set = 'training';
-sequence = '0003';
+sequence = '0010';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -51,7 +51,7 @@ k = 1;
 
 Xupd = cell(1);
 
-K = min(140,size(Z,2)); % Length of sequence
+K = min(1000,size(Z,2)); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -143,16 +143,13 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot birds-eye view pred conf
-
 step = true;
 if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
     plotBirdsConf(sequence,set,Xpred,step,jEst);
 else
     disp('Not implemented')
 end
-
 %% Evaluate
-
 clear gt, clear result, clear resultZ
 generateData
 
@@ -166,7 +163,6 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
     disp(['MOTP = ', num2str(ClearMOTZ.MOTP)])
     disp('----------------------------')
 end
-
 %% Plot estimates Img-plane
 
 figure('units','normalized','position',[.05 .05 .9 .9]);

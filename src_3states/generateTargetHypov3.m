@@ -63,9 +63,10 @@ for z = 1:nbrOfMeas
                         Zbox = [Z(1,z) - Z(nbrMeasStates+1,z)*0.5,Z(2,z)-Z(nbrMeasStates+2,z)*0.5,...
                             Z(nbrMeasStates+1,z),Z(nbrMeasStates+2,z)]; % Corners of Z box
                         [ZRed, ZGreen, ZBlue] = colorhist(img,Zbox);
-                        %logsig(colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue))
+                        %log(colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue))
+                        %Xhypo{j,z}(i).w
                         %waitforbuttonpress
-                        Xhypo{j,z}(i).w = Xhypo{j,z}(i).w + logsig(colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue));
+                        Xhypo{j,z}(i).w = Xhypo{j,z}(i).w - log(colorcomp(ZRed,ZGreen,ZBlue,Xpred{j}(i).red,Xpred{j}(i).green,Xpred{j}(i).blue));
                         Xhypo{j,z}(i).red = ZRed;
                         Xhypo{j,z}(i).green = ZGreen;
                         Xhypo{j,z}(i).blue = ZBlue;

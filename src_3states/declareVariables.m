@@ -326,7 +326,7 @@ else
     disp('Pd not implemented for this mode')
 end
 global Ps
-Ps = 0.99;   % Survival probability % 0.98 ok1
+Ps = 0.85;   % Survival probability % 0.98 ok1
 global c
 c = 1e-7;    % clutter intensity % 0.00001
 

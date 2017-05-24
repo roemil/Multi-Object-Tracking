@@ -32,10 +32,10 @@ boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];
 cx(1:size(ind,1)) = mean([GT{7}(ind),GT{9}(ind)],2);
 cy(1:size(ind,1)) = mean([GT{8}(ind),GT{10}(ind)],2);
 
-for i = 1:size(boxes,1)
-    rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
-    plot(cx(i),cy(i),'g*')
-end
+% for i = 1:size(boxes,1)
+%     rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
+%     plot(cx(i),cy(i),'g*')
+% end
 
 if ~isempty(X{1})
     for i = 1:size(X,2)
