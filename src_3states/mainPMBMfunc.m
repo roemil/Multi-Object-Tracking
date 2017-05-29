@@ -9,7 +9,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0019';
+sequence = '0000';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn

@@ -32,7 +32,7 @@ end
 
 Xtmp = zeros(size(Xpred,1),2*n);
 
-W0 = 1/(2*n+1);
+W0 = 1-n/3;%1/(2*n+1);
 Wi = (1-W0)/(2*n);
 
 %dMax = 10;
@@ -50,8 +50,8 @@ hX = H(Xtmp,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
 %hX = H(Xtmp,pose{k}(1:3,4), angles,k);
 
 yhatpred = repmat(W0*hX(:,1)+Wi*sum(hX(:,2:end),2),1,2*n+1);
-Pxy = Wi*(Xtmp-repmat(Xpred,1,2*n+1))*(hX-yhatpred)';
-S = Wi*(hX-yhatpred)*(hX-yhatpred)'+R;
+Pxy = W0*(Xtmp(:,1)-Xpred)*(hX(:,1)-yhatpred(:,1))'+Wi*(Xtmp(:,2:end)-repmat(Xpred,1,2*n))*(hX(:,2:end)-yhatpred(:,2:end))';
+S = W0*(hX(:,1)-yhatpred(:,1))*(hX(:,1)-yhatpred(:,1))' + Wi*(hX(:,2:end)-yhatpred(:,2:end))*(hX(:,2:end)-yhatpred(:,2:end))'+R;
 X = Xpred+Pxy/S*(Z-yhatpred(:,1));
 
 %Ppred = Ppred.*(max(1,dMax-Z(3)));
