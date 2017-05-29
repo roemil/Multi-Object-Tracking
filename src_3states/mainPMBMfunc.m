@@ -1,3 +1,6 @@
+% Estimates leaving FOV will make the evaluation bad. Since they exist in
+% the filter but not in the GT. Add Ps state dependent.
+
 clear Xest
 clear Pest
 close all
@@ -9,7 +12,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0000';
+sequence = '0005';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
