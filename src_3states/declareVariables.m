@@ -346,7 +346,7 @@ thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
-Nhconst = 5;
+Nhconst = 2;
 % Max nbr of globals for each old global
 maxKperGlobal = 20;
 % Max nbr globals to pass to next iteration
@@ -355,6 +355,25 @@ maxNbrGlobal = 50;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% Births %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+global angleThresh
+angleThresh = 30*pi/180;
+global distThresh
+distThresh = 10;
+global distThresh2
+distThresh2 = 7;
+global PbirthFunc
+PbirthFunc = @(x) diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(x)]);
+global PinitVeloClose
+PinitVeloClose = 200;
+global PinitVeloFar
+PinitVeloFar = 1;
+global PinitBBsize
+PinitBBsize = diag([20 20]);
+global rescaleFact
+rescaleFact = 1;
+
+
 
 % boarder width with higher probability of birth
 boarderWidth = 0.1*FOVsize(2,1);
@@ -404,7 +423,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
     end
 end
 global wInit
-wInit = 0.1;%0.2;
+wInit = 0.001;%0.005, 0.001 even better
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];

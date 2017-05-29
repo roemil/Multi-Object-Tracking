@@ -32,7 +32,7 @@ end
 
 Xtmp = zeros(size(Xpred,1),2*n);
 
-W0 = 1/(2*n+1);
+W0 = 1-n/3;%1/(2*n+1);
 Wi = (1-W0)/(2*n);
 
 %dMax = 10;
@@ -50,8 +50,8 @@ hX = H(Xtmp,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
 %hX = H(Xtmp,pose{k}(1:3,4), angles,k);
 
 yhatpred = repmat(W0*hX(:,1)+Wi*sum(hX(:,2:end),2),1,2*n+1);
-Pxy = Wi*(Xtmp-repmat(Xpred,1,2*n+1))*(hX-yhatpred)';
-S = Wi*(hX-yhatpred)*(hX-yhatpred)'+R;
+Pxy = W0*(Xtmp(:,1)-Xpred)*(hX(:,1)-yhatpred(:,1))'+Wi*(Xtmp(:,2:end)-repmat(Xpred,1,2*n))*(hX(:,2:end)-yhatpred(:,2:end))';
+S = W0*(hX(:,1)-yhatpred(:,1))*(hX(:,1)-yhatpred(:,1))' + Wi*(hX(:,2:end)-yhatpred(:,2:end))*(hX(:,2:end)-yhatpred(:,2:end))'+R;
 X = Xpred+Pxy/S*(Z-yhatpred(:,1));
 
 %Ppred = Ppred.*(max(1,dMax-Z(3)));
@@ -61,17 +61,20 @@ P = Ppred-Pxy/S*Pxy';
 v = Z-yhatpred(:,1);
 
 % Plot conf
-% seq = '0003';
-% imagePath = strcat('../../kittiTracking/','training','/image_02/',seq,'/','000001','.png');
-% img = imread(imagePath);
-% figure;
-% imagesc(img);
-% axis('image')
-% hold on
-% plot(hX(1,:),hX(2,:),'r*')
-% plot(yhatpred(1),yhatpred(2),'r+','linewidth',1)
-% plot(Z(1),Z(2),'g+','linewidth',1)
-% phi = linspace(0,2*pi,100);
-% x = repmat(yhatpred(1:2,1),1,100)+3*sqrtm(S(1:2,1:2))*[cos(phi);sin(phi)];
-% plot(x(1,:),x(2,:),'-y','LineWidth',1)
-% waitforbuttonpress
+% if k == 60
+%     seq = '0003';
+%     frameNbr = sprintf('%06d',k-1);
+%     imagePath = strcat('../../kittiTracking/','training','/image_02/',seq,'/',frameNbr,'.png');
+%     img = imread(imagePath);
+%     figure;
+%     imagesc(img);
+%     axis('image')
+%     hold on
+%     plot(hX(1,:),hX(2,:),'r*')
+%     plot(yhatpred(1),yhatpred(2),'r+','linewidth',1)
+%     plot(Z(1),Z(2),'g+','linewidth',1)
+%     phi = linspace(0,2*pi,100);
+%     x = repmat(yhatpred(1:2,1),1,100)+3*sqrtm(S(1:2,1:2))*[cos(phi);sin(phi)];
+%     plot(x(1,:),x(2,:),'-y','LineWidth',1)
+%     waitforbuttonpress
+% end

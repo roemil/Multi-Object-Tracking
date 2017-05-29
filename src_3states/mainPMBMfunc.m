@@ -9,7 +9,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'GTnonlinear';
 set = 'training';
-sequence = '0003';
+sequence = '0000';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -58,6 +58,7 @@ nbrMissmatch = zeros(1,nbrSim);
 newLabel = 1;
 
 jEst = zeros(1,K);
+normGlobWeights = cell(K,1);
 
 plotOn = 'false';
 startTime = tic;
@@ -80,7 +81,7 @@ for t = 1:nbrSim
         warning('off', MSGID)
     end
     tic
-    [XuUpd{t,kInit}, Xupd{t,kInit}, Xest{t,kInit}, Pest{t,kInit}, rest{t,kInit}, west{t,kInit}, labelsEst{t,kInit}, newLabel, jEst(kInit)] = ...
+    [XuUpd{t,kInit}, Xupd{t,kInit}, Xest{t,kInit}, Pest{t,kInit}, rest{t,kInit}, west{t,kInit}, labelsEst{t,kInit}, newLabel, jEst(kInit), normGlobWeights{kInit}] = ...
         PMBMinitFunc(Z{kInit}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
     disp(['Iteration time: ', num2str(toc)])
     %rest{1}
@@ -107,12 +108,12 @@ for t = 1:nbrSim
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
         if ~isempty(Z{k})
-            [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMfunc(Z{k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
+            [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k), normGlobWeights{k}] = ...
+                PMBMfunc(Z{k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, normGlobWeights{k-1}, k);
         else
             disp('No measurement')
-            [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k)] = ...
-                PMBMpredFunc(Z{k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k);
+            [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k), normGlobWeights{k}] = ...
+                PMBMpredFunc(Z{k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, normGlobWeights{k-1}, k);
         end
         disp(['Iteration time: ', num2str(toc)])
         %disp(['Nbr targets: ', num2str(size(X{t,k},2))])
@@ -142,6 +143,21 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+clear gt, clear result, clear resultZ
+generateData
+
+VOCscore = 0.5;
+dispON  = true;
+ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
+if ~strcmp(mode,'GTnonlinear') || simMeas
+    ClearMOTZ = evaluateMOT(gt,resultZ,VOCscore,false);
+    disp('----------------------------')
+    disp('CNN output')
+    disp(['MOTP = ', num2str(ClearMOTZ.MOTP)])
+    disp('----------------------------')
+end
+
 %% Plot birds-eye view pred conf
 step = true;
 if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
@@ -193,6 +209,18 @@ while 1
         case 'l'
             k = k + 1;
             if k > size(Xest,2)
+                fprintf('Window closed. Exiting...\n');
+                break
+            end
+        case 'o'
+            k = k + 10;
+            if k > size(Xest,2)
+                fprintf('Window closed. Exiting...\n');
+                break
+            end
+        case 'q'
+            k = k - 10;
+            if k <= 0
                 fprintf('Window closed. Exiting...\n');
                 break
             end
