@@ -8,8 +8,8 @@ addpath('evalMOT')
 addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
-set = 'testing';
-sequence = '0004';
+set = 'training';
+sequence = '0000';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -42,6 +42,12 @@ XuUpd = cell(1,1);
 
 global nbrPosStates
 nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
+ClearMOT = cell(1);
+for sim = 1 : 2
+    clear Xest;
+    disp(['--------------------- ', 'SIM Number ','---------------------']) 
+    disp(['--------------------- ', num2str(sim),'---------------------'])
+sequence = sprintf('%04d',sim-1);
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -62,7 +68,9 @@ normGlobWeights = cell(K,1);
 
 plotOn = 'false';
 startTime = tic;
+
 for t = 1:nbrSim
+
     disp('-------------------------------------')
     disp(['--------------- t = ', num2str(t), ' ---------------'])
     disp('-------------------------------------')
@@ -70,12 +78,13 @@ for t = 1:nbrSim
     disp(['--------------- k = ', num2str(1), ' ---------------'])
     global k
     global kInit
-    for z = 1:size(Z,2)
-        if ~isempty(Z{z})
-            kInit = z;
-            break
-        end
-    end
+    kInit = 1;
+%     for z = 1:size(Z,2)
+%         if ~isempty(Z{z})
+%             kInit = z;
+%             break
+%         end
+%     end
     if ~isempty(lastwarn())
         [a, MSGID] = lastwarn();
         warning('off', MSGID)
@@ -132,7 +141,7 @@ for t = 1:nbrSim
             pause(0.1)
         end
     end
-end
+
 simTime = toc(startTime);
 
 
@@ -149,7 +158,7 @@ generateData
 
 VOCscore = 0.5;
 dispON  = true;
-ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
+ClearMOT{sim} = evaluateMOT(gt,result,VOCscore,dispON);
 if ~strcmp(mode,'GTnonlinear') || simMeas
     ClearMOTZ = evaluateMOT(gt,resultZ,VOCscore,false);
     disp('----------------------------')
@@ -157,7 +166,8 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
     disp(['MOTP = ', num2str(ClearMOTZ.MOTP)])
     disp('----------------------------')
 end
-
+end
+end
 %% Plot birds-eye view pred conf
 step = true;
 if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
@@ -191,7 +201,7 @@ while 1
     elseif strcmp(mode,'CNNnonlinear') || simMeas
         plotImgEst(sequence,set,k,Xest{k},Z{k})
     end
-    title(['k = ', num2str(k)])
+    title(['k = ', num2str(k-1)])
     try
         waitforbuttonpress; 
     catch
