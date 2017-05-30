@@ -3,7 +3,7 @@ function [XpotNew, rho, newLabel] = updateNewPotTargetsUniform(XmuPred, nbrOfMea
 global Pd, global H3dFunc, global Hdistance, global R3dTo2d, global Rdistance, global Jh
 global c, global nbrStates, global nbrMeasStates, global H, global R,
 global pose, global k, global angles, global FOVsize, global color, global imgpath
-global wInit
+global wInit, global angleThresh, global distThresh, global PbirthFunc
 
 rho = zeros(nbrOfMeas,1);
 if(color)
@@ -32,17 +32,18 @@ for z = 1:nbrOfMeas
 %         end
 
     % TEST 3
-    theta = pi/2 / FOVsize(2,1)*(Z(1,z)-FOVsize(2,1)/2);
-    angleThresh = 30*pi/180; % TODO: Move to declareVariables
-    distThresh = 10; % TODO: Move to declareVariables
+    %theta = pi/2 / FOVsize(2,1)*(Z(1,z)-FOVsize(2,1)/2);
     if Z(3,z) < distThresh % && abs(theta) > angleThresh
-        Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) 6*Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+        %Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2)
+        %6*Rdistance(Z(3,z))]); % TODO: Have increased Rdistance????
+        Pbirth = PbirthFunc(Z(3,z));
     else
-        Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+        Pbirth = PbirthFunc(Z(3,z));
     end
 
     e = wInit*Pd*mvnpdf(Z(1:3,z), Z(1:3,z), Pbirth);
     rho(z) = e+c;
+    %log(e+c)
     XpotNew{z}.w = log(e+c); % rho (45) (44)
     XpotNew{z}.r = e/rho(z); % (43) (44)
     %[XpotNew{z}.w XpotNew{z}.r e]

@@ -6,7 +6,9 @@ global pose, global egoMotionOn, global TcamToVelo
 global T20, global TveloToImu, global k,
 global maxX, global maxY, global Zinter, global TcamToVelo, global xAngle, global yAngle
 global angles, global R, global Rdistance, global FOVsize, global color, global imgpath
-global nbrMeasStates
+global nbrMeasStates, global PinitVeloClose, global PinitVeloFar, global PbirthFunc,
+global distThresh, global angleThresh, global T, global PinitBBsize, global distThresh2
+global rescaleFact
 
 % Find the corresponding 3D covariance
 
@@ -58,34 +60,28 @@ elseif strcmp(birthSpawn, 'uniform')
 
             % TEST 3
             % TAG: Shall we do this?
-            angleThresh = 30*pi/180; % TODO: Move to declareVariables
-            distThresh = 10; % TODO: Move to declareVariables
             XmuPred(z).P = zeros(8,8);
             if Z(3,z) < distThresh % && abs(theta) > angleThresh
-                Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+                Pbirth = PbirthFunc(Z(3,z)); % TODO: Move to declareVariables
                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
             
-                XmuPred(z).P(4:6,4:6) = 200*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
+                XmuPred(z).P(4:6,4:6) = PinitVeloClose*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
             else
-                Pbirth = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(Z(3,z))]); % TODO: Move to declareVariables
+                Pbirth = PbirthFunc(Z(3,z)); % TODO: Use different values close and far?
                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
-                XmuPred(z).P(4:6,4:6) = 1*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
+                XmuPred(z).P(4:6,4:6) = PinitVeloFar*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
             end
             
             % Initiate velo?
-            distThresh2 = 7;
-            angleThresh2 = 30*pi/180;
-            if ((Z(3,z) < distThresh2) && (abs(theta) > angleThresh2))
+            if ((Z(3,z) < distThresh2) && (abs(theta) > angleThresh))
                 if k > 1
-                    global T
                     XmuPred(z).state(4:6) = (pose{k}(1:3,4)-pose{k-1}(1:3,4))/T;
                 elseif k == 1
-                    global T
-                    XmuPred(z).state(4:6) = 0.7*(pose{k+1}(1:3,4)-pose{k}(1:3,4))/T;
+                    XmuPred(z).state(4:6) = (pose{k+1}(1:3,4)-pose{k}(1:3,4))/T;
                 end
             end
             
-            XmuPred(z).P(7:8,7:8) = diag([20 20]); % TODO: Move to declareVariables
+            XmuPred(z).P(7:8,7:8) = PinitBBsize; % TODO: Move to declareVariables
             XmuPred(z).w = weightBirth;
             if egoMotionOn
                 % Local cam2 -> local cam0 -> local velo -> local IMU ->

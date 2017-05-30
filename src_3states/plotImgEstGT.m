@@ -5,7 +5,7 @@ global H3dTo2d
 global H
 global egoMotionOn
 global k
-global pose, global angles
+global pose, global angles, global rescaleFact
 
 datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
 filename = [datapath,'.txt'];
@@ -53,8 +53,7 @@ if ~isempty(X{1})
         text(box(1), box(2)-10, num2str(X{i}(end)),'Fontsize',18,'Color','red')
         
         % color box
-        fact = 0.5;
-        box = [tmp(1)-fact*X{i}(end-2)/2, tmp(2)-fact*X{i}(end-1)/2, fact*X{i}(end-2), fact*X{i}(end-1)];
+        box = [tmp(1)-rescaleFact*X{i}(end-2)/2, tmp(2)-rescaleFact*X{i}(end-1)/2, rescaleFact*X{i}(end-2), rescaleFact*X{i}(end-1)];
         rectangle('Position',box,'EdgeColor','r','LineWidth',1,'LineStyle','--')
     end
 end

@@ -1,6 +1,6 @@
 %%%%% PMBM %%%%%
-function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst] = ...
-    PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, k)
+function [XuUpd, Xpred, Xupd, Xest, Pest, rest, west, labelsEst, newLabel, jEst, normGlobWeights] = ...
+    PMBMfunc(Z, XuUpdPrev, XupdPrev, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, normGlobWeightsOld, k)
 
 global gatingOn, global FOVsize, global uniformBirths, global P2
 
@@ -15,17 +15,6 @@ nbrOldTargetsPrev = 1e4;
 %%%%% Prediction %%%%%
 %%%%%%%%%%%%%%%%%%%%%%
 
-% Poisson prediction
-for i = 1:size(XuUpdPrev,2) % For each single target component i
-    [XuPred(i).state, XuPred(i).P] = KFPred(XuUpdPrev(i).state,F, XuUpdPrev(i).P, Q);
-
-    XmuPred(i).w = XuUpdPrev(i).w;    % Pred weight
-    XmuPred(i).state = XuPred(i).state;      % Pred state
-    XmuPred(i).P = XuPred(i).P;      % Pred cov    
-
-    % MIGHT HAVE MIXED UP PREDICTION STEPS
-end
-
 % Add hypotheses for births
 % for i = 1:nbrOfBirths
 %     XmuPred(end+1).w = 1/nbrOfBirths;
@@ -35,6 +24,17 @@ end
 % end
 
 if ~uniformBirths
+    % Poisson prediction
+    for i = 1:size(XuUpdPrev,2) % For each single target component i
+        [XuPred(i).state, XuPred(i).P] = KFPred(XuUpdPrev(i).state,F, XuUpdPrev(i).P, Q);
+
+        XmuPred(i).w = XuUpdPrev(i).w;    % Pred weight
+        XmuPred(i).state = XuPred(i).state;      % Pred state
+        XmuPred(i).P = XuPred(i).P;      % Pred cov    
+
+        % MIGHT HAVE MIXED UP PREDICTION STEPS
+    end
+    
     XmuPred = generateBirthHypo(XmuPred, motionModel, nbrPosStates, mode, k);
     % Update the poisson components
     XuUpdTmp = updatePoisson(XmuPred,Pd);
@@ -141,13 +141,15 @@ else
     Wnew = diag(rho);
     [Xhypo] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates); 
     for j = 1:max(1,nbrOfGlobHyp)
-        S = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, Pd, j, maxKperGlobal);
-        nbrOldTargets = size(Xhypo{j,1},2);
-        [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S, nbrOldTargets);
-        for jnew = oldInd+1:newInd
-            Xtmp{jnew} = newGlob{jnew-oldInd};
+        S = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, Pd, j, maxKperGlobal, normGlobWeightsOld(j));
+        if ~isempty(S)
+            nbrOldTargets = size(Xhypo{j,1},2);
+            [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S, nbrOldTargets);
+            for jnew = oldInd+1:newInd
+                Xtmp{jnew} = newGlob{jnew-oldInd};
+            end
+            oldInd = newInd;
         end
-        oldInd = newInd;
     end
 end
 %disp(['Error: ', num2str(5)])
@@ -195,6 +197,7 @@ if sum(keepGlobs ~= 0) ~= 0
         if jEst == keepGlobs(j)
             jEst = jInd;
         end
+        globWeight(jInd) = 0;
         if ~isempty(wSum{keepGlobs(j)})
             iInd = 1;
             [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
@@ -203,6 +206,7 @@ if sum(keepGlobs ~= 0) ~= 0
                 if Xtmp{keepGlobs(j)}(i).r > threshold
                     Xupd{jInd}(iInd) = Xtmp{keepGlobs(j)}(i);
                     Xupd{jInd}(iInd).w = weights(iInd);
+                    globWeight(jInd) = globWeight(jInd)+weights(iInd);
                     iInd = iInd+1;
                 end
             end
@@ -216,6 +220,7 @@ else % TODO: Do we wanna do this?!
             if jEst == j
                 jEst = jInd;
             end
+            globWeight(jInd) = 0;
             iInd = 1;
             [weights, ~] = normalizeLogWeights(wSum{j});
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
@@ -223,6 +228,7 @@ else % TODO: Do we wanna do this?!
                 if Xtmp{j}(i).r > threshold
                     Xupd{jInd}(iInd) = Xtmp{j}(i);
                     Xupd{jInd}(iInd).w = weights(iInd);
+                    globWeight(jInd) = globWeight(jInd)+weights(iInd);
                     %if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
                     %    Xupd{jInd}(iInd).P = 3*Xupd{jInd}(iInd).P+diag([30 10 0 0 0 0]);
                     %end
@@ -233,6 +239,8 @@ else % TODO: Do we wanna do this?!
         end
     end
 end
+
+normGlobWeights = normalizeLogWeights(globWeight);
 
 %if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
 %    for i = 1:size(Pest,2)

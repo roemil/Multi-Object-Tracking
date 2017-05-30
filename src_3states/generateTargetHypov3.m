@@ -2,7 +2,7 @@ function [Xhypo] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, 
  global Pd, global R, global nbrMeasStates, global H3dTo2d, global H3dFunc, ...
  global Hdistance, global R3dTo2d, global Rdistance, global H, global R,
  global pose, global k, global plotHypoConf, global angles, global imgpath,...
- global color
+ global color, global rescaleFact
 
 % Create missdetection hypo in index size(Z{k},2)+1
 if(isempty(Xpred)) % If we have no predicted targets, we cannot 

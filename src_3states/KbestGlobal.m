@@ -1,4 +1,4 @@
-function S = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, Pd, j, maxKperGlobal)
+function S = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, Pd, j, maxKperGlobal, normGlobWeightsOld)
 
 wHyp = 0;
 wHypSum = 0;
@@ -19,20 +19,14 @@ for m = 1 : nbrOfMeas
     end
 end
 
-for nj = 1 : size(Xhypo{j},2)
-    wHyp = wHyp + Xpred{j}(nj).w;
-end
+% for nj = 1 : size(Xhypo{j},2)
+%     wHyp = wHyp + Xpred{j}(nj).w;
+% end
 
-%if(wHypSum == 0)
-%    wHypSum = 1;
-%end
 if ~isempty(Xhypo{j})
-    [~, wHypSum] = normalizeLogWeights(Wold);
-    wHyp = exp(wHyp - wHypSum); % shall I normalize?
-    %tmp = wHyp;
-    %wHyp = exp(wHyp/size(Xhypo{j},2));
-    %wHyp = exp(wHyp);
-    %wHyp = wHyp*size(Xhypo{j},2);
+    %[~, wHypSum] = normalizeLogWeights(Wold);
+    %wHyp = exp(wHyp - wHypSum); % shall I normalize?
+    wHyp = exp(normGlobWeightsOld);
     C = -[Wold, log(Wnew)];
 else
     C = -log(Wnew);
@@ -44,11 +38,19 @@ if ~isempty(rows)
         C(rows(i),cols(i)) = 1e20;
     end
 end
+%Wold
+%K_hyp = max(1,ceil(Nh * wHyp));
+K_hyp = round(Nh * wHyp);
 
-% TODO: max(2, ...)?? 
-K_hyp = max(1,ceil(Nh * wHyp));
+if K_hyp == 0
+    [ass, cost] = murty(C,1);
+    if cost > 1 
+        [ass, ~] = murty(C,min(maxKperGlobal,K_hyp));
+    end
+else
+    [ass, ~] = murty(C,min(maxKperGlobal,K_hyp));
+end
 
-[ass, cost] = murty(C,min(maxKperGlobal,K_hyp));
 [row, ~] = find(ass(:,1)~=0);
 if ~isempty(row)
     ass = ass(row,:);

@@ -1,4 +1,4 @@
-function plotImgEstGT(seq,set,k,X,Z)
+function plotImgEst(seq,set,k,X,Z)
 global FOVsize
 global H3dFunc
 global H3dTo2d
@@ -7,8 +7,9 @@ global egoMotionOn
 global k
 global pose, global angles
 
-datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
-filename = [datapath,'.txt'];
+%datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
+datapath = strcat('../data/tracking_dist/',set,'/',seq);
+filename = [datapath,'/inferResult.txt'];
 formatSpec = '%f%f%s%f%f%f%f%f%f%f%f%f%f%f%f%f%f';
 f = fopen(filename);
 GT = textscan(f,formatSpec);
