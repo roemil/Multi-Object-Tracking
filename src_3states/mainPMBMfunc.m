@@ -9,7 +9,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequence = '0000';
+sequence = '0020';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -43,11 +43,11 @@ XuUpd = cell(1,1);
 global nbrPosStates
 nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
-for sim = 1 : 2
+for sim = 1 : 1
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
     disp(['--------------------- ', num2str(sim),'---------------------'])
-sequence = sprintf('%04d',sim-1);
+%sequence = sprintf('%04d',sim-1);
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -167,6 +167,7 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
     disp('----------------------------')
 end
 end
+writetofile(Xest,mode,[sequence,'.txt']);
 end
 %% Plot birds-eye view pred conf
 step = true;

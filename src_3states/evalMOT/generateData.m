@@ -56,7 +56,7 @@ end
 
 for i = 1 : size(Xest,2)
     for j = 1 : size(Ztmp{i},2)
-        gt{i}(j,1) = Ztmp{i}(end,j);             % label
+        gt{i}(j,1) = Ztmp{i}(6,j);             % label
         gt{i}(j,2) = Ztmp{i}(1,j)-Ztmp{i}(4,j)*0.5; % Top left corner
         gt{i}(j,3) = Ztmp{i}(2,j)-Ztmp{i}(5,j)*0.5; % Top right corner
         gt{i}(j,4) = Ztmp{i}(4,j);               % width
@@ -72,7 +72,7 @@ if(strcmp(motionModel,'ca'))
         jInd = 1;
         for j = 1 : size(Xest{i},2)
             if(~isempty(Xest{i}{j}))
-                result(iInd).trackerData.idxTracks(jInd) = Xest{i}{j}(end); % label
+                result(iInd).trackerData.idxTracks(jInd) = Xest{i}{j}(9); % label
                 result(iInd).trackerData.target(jInd).bbox = [Xest{i}{j}(1)-Xest{i}{j}(7)*0.5 Xest{i}{j}(2)-Xest{i}{j}(8)*0.5 Xest{i}{j}(7:8)'];%[camera2pixelcoords(Xest{i}{j}(1:3),P)', Xest{i}{j}(7:8)'];
                 jInd = jInd + 1;
             else
@@ -89,7 +89,7 @@ elseif(strcmp(motionModel,'cvBB'))
         jInd = 1;
         for j = 1 : size(Xest{i},2)
             if(~isempty(Xest{i}{j}))
-                result(iInd).trackerData.idxTracks(jInd) = Xest{i}{j}(end);%
+                result(iInd).trackerData.idxTracks(jInd) = Xest{i}{j}(9);%
                 heading = angles{i}.heading-angles{1}.heading;
                 tmp = H(Xest{i}{j}(1:8),pose{i}(1:3,4),heading);
                 result(iInd).trackerData.target(jInd).bbox = [tmp(1)-Xest{i}{j}(7)*0.5 tmp(2)-Xest{i}{j}(8)*0.5 Xest{i}{j}(7:8)'];%[camera2pixelcoords(Xest{i}{j}(1:3),P)', Xest{i}{j}(7:8)'];

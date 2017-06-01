@@ -2,7 +2,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
     motionModel, nbrPosStates)
  global Pd, global R, global nbrMeasStates, global H3dTo2d, global H3dFunc, ...
  global Hdistance, global R3dTo2d, global Rdistance, global H, global R,
- global pose, global k, global plotHypoConf, global angles
+ global pose, global k, global plotHypoConf, global angles, global color
 
 % Create missdetection hypo in index size(Z{k},2)+1
     if(isempty(Xpred)) % If we have no predicted targets, we cannot 
@@ -10,6 +10,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
         Xhypo{1} = [];
         return;
     end
+    Xhypo{1,1} = initiateStruct(color); 
     for j = 1:nbrOfGlobHyp
         for i = 1:size(Xpred{j},2)
             Xhypo{j,nbrOfMeas+1}(i).w = Xpred{j}(i).w + log(1-Xpred{j}(i).r+Xpred{j}(i).r*(1-Pd));
@@ -20,6 +21,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
             Xhypo{j,nbrOfMeas+1}(i).label = Xpred{j}(i).label;
             Xhypo{j,nbrOfMeas+1}(i).S = 0;
             Xhypo{j,nbrOfMeas+1}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss; % TAGass
+            Xhypo{j,nbrOfMeas+1}(i).class = NaN;
         end
     end
          
@@ -86,6 +88,7 @@ function Xhypo = generateTargetHypo(Xpred,nbrOfMeas,nbrOfGlobHyp, Z, ...
                 Xhypo{j,z}(i).r = 1;
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
                 Xhypo{j,z}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss+1; % TAGass
+                Xhypo{j,z}(i).class = Z(nbrMeasStates+4,z);
             end
         end
     end

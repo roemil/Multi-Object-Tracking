@@ -15,6 +15,7 @@ if(color)
     framenbr = sprintf('%06d',k-1);
     img = imread([imgpath,framenbr,'.png']);
 end
+Xhypo{1,1} = initiateStruct(color); 
 for j = 1:nbrOfGlobHyp
     for i = 1:size(Xpred{j},2)
         Xhypo{j,nbrOfMeas+1}(i).w = Xpred{j}(i).w + log(1-Xpred{j}(i).r+Xpred{j}(i).r*(1-Pd));
@@ -25,6 +26,7 @@ for j = 1:nbrOfGlobHyp
         Xhypo{j,nbrOfMeas+1}(i).label = Xpred{j}(i).label;
         Xhypo{j,nbrOfMeas+1}(i).S = 0;
         Xhypo{j,nbrOfMeas+1}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss; % TAGass
+        Xhypo{j,nbrOfMeas+1}(i).class = NaN;
         if color
             Xhypo{j,nbrOfMeas+1}(i).red = Xpred{j}(i).red;
             Xhypo{j,nbrOfMeas+1}(i).green = Xpred{j}(i).green;
@@ -77,6 +79,7 @@ for z = 1:nbrOfMeas
                 Xhypo{j,z}(i).label = Xpred{j}(i).label;
                 Xhypo{j,z}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss+1; % TAGass
                 Xhypo{j,z}(i).box = Xhypo{j,z}(i).state(7:8);
+                Xhypo{j,z}(i).class = Z(end,z);
                 %Stmp{z,j}(ind,1:nbrMeasObj) = 0;
                 %Stmp{z,j}(ind,i) = 1;
                 ind = ind+1;
@@ -89,6 +92,7 @@ for z = 1:nbrOfMeas
                Xhypo{j,z}(i).r = 0; %TODO: should this really be 1??
                Xhypo{j,z}(i).label = 313313;
                Xhypo{j,z}(i).nbrMeasAss = 0; % TAGass
+               Xhypo{j,z}(i).class = NaN;
                if color
                    Xhypo{j,z}(i).red = 0;
                    Xhypo{j,z}(i).green = 0;

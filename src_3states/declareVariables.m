@@ -27,15 +27,15 @@ Z = cell(1);
 if (strcmp(mode,'CNNnonlinear')) && ~simMeas
     oldFrame = detections{1}(1)+1;
     count = 1;
-    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{10}(1);detections{7}(1);detections{8}(1)]; % cx
+    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{10}(1);detections{7}(1);detections{8}(1);detections{4}(1)]; % cx
     for i = 2 : size(detections{1},1)
         frame = detections{1}(i)+1;
         %if detections{9}(i) > 0.9
             if(frame == oldFrame)
-                Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i)]; % cx
+                Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i);detections{4}(i)]; % cx
                 count = count + 1;
             else
-                Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i)]; % cx
+                Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i);detections{4}(i)]; % cx
                 count = 1;
             end
         %end
@@ -329,7 +329,7 @@ elseif strcmp(mode,'CNNnonlinear')
     global Ps
     Ps = 0.99;   % Survival probability % 0.98 ok1
     global c
-    c = 1e-7;    % clutter intensity % 0.00001
+    c = 0.0000001;    % clutter intensity % 0.00001
 else
     disp('Pd not implemented for this mode')
 end
