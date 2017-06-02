@@ -68,6 +68,7 @@ for j = 1:size(S,3)
                 newGlob{j}(target).state = Xnew{target-nbrOldTargets}.state;
                 newGlob{j}(target).P = Xnew{target-nbrOldTargets}.P;
                 newGlob{j}(target).label = Xnew{target-nbrOldTargets}.label;
+                newGlob{j}(target).class = Xnew{target-nbrOldTargets}.class;
             end
         end
     end
