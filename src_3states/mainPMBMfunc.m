@@ -9,7 +9,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequences = {'0007'};%,'0002','0003','0012','0017'};
+sequences = {'0002'};%,'0002','0003','0012','0017'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -154,6 +154,8 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
+%%
 clear gt, clear result, clear resultZ
 generateData
 
@@ -168,7 +170,6 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
     disp('----------------------------')
 end
 end
-writetofile(Xest,mode,[sequence,'.txt']);
 end
 %% Plot birds-eye view pred conf
 step = true;

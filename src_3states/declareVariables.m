@@ -304,7 +304,7 @@ if strcmp(mode,'GTnonlinear')
         R = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
     end
 elseif strcmp(mode,'CNNnonlinear')
-    R3dTo2d = diag([25 25 25 25 25]);
+    R3dTo2d = diag([20 25 25 40 40]);
     %Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
     Rdistance = @(x) (0.161.*x./1.959964).^2;
     %Rdistance = @(x) 5;
@@ -371,7 +371,7 @@ PinitVeloFar = 1;
 global PinitBBsize
 PinitBBsize = diag([20 20]);
 global rescaleFact
-rescaleFact = 1;
+rescaleFact = .8;
 
 
 
@@ -418,7 +418,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
         %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
-        covBirth = 2*diag([1 1 1 2 2 2 20 20]); %0.1 2*Q
+        covBirth = 4*diag([1 1 1 2 2 2 20 20]); %0.1 2*Q
         covBirth(7:8,7:8) = diag([20 20]);
     end
 end

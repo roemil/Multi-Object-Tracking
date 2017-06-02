@@ -9,6 +9,9 @@ for i = 1 : size(Xest,2)
             pos = H(Xest{i}{j},pose{i}(1:3,4),angles{i}.heading-angles{1}.heading);
             bbox = [Xest{i}{j}(7),Xest{i}{j}(8)];
             if(strcmp(mode,'CNNnonlinear'))
+                if(Xest{i}{j}(9) == 999)
+                    continue;
+                end
                 if(Xest{i}{j}(10) == 1)
                     type = 'Car';
                     %formatSpec = '%06d %d %s %d %d %d %06f %06f %06f %06f %d %d %d %06f %06f %06f %d %d\n';
