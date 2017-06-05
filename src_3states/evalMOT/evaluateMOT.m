@@ -199,6 +199,7 @@ ClearMOT.FP = falsepos;
 ClearMOT.IDSW = idswitch;
 ClearMOT.MOTP = distances / truepos;
 ClearMOT.MOTA = 1. - ( ( falseneg + falsepos + idswitch ) / gt );
+ClearMOT.Recall = truepos / (truepos + falseneg);
 
 if dispON
    disp('------ ::RESULTS:: ---------');
@@ -216,6 +217,7 @@ if dispON
    disp('----------------------------');
    disp(['MOTP = ', num2str(ClearMOT.MOTP)]);
    disp(['MOTA = ', num2str(ClearMOT.MOTA) '  (',num2str(ClearMOT.MOTA*100), '%)']);
+   disp(['Recall = ', num2str(ClearMOT.Recall)]);
    disp('----------------------------');
 end
 
