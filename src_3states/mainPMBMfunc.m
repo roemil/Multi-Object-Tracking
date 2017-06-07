@@ -9,7 +9,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequences = {'0002'};%,'0002','0003','0012','0017'};
+sequences = {'0003'};%,'0002','0003','0012','0017'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -46,7 +46,7 @@ ClearMOT = cell(1);
 for sim = 1 : length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
-    disp(['--------------------- ', num2str(sim),'---------------------'])
+    disp(['--------------------- ', num2str(sim),' ---------------------'])
 %sequence = sprintf('%04d',sim-1);
 sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
@@ -114,7 +114,7 @@ for t = 1:nbrSim
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
 
     for k = kInit+1:K % For each time step
-        disp(['--------------- k = ', num2str(k), ' ---------------'])
+        disp(['--------------- k = ', num2str(k),'/',num2str(K), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
         if ~isempty(Z{k})
@@ -155,7 +155,7 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
-%%
+
 clear gt, clear result, clear resultZ
 generateData
 

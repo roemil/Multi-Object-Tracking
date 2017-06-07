@@ -26,7 +26,7 @@ for j = 1:nbrOfGlobHyp
         Xhypo{j,nbrOfMeas+1}(i).label = Xpred{j}(i).label;
         Xhypo{j,nbrOfMeas+1}(i).S = 0;
         Xhypo{j,nbrOfMeas+1}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss; % TAGass
-        Xhypo{j,nbrOfMeas+1}(i).class = NaN;
+        Xhypo{j,nbrOfMeas+1}(i).class = Xpred{j}(i).class; % TODO: set the class as the old class? 
         if color
             Xhypo{j,nbrOfMeas+1}(i).red = Xpred{j}(i).red;
             Xhypo{j,nbrOfMeas+1}(i).green = Xpred{j}(i).green;

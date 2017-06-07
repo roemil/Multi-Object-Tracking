@@ -44,7 +44,7 @@ if(nbrOfStates == 4)
     cx(1) = mean([GT{7}(3),GT{9}(3)]);
     cy(1) = mean([GT{8}(3),GT{10}(3)]);
     pxCoords = [cx,cy];
-    ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(3)]; % cx
+    ZGT{1}(:,1) = [pxCoords(1);pxCoords(2);bbsize(1);bbsize(2);GT{trackID}(3)];
     count = 1;
     oldFrame = GT{1}(3)+1;
     for i = 4 : size(GT{1},1)
