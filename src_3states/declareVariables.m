@@ -375,6 +375,25 @@ if strcmp(mode,'GTnonlinear')
     global rescaleFact
     rescaleFact = 1;
 elseif strcmp(mode,'CNNnonlinear')
+    % Old values 
+%     global angleThresh
+%     angleThresh = 30*pi/180;
+%     global distThresh
+%     distThresh = 10;
+%     global distThresh2
+%     distThresh2 = 7;
+%     global PbirthFunc
+%     PbirthFunc = @(x) 2.6*diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) 0.6*Rdistance(x)]);
+%     global PinitVeloClose
+%     PinitVeloClose = 350;
+%     global PinitVeloFar
+%     PinitVeloFar = 2;
+%     global PinitBBsize
+%     PinitBBsize = diag([20 20]);
+%     global rescaleFact
+%     rescaleFact = 1;
+    
+    % Test
     global angleThresh
     angleThresh = 30*pi/180;
     global distThresh
@@ -382,7 +401,7 @@ elseif strcmp(mode,'CNNnonlinear')
     global distThresh2
     distThresh2 = 7;
     global PbirthFunc
-    PbirthFunc = @(x) 2.6*diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) 0.6*Rdistance(x)]);
+    PbirthFunc = @(x) diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(x)]);
     global PinitVeloClose
     PinitVeloClose = 350;
     global PinitVeloFar
@@ -391,6 +410,12 @@ elseif strcmp(mode,'CNNnonlinear')
     PinitBBsize = diag([20 20]);
     global rescaleFact
     rescaleFact = 1;
+    
+    % Use function instead of just 2 values? 
+    %global Ptest
+    %slope = -10;
+    %startInd = 10;
+    %Ptest = @(x) max(1,min(PinitVeloClose,slope*(x-startInd)+PinitVeloClose));
 end
 
 

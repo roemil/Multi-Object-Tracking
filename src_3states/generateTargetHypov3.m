@@ -62,7 +62,6 @@ for z = 1:nbrOfMeas
                     Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + ...
                         log_mvnpdf(Z(1:nbrMeasStates,z), H(Xpred{j}(i).state,pose{k}(1:3,4),angles{k}.heading-angles{1}.heading), Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates));
                     if(color)
-                        rescaleFact = 0.6;
                         Zbox = [Z(1,z) - rescaleFact*Z(nbrMeasStates+1,z)*0.5, Z(2,z)-rescaleFact*Z(nbrMeasStates+2,z)*0.5,...
                             rescaleFact*Z(nbrMeasStates+1,z),rescaleFact*Z(nbrMeasStates+2,z)]; % Corners of Z box
                         [ZRed, ZGreen, ZBlue] = colorhist(img,Zbox);

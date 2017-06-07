@@ -64,13 +64,15 @@ elseif strcmp(birthSpawn, 'uniform')
             if Z(3,z) < distThresh % && abs(theta) > angleThresh
                 Pbirth = PbirthFunc(Z(3,z)); % TODO: Move to declareVariables
                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
-            
-                XmuPred(z).P(4:6,4:6) = PinitVeloClose*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
+                XmuPred(z).P(4:6,4:6) = PinitVeloClose*XmuPred(z).P(1:3,1:3);
             else
                 Pbirth = PbirthFunc(Z(3,z)); % TODO: Use different values close and far?
                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
-                XmuPred(z).P(4:6,4:6) = PinitVeloFar*XmuPred(z).P(1:3,1:3); % TODO: Move to declareVariables
+                XmuPred(z).P(4:6,4:6) = PinitVeloFar*XmuPred(z).P(1:3,1:3);
             end
+            
+            %global Ptest
+            %XmuPred(z).P(4:6,4:6) = Ptest(Z(3,z))*XmuPred(z).P(1:3,1:3);
             
             % Initiate velo?
             if ((Z(3,z) < distThresh2) && (abs(theta) > angleThresh))
@@ -92,7 +94,6 @@ elseif strcmp(birthSpawn, 'uniform')
             end
             
             if color
-                rescaleFact = 0.6;
                 Zbox = [Z(1,z) - rescaleFact*Z(nbrMeasStates+1,z)*0.5, Z(2,z)-rescaleFact*Z(nbrMeasStates+2,z)*0.5,...
                         rescaleFact*Z(nbrMeasStates+1,z),rescaleFact*Z(nbrMeasStates+2,z)]; % Corners of Z box
                 [ZRed, ZGreen, ZBlue] = colorhist(img,Zbox);
