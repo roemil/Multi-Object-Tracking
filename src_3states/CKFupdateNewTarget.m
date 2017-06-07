@@ -21,8 +21,8 @@ global pose, global k, global angles
 Xtmp = zeros(size(Xpred,1),2*n);
 Wi = 1/(2*n);
 
+Psqrt = chol(Ppred)';
 for i = 1:n
-    Psqrt = chol(Ppred)';
     Xtmp(:,i) = Xpred+sqrt(n)*Psqrt(:,i);
     Xtmp(:,i+n) = Xpred-sqrt(n)*Psqrt(:,i);
     

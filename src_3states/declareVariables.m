@@ -30,7 +30,7 @@ if (strcmp(mode,'CNNnonlinear')) && ~simMeas
     Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{10}(1);detections{7}(1);detections{8}(1);detections{4}(1)]; % cx
     for i = 2 : size(detections{1},1)
         frame = detections{1}(i)+1;
-        if detections{9}(i) > 0.85
+        %if detections{9}(i) > 0.85
             if(frame == oldFrame)
                 Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i);detections{4}(i)]; % cx
                 count = count + 1;
@@ -39,7 +39,7 @@ if (strcmp(mode,'CNNnonlinear')) && ~simMeas
                 count = 1;
             end
             oldFrame = frame;
-        end 
+        %end 
     end
 elseif(strcmp(mode,'GT')) || (strcmp(mode,'GTnonlinear') && ~simMeas) 
     Z = generateGT(set,sequence,datapath, nbrPosStates);
@@ -356,23 +356,42 @@ maxNbrGlobal = 50;
 %%%%%%%%%%%%%%%%%%%%%% Births %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-global angleThresh
-angleThresh = 30*pi/180;
-global distThresh
-distThresh = 10;
-global distThresh2
-distThresh2 = 7;
-global PbirthFunc
-PbirthFunc = @(x) 2.6*diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) 0.6*Rdistance(x)]);
-global PinitVeloClose
-PinitVeloClose = 350;
-global PinitVeloFar
-PinitVeloFar = 2;
-global PinitBBsize
-PinitBBsize = diag([20 20]);
-global rescaleFact
-rescaleFact = 1;
-
+% Tuned for GT
+if strcmp(mode,'GTnonlinear')
+    global angleThresh
+    angleThresh = 30*pi/180;
+    global distThresh
+    distThresh = 10;
+    global distThresh2
+    distThresh2 = 7;
+    global PbirthFunc
+    PbirthFunc = @(x) diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(x)]);
+    global PinitVeloClose
+    PinitVeloClose = 200;
+    global PinitVeloFar
+    PinitVeloFar = 1;
+    global PinitBBsize
+    PinitBBsize = diag([20 20]);
+    global rescaleFact
+    rescaleFact = 1;
+elseif strcmp(mode,'CNNnonlinear')
+    global angleThresh
+    angleThresh = 30*pi/180;
+    global distThresh
+    distThresh = 10;
+    global distThresh2
+    distThresh2 = 7;
+    global PbirthFunc
+    PbirthFunc = @(x) 2.6*diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) 0.6*Rdistance(x)]);
+    global PinitVeloClose
+    PinitVeloClose = 350;
+    global PinitVeloFar
+    PinitVeloFar = 2;
+    global PinitBBsize
+    PinitBBsize = diag([20 20]);
+    global rescaleFact
+    rescaleFact = 1;
+end
 
 
 % boarder width with higher probability of birth
