@@ -70,7 +70,7 @@ for t = 1:nbrSim
     disp(['--------------- t = ', num2str(t), ' ---------------'])
     disp('-------------------------------------')
     
-    disp(['--------------- k = ', num2str(1), ' ---------------'])
+    disp(['--------------- k = ', num2str(1), '/',num2str(K), '---------------'])
     global k
     global kInit
     for z = 1:size(Z,2)
@@ -107,7 +107,7 @@ for t = 1:nbrSim
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
 
     for k = kInit+1:K % For each time step
-        disp(['--------------- k = ', num2str(k), ' ---------------'])
+        disp(['--------------- k = ', num2str(k), '/',num2str(K), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
         if ~isempty(Z{k})
