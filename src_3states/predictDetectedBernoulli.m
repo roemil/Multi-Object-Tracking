@@ -39,7 +39,7 @@ function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)
                 Xpred{j}(i).box = XupdPrev{j}(i).box;
                 Xpred{j}(i).label = XupdPrev{j}(i).label;
                 Xpred{j}(i).nbrMeasAss = XupdPrev{j}(i).nbrMeasAss; % TAGass
-                
+                Xpred{j}(i).class = XupdPrev{j}(i).class;
                 global color
                 if color
                     Xpred{j}(i).red = XupdPrev{j}(i).red;

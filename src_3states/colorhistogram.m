@@ -10,7 +10,7 @@ f = fopen(filename);
 GT = textscan(f,formatSpec);
 fclose(f);
 
-plotGT('training', '0004', '000026')
+%plotGT('training', '0004', '000026')
 
 meanpixVal = [];
 %for i = 1 : 1
@@ -19,7 +19,10 @@ meanpixVal = [];
 yRed = cell(1);
 yGreen = cell(1);
 yBlue = cell(1);
-
+L = cell(1);
+a = cell(1);
+b = cell(1);
+i = 26;
 %%
 ind = find(GT{1} == i-1 & GT{2} ~= -1);
 
@@ -47,12 +50,13 @@ for j = 1 : 1%length(index)
         title(['i = ', num2str(ind1), ' ', ''])
         %[subImage,num2str(ind1)] = subImage;
         [yRed{ind1+8*(i-26)}, yGreen{ind1+8*(i-26)},yBlue{ind1+8*(i-26)}] = colorhist(img, boxes(ind1,:));
+        [L{ind1+8*(i-26)}, a{ind1+8*(i-26)}, b{ind1+8*(i-26)}] = Lab(img, boxes(ind1,:));
         %[yBlue,num2str(ind1)] = yBlue;
         %meanpixVal(i,label(ind1)+1) = mean(mean(mean(subImage,3),2));
     end
 end
-
-
+i = i + 1;
+close all;
 %%
 figure;
 imagesc(subImage);

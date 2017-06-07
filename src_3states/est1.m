@@ -26,7 +26,7 @@ function [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xupd, threshold, motio
                 wGlob = 0;
             else
                 for i = 1 : size(Xupd{j},2) % find index of which global hyp is
-                    wGlob = wGlob + Xupd{j}(i).w;
+                    wGlob = wGlob + Xupd{j}(i).w;% most likely
                 end
             end
             if(wGlob >= M)
@@ -51,12 +51,16 @@ function [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xupd, threshold, motio
             end
         elseif strcmp(motionModel,'cvBB')
             for i = 1 : size(Xupd{ind},2)
-                if(Xupd{ind}(i).r > threshold) % if prob. of existence great enough
-                    Xest{index} = [Xupd{ind}(i).state; Xupd{ind}(i).label]; % store mean (i.e states)
+                if(Xupd{ind}(i).r > threshold)% && Xupd{ind}(i).nbrMeasAss > 3) % if prob. of existence great enough
+                    Xest{index} = [Xupd{ind}(i).state; Xupd{ind}(i).label;Xupd{ind}(i).class]; % store mean (i.e states)
                     Pest{index} = Xupd{ind}(i).P;
                     index = index + 1;
                 %else
                 %    Xest{index} = [];
+                elseif((Xupd{ind}(i).r > threshold))
+                    Xest{index} = [Xupd{ind}(i).state; 999;Xupd{ind}(i).class]; % store mean (i.e states)
+                    Pest{index} = Xupd{ind}(i).P;
+                    index = index + 1;
                 end
                 rest = [rest, Xupd{ind}(i).r];
                 west = [west, Xupd{ind}(i).w];

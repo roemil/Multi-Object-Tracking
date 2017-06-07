@@ -10,7 +10,7 @@ if(color)
     framenbr = sprintf('%06d',k-1);
     img = imread([imgpath,framenbr,'.png']);
 end
-    
+XpotNew{1} = initiateStruct(color);
 for z = 1:nbrOfMeas
       % Test 1! This works ok
 %         % TAG: Shall we do this?
@@ -55,7 +55,7 @@ for z = 1:nbrOfMeas
     XpotNew{z}.P = XmuPred(z).P;
     newLabel = newLabel+1;
     XpotNew{z}.nbrMeasAss = 1; % TAGass Nbr meas assignments
-
+    XpotNew{z}.class = Z(end,z);
     if color
         XpotNew{z}.red = XmuPred(z).red;
         XpotNew{z}.green =  XmuPred(z).green;

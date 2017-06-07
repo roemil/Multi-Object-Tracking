@@ -10,9 +10,9 @@ addpath('mtimesx')
 addpath('evalMOT')
 addpath('../../kittiTracking/')
 clc
-mode = 'GTnonlinear';
+mode = 'CNNnonlinear';
 set = 'training';
-sequence = '0000';
+sequences = {'0003'};%,'0002','0003','0012','0017'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -45,6 +45,13 @@ XuUpd = cell(1,1);
 
 global nbrPosStates
 nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
+ClearMOT = cell(1);
+for sim = 1 : length(sequences)
+    clear Xest;
+    disp(['--------------------- ', 'SIM Number ','---------------------']) 
+    disp(['--------------------- ', num2str(sim),' ---------------------'])
+%sequence = sprintf('%04d',sim-1);
+sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -65,7 +72,9 @@ normGlobWeights = cell(K,1);
 
 plotOn = 'false';
 startTime = tic;
+
 for t = 1:nbrSim
+
     disp('-------------------------------------')
     disp(['--------------- t = ', num2str(t), ' ---------------'])
     disp('-------------------------------------')
@@ -73,12 +82,13 @@ for t = 1:nbrSim
     disp(['--------------- k = ', num2str(1), '/',num2str(K), '---------------'])
     global k
     global kInit
-    for z = 1:size(Z,2)
-        if ~isempty(Z{z})
-            kInit = z;
-            break
-        end
-    end
+    kInit = 1;
+%     for z = 1:size(Z,2)
+%         if ~isempty(Z{z})
+%             kInit = z;
+%             break
+%         end
+%     end
     if ~isempty(lastwarn())
         [a, MSGID] = lastwarn();
         warning('off', MSGID)
@@ -135,7 +145,7 @@ for t = 1:nbrSim
             pause(0.1)
         end
     end
-end
+
 simTime = toc(startTime);
 
 
@@ -147,12 +157,14 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
+
 clear gt, clear result, clear resultZ
 generateData
 
 VOCscore = 0.5;
 dispON  = true;
-ClearMOT = evaluateMOT(gt,result,VOCscore,dispON);
+ClearMOT{sim} = evaluateMOT(gt,result,VOCscore,dispON);
 if ~strcmp(mode,'GTnonlinear') || simMeas
     ClearMOTZ = evaluateMOT(gt,resultZ,VOCscore,false);
     disp('----------------------------')
@@ -160,18 +172,16 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
     disp(['MOTP = ', num2str(ClearMOTZ.MOTP)])
     disp('----------------------------')
 end
-
+end
+end
 %% Plot birds-eye view pred conf
-
 step = true;
 if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
     plotBirdsConf(sequence,set,Xpred,step,jEst);
 else
     disp('Not implemented')
 end
-
 %% Evaluate
-
 clear gt, clear result, clear resultZ
 generateData
 
@@ -185,7 +195,6 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
     disp(['MOTP = ', num2str(ClearMOTZ.MOTP)])
     disp('----------------------------')
 end
-
 %% Plot estimates Img-plane
 
 figure('units','normalized','position',[.05 .05 .9 .9]);
@@ -198,7 +207,7 @@ while 1
     elseif strcmp(mode,'CNNnonlinear') || simMeas
         plotImgEst(sequence,set,k,Xest{k},Z{k})
     end
-    title(['k = ', num2str(k)])
+    title(['k = ', num2str(k-1)])
     try
         waitforbuttonpress; 
     catch

@@ -30,11 +30,12 @@ if ~isempty(Xhypo{1})
         Xtmp{z}(end+z) = Xnew{z};
     end
 else
-    if ~color
-        Xtmp{1} = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0);
-    else
-        Xtmp{1} = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0,'red',0,'green',0,'blue',0);
-    end
+%     if ~color
+%         Xtmp{1} = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0);
+%     else
+%         Xtmp{1} = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0,'red',0,'green',0,'blue',0);
+%     end
+    Xtmp{1} = initiateStruct(color);
     for z = 1:m
         Xtmp{z}(z) = Xnew{z};
     end
@@ -46,12 +47,13 @@ end
 
 for j = 1:size(S,3)
     % Initiate
-    if ~color
-        newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0);
-    else
-        newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0,'red',0,...,
-        'green',0,'blue',0); % TAGass
-    end
+%     if ~color
+%         newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0);
+%     else
+%         newGlob{j}(1:nbrOldTargets+m) = struct('state',[],'P',[],'w',0,'r',0,'S',0,'box',[],'label',0,'nbrMeasAss',0,'red',0,...,
+%         'green',0,'blue',0); % TAGass
+%     end
+    newGlob{j}(1:nbrOldTargets+m) = initiateStruct(color);
     for col = 1:size(S,1)
         % Find combination
         newGlob{j}(find(S(col,:,j) == 1)) = Xtmp{col}(find(S(col,:,j) == 1));
@@ -66,6 +68,7 @@ for j = 1:size(S,3)
                 newGlob{j}(target).state = Xnew{target-nbrOldTargets}.state;
                 newGlob{j}(target).P = Xnew{target-nbrOldTargets}.P;
                 newGlob{j}(target).label = Xnew{target-nbrOldTargets}.label;
+                newGlob{j}(target).class = Xnew{target-nbrOldTargets}.class;
             end
         end
     end

@@ -27,15 +27,15 @@ Z = cell(1);
 if (strcmp(mode,'CNNnonlinear')) && ~simMeas
     oldFrame = detections{1}(1)+1;
     count = 1;
-    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{10}(1);detections{7}(1);detections{8}(1)]; % cx
+    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{10}(1);detections{7}(1);detections{8}(1);detections{4}(1)]; % cx
     for i = 2 : size(detections{1},1)
         frame = detections{1}(i)+1;
         %if detections{9}(i) > 0.9
             if(frame == oldFrame)
-                Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i)]; % cx
+                Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i);detections{4}(i)]; % cx
                 count = count + 1;
             else
-                Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i)]; % cx
+                Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i);detections{4}(i)]; % cx
                 count = 1;
             end
         %end
@@ -304,7 +304,7 @@ if strcmp(mode,'GTnonlinear')
         R = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
     end
 elseif strcmp(mode,'CNNnonlinear')
-    R3dTo2d = diag([25 25 25 25 25]);
+    R3dTo2d = diag([20 25 25 40 40]);
     %Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
     Rdistance = @(x) (0.161.*x./1.959964).^2;
     %Rdistance = @(x) 5;
@@ -319,16 +319,21 @@ end
 if strcmp(mode,'GTnonlinear')
     global Pd
     Pd = 0.95;   % Detection probability % 0.7 ok1
+    global Ps
+    Ps = 0.99;   % Survival probability % 0.98 ok1
+    global c
+    c = 1e-7;    % clutter intensity % 0.00001
 elseif strcmp(mode,'CNNnonlinear')
     global Pd
     Pd = 0.95;   % Detection probability % 0.7 ok1
+    global Ps
+    Ps = 0.99;   % Survival probability % 0.98 ok1
+    global c
+    c = 0.0000001;    % clutter intensity % 0.00001
 else
     disp('Pd not implemented for this mode')
 end
-global Ps
-Ps = 0.99;   % Survival probability % 0.98 ok1
-global c
-c = 1e-7;    % clutter intensity % 0.00001
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Thresholds and Murty %%%%%%%%%%%%%%%
@@ -341,7 +346,7 @@ thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
-Nhconst = 3;
+Nhconst = 4;
 % Max nbr of globals for each old global
 maxKperGlobal = 20;
 % Max nbr globals to pass to next iteration
@@ -366,7 +371,7 @@ PinitVeloFar = 1;
 global PinitBBsize
 PinitBBsize = diag([20 20]);
 global rescaleFact
-rescaleFact = 1;
+rescaleFact = .8;
 
 
 
@@ -413,7 +418,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
         %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
-        covBirth = 2*diag([1 1 1 2 2 2 20 20]); %0.1 2*Q
+        covBirth = 4*diag([1 1 1 2 2 2 20 20]); %0.1 2*Q
         covBirth(7:8,7:8) = diag([20 20]);
     end
 end
