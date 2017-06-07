@@ -1,3 +1,6 @@
+% Estimates leaving FOV will make the evaluation bad. Since they exist in
+% the filter but not in the GT. Add Ps state dependent.
+
 clear Xest
 clear Pest
 close all
@@ -9,11 +12,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-<<<<<<< HEAD
-sequences = {'0003'};%,'0002','0003','0012','0017'};
-=======
 sequences = {'0007'};%,'0002','0003','0012','0017'};
->>>>>>> birth
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -80,7 +79,7 @@ for t = 1:nbrSim
     disp(['--------------- t = ', num2str(t), ' ---------------'])
     disp('-------------------------------------')
     
-    disp(['--------------- k = ', num2str(1), ' ---------------'])
+    disp(['--------------- k = ', num2str(1), '/',num2str(K), '---------------'])
     global k
     global kInit
     kInit = 1;
@@ -116,9 +115,9 @@ for t = 1:nbrSim
     %tmp = XuUpd;
     %clear XuUpd;
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
-
+    
     for k = kInit+1:K % For each time step
-        disp(['--------------- k = ', num2str(k),'/',num2str(K), ' ---------------'])
+        disp(['--------------- k = ', num2str(k), '/',num2str(K), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
         if ~isempty(Z{k})
