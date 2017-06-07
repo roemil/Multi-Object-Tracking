@@ -30,7 +30,7 @@ if (strcmp(mode,'CNNnonlinear')) && ~simMeas
     Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{10}(1);detections{7}(1);detections{8}(1);detections{4}(1)]; % cx
     for i = 2 : size(detections{1},1)
         frame = detections{1}(i)+1;
-        %if detections{9}(i) > 0.9
+        if detections{9}(i) > 0.9
             if(frame == oldFrame)
                 Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i);detections{4}(i)]; % cx
                 count = count + 1;
@@ -38,8 +38,8 @@ if (strcmp(mode,'CNNnonlinear')) && ~simMeas
                 Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{10}(i);detections{7}(i);detections{8}(i);detections{4}(i)]; % cx
                 count = 1;
             end
-        %end
-        oldFrame = frame; 
+            oldFrame = frame;
+        end 
     end
 elseif(strcmp(mode,'GT')) || (strcmp(mode,'GTnonlinear') && ~simMeas) 
     Z = generateGT(set,sequence,datapath, nbrPosStates);

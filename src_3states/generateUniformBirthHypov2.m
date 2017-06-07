@@ -81,7 +81,7 @@ elseif strcmp(birthSpawn, 'uniform')
                 end
             end
             
-            XmuPred(z).P(7:8,7:8) = PinitBBsize; % TODO: Move to declareVariables
+            XmuPred(z).P(7:8,7:8) = PinitBBsize;
             XmuPred(z).w = weightBirth;
             if egoMotionOn
                 % Local cam2 -> local cam0 -> local velo -> local IMU ->

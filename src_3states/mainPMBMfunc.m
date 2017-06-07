@@ -12,7 +12,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequences = {'0003'};%,'0002','0003','0012','0017'};
+sequences = {'0007'};%,'0002','0003','0012','0017'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -115,7 +115,7 @@ for t = 1:nbrSim
     %tmp = XuUpd;
     %clear XuUpd;
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
-
+    
     for k = kInit+1:K % For each time step
         disp(['--------------- k = ', num2str(k), '/',num2str(K), ' ---------------'])
         Nh = Nhconst*size(Z{k},2);    %Murty
