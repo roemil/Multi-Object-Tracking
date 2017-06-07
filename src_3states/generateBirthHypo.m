@@ -34,7 +34,6 @@ elseif strcmp(birthSpawn, 'uniform')
                                             sin(heading+atan(XmuPred(end).state(2,:)./XmuPred(end).state(1,:)))];
                 XmuPred(end).state(1:3) = XmuPred(end).state(1:3) + pose{k}(1:3,4);
                 
-                
                 %XmuPred(end).state(1:3) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[XmuPred(end).state(1:3);1]))...
                 %    + pose{k}(1:3,4);
             end

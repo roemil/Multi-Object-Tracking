@@ -197,6 +197,16 @@ global F
 global Q
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
 
+% Test CV for BB size
+sigmaBB = 200;
+F(9:10,1:8) = zeros(2,8);
+F(1:10,9:10) = [zeros(8,2); eye(2)];
+F(7,9) = T;
+F(8,10) = T;
+Q(9:10,1:8) = zeros(2,8);
+Q(1:10,9:10) = zeros(10,2);
+Q(7:10,7:10) = sigmaBB*kron([T^3/3 T^2/2;T^2/2,T],eye(2));
+
 % if strcmp(motionModel, 'cvBB')
 %     if nbrPosStates == 4
 %         Q = Q + 0.05*diag([FOVsize(2,1), FOVsize(2,2), 0 0 0 0]); % 0.1 seems good! 0.15

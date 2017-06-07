@@ -89,7 +89,7 @@ elseif(strcmp(motionModel,'cvBB'))
         jInd = 1;
         for j = 1 : size(Xest{i},2)
             if(~isempty(Xest{i}{j}))
-                result(iInd).trackerData.idxTracks(jInd) = Xest{i}{j}(9);%
+                result(iInd).trackerData.idxTracks(jInd) = Xest{i}{j}(11);%
                 heading = angles{i}.heading-angles{1}.heading;
                 tmp = H(Xest{i}{j}(1:8),pose{i}(1:3,4),heading);
                 result(iInd).trackerData.target(jInd).bbox = [tmp(1)-Xest{i}{j}(7)*0.5 tmp(2)-Xest{i}{j}(8)*0.5 Xest{i}{j}(7:8)'];%[camera2pixelcoords(Xest{i}{j}(1:3),P)', Xest{i}{j}(7:8)'];

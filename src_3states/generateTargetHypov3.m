@@ -55,8 +55,11 @@ for z = 1:nbrOfMeas
             if(gatingv3(v,Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates))) % 100
                 if strcmp(motionModel,'cvBB')
                     % Bound box size
+                    % Test CV for BB size
+                    Htmp = H3dTo2d(nbrMeasStates+1:end,1:end-1);
+                    Htmp(1:2,9:10) = zeros(2,2);
                     [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(nbrMeasStates+1:5,nbrMeasStates+1:5)] = ...
-                        KFUpd(Xhypo{j,z}(i).state, H3dTo2d(nbrMeasStates+1:end,1:end-1), Xhypo{j,z}(i).P, R3dTo2d(nbrMeasStates+1:end,nbrMeasStates+1:end), Z(4:5,z));
+                        KFUpd(Xhypo{j,z}(i).state, Htmp, Xhypo{j,z}(i).P, R3dTo2d(nbrMeasStates+1:end,nbrMeasStates+1:end), Z(4:5,z));
 
                     % Only yaw
                     Xhypo{j,z}(i).w = Xpred{j}(i).w + log(Xpred{j}(i).r*Pd) + ...

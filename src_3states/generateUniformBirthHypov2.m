@@ -60,7 +60,7 @@ elseif strcmp(birthSpawn, 'uniform')
 
             % TEST 3
             % TAG: Shall we do this?
-            XmuPred(z).P = zeros(8,8);
+            XmuPred(z).P = zeros(10,10);
             if Z(3,z) < distThresh % && abs(theta) > angleThresh
                 Pbirth = PbirthFunc(Z(3,z)); % TODO: Move to declareVariables
                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
@@ -92,6 +92,10 @@ elseif strcmp(birthSpawn, 'uniform')
                 XmuPred(z).state(1:2) = [cos(heading), -sin(heading); sin(heading) cos(heading)]*XmuPred(z).state(1:2);
                 XmuPred(z).state(1:3) = XmuPred(z).state(1:3) + pose{k}(1:3,4);
             end
+            
+            % Test CV for BB size
+            XmuPred(end).state(9:10) = zeros(2,1);
+            XmuPred(z).P(9:10,9:10) = 3*PinitBBsize;
             
             if color
                 Zbox = [Z(1,z) - rescaleFact*Z(nbrMeasStates+1,z)*0.5, Z(2,z)-rescaleFact*Z(nbrMeasStates+2,z)*0.5,...
