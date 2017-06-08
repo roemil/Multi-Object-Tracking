@@ -304,7 +304,8 @@ if strcmp(mode,'GTnonlinear')
         R = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
     end
 elseif strcmp(mode,'CNNnonlinear')
-    R3dTo2d = diag([170 120 25 40 40]);
+    %R3dTo2d = diag([170 120 25 40 40]);
+    R3dTo2d = diag([25 25 15 15 15]); % * 0.5?? 
     %Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
     Rdistance = @(x) (0.161.*x./1.959964).^2;
     %Rdistance = @(x) 5;
@@ -409,7 +410,7 @@ elseif strcmp(mode,'CNNnonlinear')
     global PinitBBsize
     PinitBBsize = diag([20 20]);
     global rescaleFact
-    rescaleFact = 1;
+    rescaleFact = 0.9; % 0.9
     
     % Use function instead of just 2 values? 
     %global Ptest

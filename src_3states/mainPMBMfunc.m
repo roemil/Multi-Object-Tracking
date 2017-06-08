@@ -12,7 +12,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequences = {'0003'};%,'0002','0003','0012','0017'};
+sequences = {'0000'};%,'0002','0003','0012','0017'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -156,9 +156,10 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
-
+end
+end
+%%
 clear gt, clear result, clear resultZ
 generateData
 

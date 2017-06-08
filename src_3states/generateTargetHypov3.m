@@ -2,7 +2,7 @@ function [Xhypo] = generateTargetHypov3(Xpred,nbrOfMeas,nbrOfGlobHyp, Pd, H, R, 
  global Pd, global R, global nbrMeasStates, global H3dTo2d, global H3dFunc, ...
  global Hdistance, global R3dTo2d, global Rdistance, global H, global R,
  global pose, global k, global plotHypoConf, global angles, global imgpath,...
- global color, global rescaleFact
+ global color, global rescaleFact, global threshold
 
 % Create missdetection hypo in index size(Z{k},2)+1
 if(isempty(Xpred)) % If we have no predicted targets, we cannot 
@@ -25,7 +25,11 @@ for j = 1:nbrOfGlobHyp
         Xhypo{j,nbrOfMeas+1}(i).box = Xpred{j}(i).box;
         Xhypo{j,nbrOfMeas+1}(i).label = Xpred{j}(i).label;
         Xhypo{j,nbrOfMeas+1}(i).S = 0;
-        Xhypo{j,nbrOfMeas+1}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss; % TAGass
+        if Xhypo{j,nbrOfMeas+1}(i).r > threshold
+            Xhypo{j,nbrOfMeas+1}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss+1; % TAGass
+        else
+            Xhypo{j,nbrOfMeas+1}(i).nbrMeasAss = Xpred{j}(i).nbrMeasAss;
+        end
         Xhypo{j,nbrOfMeas+1}(i).class = Xpred{j}(i).class; % TODO: set the class as the old class? 
         if color
             Xhypo{j,nbrOfMeas+1}(i).red = Xpred{j}(i).red;
