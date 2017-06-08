@@ -57,16 +57,16 @@ if ~step
             for i = 1:size(X{k},2)
                 if legEstOn
                    est = plot(X{k}{i}(1),X{k}{i}(2),'r*'); %sum(ismember(X{k}{i}(9),labels)) == 0
-                   if isempty(find(labels == X{k}{i}(9)))
-                       text(X{k}{i}(1),X{k}{i}(2),num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
-                       labels = [labels, X{k}{i}(9)];
+                   if isempty(find(labels == X{k}{i}(11)))
+                       text(X{k}{i}(1),X{k}{i}(2),num2str(X{k}{i}(11)),'Fontsize',18,'Color','red')
+                       labels = [labels, X{k}{i}(11)];
                    end
                    legEstOn = false;
                 else
                     plot(X{k}{i}(1),X{k}{i}(2),'r*')
-                    if isempty(find(labels == X{k}{i}(9)))
-                       text(X{k}{i}(1),X{k}{i}(2),num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
-                       labels = [labels, X{k}{i}(9)];
+                    if isempty(find(labels == X{k}{i}(11)))
+                       text(X{k}{i}(1),X{k}{i}(2),num2str(X{k}{i}(11)),'Fontsize',18,'Color','red')
+                       labels = [labels, X{k}{i}(11)];
                    end
                 end
             end
@@ -128,15 +128,15 @@ elseif ~auto
             for i = 1:size(X{k},2)
                 if legEstOn
                    est = plot(X{k}{i}(1),X{k}{i}(2),'r*'); %sum(ismember(X{k}{i}(9),labels)) == 0
-                   if isempty(find(labels == X{k}{i}(9)))
-                       text(X{k}{i}(1),X{k}{i}(2),num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
-                       labels = [labels, X{k}{i}(9)];
+                   if isempty(find(labels == X{k}{i}(11)))
+                       text(X{k}{i}(1),X{k}{i}(2),num2str(X{k}{i}(11)),'Fontsize',18,'Color','red')
+                       labels = [labels, X{k}{i}(11)];
                    end
                    legEstOn = false;
                 else
                     plot(X{k}{i}(1),X{k}{i}(2),'r*')
-                    if isempty(find(labels == X{k}{i}(9)))
-                       text(X{k}{i}(1),X{k}{i}(2),num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
+                    if isempty(find(labels == X{k}{i}(11)))
+                       text(X{k}{i}(1),X{k}{i}(2),num2str(X{k}{i}(11)),'Fontsize',18,'Color','red')
                        labels = [labels, X{k}{i}(9)];
                    end
                 end
@@ -224,14 +224,14 @@ else
             if legEstOn
                est = plot(X{k}{i}(1),X{k}{i}(2),'r*','Markersize',8,'linewidth',1); %sum(ismember(X{k}{i}(9),labels)) == 0
                %if isempty(find(labels == X{k}{i}(9)))
-                   text(X{k}{i}(1)-1,X{k}{i}(2)+3,num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
+                   text(X{k}{i}(1)-1,X{k}{i}(2)+3,num2str(X{k}{i}(11)),'Fontsize',18,'Color','red')
                %    labels = [labels, X{k}{i}(9)];
                %end
                legEstOn = false;
             else
                 plot(X{k}{i}(1),X{k}{i}(2),'r*','Markersize',8,'linewidth',1)
                % if isempty(find(labels == X{k}{i}(9)))
-                   text(X{k}{i}(1)-1,X{k}{i}(2)+3,num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
+                   text(X{k}{i}(1)-1,X{k}{i}(2)+3,num2str(X{k}{i}(11)),'Fontsize',18,'Color','red')
                %    labels = [labels, X{k}{i}(9)];
                % end
             end
@@ -262,7 +262,7 @@ else
 end
     
 if egoMotionOn
-    legend([gt, est, ego],'GT','Est','Ego','Location','SouthEast')
+    %legend([gt, est, ego],'GT','Est','Ego','Location','SouthEast')
 elseif FOVon
     legend([gt, est, ego, legFOV],'GT','Est','Ego','FOV','Location','SouthEast')
 else
