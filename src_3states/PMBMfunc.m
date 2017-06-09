@@ -137,6 +137,7 @@ if ~gatingOn
         oldInd = newInd;
     end
 else
+    Xtmp = cell(1);
     oldInd = 0;
     Wnew = diag(rho);
     [Xhypo] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates); 
@@ -152,8 +153,28 @@ else
         end
     end
 end
+
+% If not ceil Nh*Whyp
+% if isempty(Xtmp{1})
+%     oldInd = 0;
+%     Wnew = diag(rho);
+%     [Xhypo] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates); 
+%     for j = 1:max(1,nbrOfGlobHyp)
+%         S = KbestGlobalv2(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, Pd, j, maxKperGlobal, normGlobWeightsOld(j));
+%         if ~isempty(S)
+%             nbrOldTargets = size(Xhypo{j,1},2);
+%             [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S, nbrOldTargets);
+%             for jnew = oldInd+1:newInd
+%                 Xtmp{jnew} = newGlob{jnew-oldInd};
+%             end
+%             oldInd = newInd;
+%         end
+%     end
+% end
+
 %disp(['Error: ', num2str(5)])
 % Find global hypotheses weights and weight sum for normalization
+wSumMaxSize = 0;
 wSum = cell(size(Xtmp,2),1);
 for j = 1:size(Xtmp,2)
     wSum{j} = 0;
@@ -179,6 +200,40 @@ end
 %disp(['Error: ', num2str(7)])
 % Keep the Nh best global hypotheses
 
+
+% Test
+% [~,ind,~] = unique(wGlob);
+% compVec = (1:size(wGlob,2))';
+% indVec = find(ismember(compVec,ind) == 0);
+% diffVec = 0;
+% for j = 1:size(wSum,1)
+%     if size(wSum{j},2) > 1
+%         diffj = sum(diff(wSum{j}));
+%         if abs(diffj-diffVec) > 1e-3
+%             indVec = [indVec, j];
+%             diffVec = [diffVec;diffj];
+%         end
+%     end
+% end
+% if ~isempty(indVec)
+%     indEqual = find(ismember(compVec,indVec) == 0);
+%     wGlob(indEqual) = wGlob(indEqual)-1e6;
+% end
+
+compVec = (1:size(wGlob,2))';
+% added test
+ww = zeros(size(wSum,1),1);
+for j = 1:size(wSum,1)
+    ww(j) = sum(normalizeLogWeights(wSum{j}));
+end
+[~,tmp,~] = unique(ww);
+indEqual = find(ismember(compVec,tmp) == 0);
+wGlob(indEqual) = wGlob(indEqual)-1e6;
+%added test
+% [~,ind,~] = unique(wGlob); %round(wGlob,3)
+% indEqual = find(ismember(compVec,ind) == 0);
+% wGlob(indEqual) = wGlob(indEqual)-1e6;
+
 minTmp = min(size(wGlob,2), Nh);
 
 [keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
@@ -200,7 +255,11 @@ if sum(keepGlobs ~= 0) ~= 0
         globWeight(jInd) = 0;
         if ~isempty(wSum{keepGlobs(j)})
             iInd = 1;
-            [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
+            if size(wSum{keepGlobs(j)},2) == 1
+                weights = wSum{keepGlobs(j)}(1);
+            else
+                [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
+            end
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
             for i = 1:size(Xtmp{keepGlobs(j)},2)
                 if Xtmp{keepGlobs(j)}(i).r > threshold
@@ -216,13 +275,18 @@ if sum(keepGlobs ~= 0) ~= 0
 else % TODO: Do we wanna do this?!
     disp('keepGlobs is 0')
     for j = 1:size(Xtmp,2)
+    j = 1;
         if ~isempty(wSum{j})
             if jEst == j
                 jEst = jInd;
             end
             globWeight(jInd) = 0;
             iInd = 1;
-            [weights, ~] = normalizeLogWeights(wSum{j});
+            if size(wSum{j},2) == 1
+                weights = wSum{j}(1);
+            else
+                [weights, ~] = normalizeLogWeights(wSum{j});
+            end
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
             for i = 1:size(Xtmp{j},2)
                 if Xtmp{j}(i).r > threshold
@@ -239,6 +303,10 @@ else % TODO: Do we wanna do this?!
         end
     end
 end
+
+% if size(unique(globWeight),2) ~= size(globWeight,2)
+%     keyboard
+% end
 
 normGlobWeights = normalizeLogWeights(globWeight);
 

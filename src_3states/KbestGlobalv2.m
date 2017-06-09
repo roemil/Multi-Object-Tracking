@@ -13,7 +13,7 @@ for m = 1 : nbrOfMeas
         %Wold(m,nj) = min(1,Xhypo{j,m}(nj).w); % TODO: This is not proper
         %Wold(m,nj) = min(1,Xhypo{j,m}(nj).w/Xhypo{j,end}(nj).w); % TODO: SHOULDNT IT BE LIKE THIS?
         %[Xhypo{j,m}(nj).w Xhypo{j,end}(nj).w]
-        Wold(m,nj) = min(0,Xhypo{j,m}(nj).w - Xhypo{j,end}(nj).w);
+        Wold(m,nj) = Xhypo{j,m}(nj).w - Xhypo{j,end}(nj).w;
         %wHypSum = wHypSum + Xpred{j}(nj).w;
         %whypo(m,nj) = Xhypo{j,m}(nj).w;
     end
@@ -39,9 +39,8 @@ if ~isempty(rows)
     end
 end
 %Wold
-%K_hyp = max(1,ceil(Nh * wHyp));
-% K_hyp = round(Nh * wHyp);
-K_hyp = ceil(Nh * wHyp);
+K_hyp = max(1,ceil(Nh * wHyp));
+%K_hyp = round(Nh * wHyp);
 
 if K_hyp == 0
     [ass, cost] = murty(C,1);
@@ -63,5 +62,4 @@ ass2 = [repmat((1:nbrOfMeas)',size(ass,1),1), reshape(ass',size(ass,2)*size(ass,
 %ass2 = reshape([(1:nbrOfMeas).*size(ass), ass, (1:size(ass,1))'.*size(ass)],nbrOfMeas,2*nbrOfMeas);
 
 S(sub2ind(size(S),ass2(:,1),ass2(:,2),ass2(:,3))) = 1;
-
 
