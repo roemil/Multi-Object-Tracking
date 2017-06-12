@@ -71,8 +71,8 @@ elseif strcmp(birthSpawn, 'uniform')
                 XmuPred(z).P(4:6,4:6) = PinitVeloFar*XmuPred(z).P(1:3,1:3);
             end
             
-            %global Ptest
-            %XmuPred(z).P(4:6,4:6) = Ptest(Z(3,z))*XmuPred(z).P(1:3,1:3);
+            global Ptest
+            XmuPred(z).P(4:6,4:6) = Ptest(Z(3,z))*XmuPred(z).P(1:3,1:3);
             
             % Initiate velo?
             if ((Z(3,z) < distThresh2) && (abs(theta) > angleThresh))

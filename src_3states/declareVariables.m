@@ -153,9 +153,9 @@ Xupd = cell(1,1);
 
 global FOVsize
 if strcmp(mode,'GT') || (strcmp(mode,'GTnonlinear')) || simMeas
-    FOVsize = [0,0;1242,375]; % in m
+    FOVsize = [0,0;1242,375]; 
 elseif strcmp(mode,'CNNnonlinear')
-    FOVsize = [0,0;detections{3}(1),detections{2}(1)]; % in m
+    FOVsize = [0,0;detections{3}(1),detections{2}(1)]; 
 end
 
 global nbrStates
@@ -315,7 +315,7 @@ if strcmp(mode,'GTnonlinear')
     end
 elseif strcmp(mode,'CNNnonlinear')
     %R3dTo2d = diag([170 120 25 40 40]);
-    R3dTo2d = diag([25 25 15 15 15]);
+    R3dTo2d = diag([25 25 15 15 15]); % * 0.5?? 
     %Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
     Rdistance = @(x) (0.161.*x./1.959964).^2;
     %Rdistance = @(x) 5;
@@ -420,13 +420,13 @@ elseif strcmp(mode,'CNNnonlinear')
     global PinitBBsize
     PinitBBsize = diag([20 20]);
     global rescaleFact
-    rescaleFact = 1;
+    rescaleFact = 0.9; % 0.9
     
     % Use function instead of just 2 values? 
-    %global Ptest
-    %slope = -10;
-    %startInd = 10;
-    %Ptest = @(x) max(1,min(PinitVeloClose,slope*(x-startInd)+PinitVeloClose));
+    global Ptest
+    slope = -10;
+    startInd = 10;
+    Ptest = @(x) max(1,min(PinitVeloClose,slope*(x-startInd)+PinitVeloClose));
 end
 
 
@@ -478,7 +478,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
     end
 end
 global wInit
-wInit = 0.001;%0.005, 0.001 even better
+wInit = 1e-5;%ordinary 0.001. best atm 0.00005
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];

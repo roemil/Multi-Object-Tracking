@@ -3,7 +3,7 @@ function [XpotNew, rho, newLabel] = updateNewPotTargetsUniform(XmuPred, nbrOfMea
 global Pd, global H3dFunc, global Hdistance, global R3dTo2d, global Rdistance, global Jh
 global c, global nbrStates, global nbrMeasStates, global H, global R,
 global pose, global k, global angles, global FOVsize, global color, global imgpath
-global wInit, global angleThresh, global distThresh, global PbirthFunc, global threshold
+global wInit, global angleThresh, global distThresh, global PbirthFunc, global thresholdEst
 
 rho = zeros(nbrOfMeas,1);
 if(color)
@@ -54,7 +54,7 @@ for z = 1:nbrOfMeas
     XpotNew{z}.state = XmuPred(z).state;
     XpotNew{z}.P = XmuPred(z).P;
     newLabel = newLabel+1;
-    if XpotNew{z}.r > threshold
+    if XpotNew{z}.r > thresholdEst
         XpotNew{z}.nbrMeasAss = 1; % TAGass Nbr meas assignments
     else
         XpotNew{z}.nbrMeasAss = 0;
