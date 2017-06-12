@@ -48,7 +48,8 @@ Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps);
 
 %disp(['Error: ', num2str(5)])
 % Find global hypotheses weights and weight sum for normalization
-Xtmp = Xpred;
+%Xtmp = Xpred;
+Xtmp = generateTargetHypov3(Xpred, 0, size(Xpred,2), Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates);
 wSum = cell(size(Xtmp,2),1);
 for j = 1:size(Xtmp,2)
     wSum{j} = 0;
@@ -75,6 +76,43 @@ end
 %disp(['Error: ', num2str(7)])
 % Keep the Nh best global hypotheses
 
+% Test
+% [~,ind,~] = unique(wGlob);
+% compVec = (1:size(wGlob,2))';
+% indVec = find(ismember(compVec,ind) == 0);
+% diffVec = 0;
+% for j = 1:size(wSum,1)
+%     if size(wSum{j},2) > 1
+%         diffj = sum(diff(wSum{j}));
+%         if abs(diffj-diffVec) > 1e-3
+%             indVec = [indVec, j];
+%             diffVec = [diffVec;diffj];
+%         end
+%     end
+% end
+% if ~isempty(indVec)
+%     indEqual = find(ismember(compVec,indVec) == 0);
+%     wGlob(indEqual) = wGlob(indEqual)-1e6;
+% end
+
+compVec = (1:size(wGlob,2))';
+% added test
+ww = zeros(size(wSum,1),1);
+for j = 1:size(wSum,1)
+    if size(wSum{j},2) ~= 1
+        ww(j) = sum(normalizeLogWeights(wSum{j})); %
+    else
+        ww(j) = wSum{j};
+    end
+end
+[~,tmp,~] = unique(ww);
+indEqual = find(ismember(compVec,tmp) == 0);
+wGlob(indEqual) = wGlob(indEqual)-1e6;
+%added test
+% [~,ind,~] = unique(wGlob); %round(wGlob,3)
+% indEqual = find(ismember(compVec,ind) == 0);
+% wGlob(indEqual) = wGlob(indEqual)-1e6;
+
 minTmp = min(size(wGlob,2), Nh);
 
 [keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
@@ -85,6 +123,7 @@ minTmp = min(size(wGlob,2), Nh);
 %end
 %disp(['Error: ', num2str(8)])
 % Remove bernoulli components with low probability of existence
+Xupd = cell(1,1);
 jInd = 1;
 if sum(keepGlobs ~= 0) ~= 0
     keepGlobs = keepGlobs(keepGlobs ~= 0);
@@ -96,7 +135,11 @@ if sum(keepGlobs ~= 0) ~= 0
             end
             globWeight(jInd) = 0;
             iInd = 1;
-            [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
+            if size(wSum{keepGlobs(j)},2) == 1
+                weights = wSum{keepGlobs(j)}(1);
+            else
+                [weights, ~] = normalizeLogWeights(wSum{keepGlobs(j)});
+            end
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
             for i = 1:size(Xtmp{keepGlobs(j)},2)
                 if Xtmp{keepGlobs(j)}(i).r > threshold
@@ -118,7 +161,11 @@ else % TODO: Do we wanna do this?!
             end
             globWeight(jInd) = 0;
             iInd = 1;
-            [weights, ~] = normalizeLogWeights(wSum{j});
+            if size(wSum{j},2) == 1
+                weights = wSum{j}(1);
+            else
+                [weights, ~] = normalizeLogWeights(wSum{j});
+            end
             %Xupd{k,j} = removeLowProbExistence(Xtmp{k,keepGlobs(j)},keepGlobs(j),threshold,wSum);
             for i = 1:size(Xtmp{j},2)
                 if Xtmp{j}(i).r > threshold
@@ -133,7 +180,17 @@ else % TODO: Do we wanna do this?!
     end
 end
 
-normGlobWeights = normalizeLogWeights(globWeight);
+if size(Xupd{1},2) ~= 0
+    normGlobWeights = normalizeLogWeights(globWeight);
+else
+    normGlobWeights = [];
+end
+
+for j = 1:size(globWeight,2)
+    if size(Xupd{j},2) == 1
+        Xupd{j}(1).w = normGlobWeights(j);
+    end
+end
 
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight

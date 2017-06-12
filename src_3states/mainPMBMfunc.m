@@ -12,7 +12,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequences = {'0003'};%,'0002','0003','0012','0017'};
+sequences = {'0004'};% quite good {'0004','0006'}
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -46,6 +46,7 @@ XuUpd = cell(1,1);
 global nbrPosStates
 nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
+
 for sim = 1 : length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
@@ -61,7 +62,7 @@ k = 1;
 
 Xupd = cell(1);
 
-K = min(1000,size(Z,2)); % Length of sequence
+K = size(Z,2); % Length of sequence
 nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
@@ -118,9 +119,9 @@ for t = 1:nbrSim
     
     for k = kInit+1:K % For each time step
         disp(['--------------- k = ', num2str(k), '/',num2str(K), ' ---------------'])
-        Nh = Nhconst*size(Z{k},2);    %Murty
         tic;
         if ~isempty(Z{k})
+            Nh = Nhconst*size(Z{k},2);
             [XuUpd{t,k}, Xpred{t,k}, Xupd{t,k}, Xest{t,k}, Pest{t,k}, rest{t,k}, west{t,k}, labelsEst{t,k}, newLabel, jEst(k), normGlobWeights{k}] = ...
                 PMBMfunc(Z{k}, XuUpd{t,k-1}, Xupd{t,k-1}, Nh, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode, normGlobWeights{k-1}, k);
         else
@@ -157,9 +158,13 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 writetofile(Xest,mode,['../../devkit_updated/python/results/tracker/data/',sequence,'.txt']);
 writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 %writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
+end
+end
+%%
 
 clear gt, clear result, clear resultZ
 generateData
@@ -173,8 +178,6 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
     disp('CNN output')
     disp(['MOTP = ', num2str(ClearMOTZ.MOTP)])
     disp('----------------------------')
-end
-end
 end
 %% Plot birds-eye view pred conf
 step = true;
@@ -199,7 +202,7 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
 end
 %% Plot estimates Img-plane
 
-figure('units','normalized','position',[.05 .05 .9 .9]);
+a = figure('units','normalized','position',[.05 .05 .9 .9]);
 subplot('position', [0.02 0 0.98 1])
 k = kInit;
 while 1
@@ -223,24 +226,32 @@ while 1
             if k <= 0
                 fprintf('Window closed. Exiting...\n');
                 break
+            else
+                cla(a)
             end
         case 'l'
             k = k + 1;
             if k > size(Xest,2)
                 fprintf('Window closed. Exiting...\n');
                 break
+            else
+                cla(a)
             end
         case 'o'
             k = k + 10;
             if k > size(Xest,2)
                 fprintf('Window closed. Exiting...\n');
                 break
+            else
+                cla(a)
             end
         case 'q'
             k = k - 10;
             if k <= 0
                 fprintf('Window closed. Exiting...\n');
                 break
+            else
+                cla(a)
             end
     end
     %pause(1.5)

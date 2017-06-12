@@ -262,7 +262,7 @@ else
 end
     
 if egoMotionOn
-    legend([gt, est, ego],'GT','Est','Ego','Location','SouthEast')
+    %legend([gt, est, ego],'GT','Est','Ego','Location','SouthEast')
 elseif FOVon
     legend([gt, est, ego, legFOV],'GT','Est','Ego','FOV','Location','SouthEast')
 else

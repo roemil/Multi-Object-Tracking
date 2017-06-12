@@ -8,7 +8,7 @@
 %
 %
 function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)    
-    if(isempty(XupdPrev))
+    if(isempty(XupdPrev{1}))
         Xpred = [];
     else
         % TODO: Temporary to solve initiate problems with velocity

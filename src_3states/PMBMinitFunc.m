@@ -61,6 +61,7 @@ end
 [Xest, Pest, rest, west, labelsEst, jEst] = est1(Xtmp, thresholdEst, motionModel);
 
 % Remove bernoulli components with low probability of existence
+Xupd = cell(1,1);
 iInd = 1;
 [norm_weights, ~] = normalizeLogWeights(wGlob);
 frameNbr = sprintf('%06d',k-1);
@@ -84,7 +85,11 @@ for i = 1:size(Xtmp{1},2)
     end
 end
 
-normGlobWeights = normalizeLogWeights(globWeight);
+if size(Xupd{1},2) ~= 0
+    normGlobWeights = normalizeLogWeights(globWeight);
+else
+    normGlobWeights = [];
+end
 
 %if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
 %    for i = 1:size(Pest,2)
