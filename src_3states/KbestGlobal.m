@@ -40,7 +40,7 @@ if ~isempty(rows)
 end
 %Wold
 %K_hyp = max(1,ceil(Nh * wHyp));
-K_hyp = round(Nh * wHyp);
+K_hyp = ceil(Nh * wHyp);
 
 if K_hyp == 0
     [ass, cost] = murty(C,1);
