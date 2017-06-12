@@ -137,12 +137,16 @@ if ~gatingOn
         oldInd = newInd;
     end
 else
-    Xtmp = cell(1);
+    Xtmp = cell(1,1);
     oldInd = 0;
     Wnew = diag(rho);
     [Xhypo] = generateTargetHypov3(Xpred, nbrOfMeas, nbrOfGlobHyp, Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates); 
     for j = 1:max(1,nbrOfGlobHyp)
-        S = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, Pd, j, maxKperGlobal, normGlobWeightsOld(j));
+        if ~isempty(Xhypo{j})
+            S = KbestGlobal(nbrOfMeas, Xhypo, Z, Xpred, Wnew, Nh, Pd, j, maxKperGlobal, normGlobWeightsOld(j));
+        else
+            S = eye(nbrOfMeas);
+        end
         if ~isempty(S)
             nbrOldTargets = size(Xhypo{j,1},2);
             [newGlob, newInd] = generateGlobalHypo6(Xhypo(j,:), XpotNew(:), Z, oldInd, S, nbrOldTargets);
@@ -224,7 +228,11 @@ compVec = (1:size(wGlob,2))';
 % added test
 ww = zeros(size(wSum,1),1);
 for j = 1:size(wSum,1)
-    ww(j) = sum(normalizeLogWeights(wSum{j}));
+    if size(wSum{j},2) ~= 1
+        ww(j) = sum(normalizeLogWeights(wSum{j})); %
+    else
+        ww(j) = wSum{j};
+    end
 end
 [~,tmp,~] = unique(ww);
 indEqual = find(ismember(compVec,tmp) == 0);
@@ -244,6 +252,7 @@ minTmp = min(size(wGlob,2), Nh);
 %end
 %disp(['Error: ', num2str(8)])
 % Remove bernoulli components with low probability of existence
+Xupd = cell(1,1);
 jInd = 1;
 if sum(keepGlobs ~= 0) ~= 0
     keepGlobs = keepGlobs(keepGlobs ~= 0);
@@ -308,13 +317,17 @@ end
 %     keyboard
 % end
 
-normGlobWeights = normalizeLogWeights(globWeight);
+if size(Xupd{1},2) ~= 0
+    normGlobWeights = normalizeLogWeights(globWeight);
+else
+    normGlobWeights = [];
+end
 
-%if nbrPosStates == 4 && strcmp(motionModel,'cvBB')
-%    for i = 1:size(Pest,2)
-%        Pest{i} = 3*Pest{i}+diag([30 10 0 0 0 0]);
-%    end
-%end
+for j = 1:size(globWeight,2)
+    if size(Xupd{j},2) == 1
+        Xupd{j}(1).w = normGlobWeights(j);
+    end
+end
 
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight

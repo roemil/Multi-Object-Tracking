@@ -48,7 +48,8 @@ Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps);
 
 %disp(['Error: ', num2str(5)])
 % Find global hypotheses weights and weight sum for normalization
-Xtmp = Xpred;
+%Xtmp = Xpred;
+Xtmp = generateTargetHypov3(Xpred, 0, size(Xpred,2), Pd, H, R, Z, motionModel, nbrPosStates, nbrMeasStates);
 wSum = cell(size(Xtmp,2),1);
 for j = 1:size(Xtmp,2)
     wSum{j} = 0;
@@ -98,7 +99,11 @@ compVec = (1:size(wGlob,2))';
 % added test
 ww = zeros(size(wSum,1),1);
 for j = 1:size(wSum,1)
-    ww(j) = sum(normalizeLogWeights(wSum{j}));
+    if size(wSum{j},2) ~= 1
+        ww(j) = sum(normalizeLogWeights(wSum{j})); %
+    else
+        ww(j) = wSum{j};
+    end
 end
 [~,tmp,~] = unique(ww);
 indEqual = find(ismember(compVec,tmp) == 0);
@@ -118,6 +123,7 @@ minTmp = min(size(wGlob,2), Nh);
 %end
 %disp(['Error: ', num2str(8)])
 % Remove bernoulli components with low probability of existence
+Xupd = cell(1,1);
 jInd = 1;
 if sum(keepGlobs ~= 0) ~= 0
     keepGlobs = keepGlobs(keepGlobs ~= 0);
@@ -174,7 +180,17 @@ else % TODO: Do we wanna do this?!
     end
 end
 
-normGlobWeights = normalizeLogWeights(globWeight);
+if size(Xupd{1},2) ~= 0
+    normGlobWeights = normalizeLogWeights(globWeight);
+else
+    normGlobWeights = [];
+end
+
+for j = 1:size(globWeight,2)
+    if size(Xupd{j},2) == 1
+        Xupd{j}(1).w = normGlobWeights(j);
+    end
+end
 
 %disp(['Error: ', num2str(9)])
 % Prune poisson components with low weight
