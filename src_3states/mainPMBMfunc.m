@@ -157,7 +157,9 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
+writetofile(Xest,mode,['../../devkit_updated/python/results/tracker/data/',sequence,'.txt']);
+writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
+%writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
 
 clear gt, clear result, clear resultZ
 generateData
