@@ -10,4 +10,4 @@ davg = mean([dred, dgreen, dblue]);
 %     davg = 0.3;
 % end
 % 
-% ended
+% end
