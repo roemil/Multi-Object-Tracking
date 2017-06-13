@@ -244,7 +244,12 @@ wGlob(indEqual) = wGlob(indEqual)-1e6;
 
 minTmp = min(size(wGlob,2), Nh);
 
-[keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
+if mean(wGlob) < -500
+   [keepGlobs,C] = murty(-wGlob/100,min(maxNbrGlobal,minTmp));
+else
+    [keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
+end
+%disp(['Globals kept: ', num2str(size(keepGlobs,1)),'/',num2str(size(wGlob,2))])
 %disp('Error: Murty')
 %ind = find(diff(C) > 100);
 %if ~isempty(ind)
