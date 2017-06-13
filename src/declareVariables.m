@@ -19,6 +19,13 @@ if(strcmp(mode,'CNN'))
     f = fopen(filename);
     detections = textscan(f,formatSpec);
     fclose(f);
+elseif strcmp(mode,'CNNc')
+    datapath = strcat('../data/network_C/',set,'/',sequence,'/');
+    filename = [datapath,'inferResult.txt'];
+    formatSpec = '%f%f%f%f%f%f%f%f%f';
+    f = fopen(filename);
+    detections = textscan(f,formatSpec);
+    fclose(f);
 elseif(strcmp(mode,'nonlinear'))
     datapath = strcat('../data/tracking_dist/',set,'/',sequence,'/');
     filename = [datapath,'inferResult.txt'];
@@ -45,6 +52,25 @@ count = 1;
             oldFrame = frame;
         else
             Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i);detections{4}(i)]; % cx
+            count = 1;
+            oldFrame = frame;  
+        end
+    end
+elseif strcmp(mode,'CNNc') 
+    oldFrame = detections{1}(1)+1;
+    count = 1;
+    Z{1}(:,1) = [mean([detections{5}(1) detections{7}(1)]);mean([detections{6}(1) detections{8}(1)]);...
+        detections{7}(1)-detections{5}(1);detections{8}(1)-detections{6}(1);detections{9}(1);detections{4}(1)]; % cx
+    for i = 2 : size(detections{1},1)
+        frame = detections{1}(i)+1;
+        if(frame == oldFrame)
+            Z{frame}(:,count+1) = [mean([detections{5}(i) detections{7}(i)]);mean([detections{6}(i) detections{8}(i)]);...
+                                    detections{7}(i)-detections{5}(i);detections{8}(i)-detections{6}(i);detections{9}(i);detections{4}(i)];
+            count = count + 1;
+            oldFrame = frame;
+        else
+            Z{frame}(:,1) = [mean([detections{5}(i) detections{7}(i)]);mean([detections{6}(i) detections{8}(i)]);...
+                            detections{7}(i)-detections{5}(i);detections{8}(i)-detections{6}(i);detections{9}(i);detections{4}(i)];
             count = 1;
             oldFrame = frame;  
         end
@@ -140,6 +166,11 @@ elseif strcmp(mode,'CNN')
     sigmaQ = 35; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
     global sigmaBB
     sigmaBB = 2;
+elseif strcmp(mode,'CNNc')
+    global sigmaQ
+    sigmaQ = 35; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
+    global sigmaBB
+    sigmaBB = 2;
 else
     disp('Not implemented')
 end
@@ -202,7 +233,7 @@ end
 if(strcmp(mode,'nonlinear'))
     h = {'distance','angle'};
     H = generateMeasurementModel(h,'nonlinear',nbrPosStates, motionModel);
-elseif(strcmp(mode,'CNN'))
+elseif(strcmp(mode,'CNN')) || strcmp(mode,'CNNc')
     H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
 elseif(strcmp(mode,'GT'))
     if(strcmp(motionModel,'ca'))
@@ -275,12 +306,12 @@ nbrOfBirths = 200; % 600 ok1
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global PbirthFunc
-PbirthFunc = diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2)]);
+PbirthFunc = diag([0.2*FOVsize(2,1) 0.2*FOVsize(2,2)]);
 vinit = 0;
 nbrInitBirth = 3000; % 600 ok1
 global covBirth;
 covBirth = 20; % 20 ok1
-wInit = 1;%0.2;
+wInit = 0.7;%0.2;
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];

@@ -10,9 +10,9 @@ addpath('mtimesx')
 addpath('evalMOT')
 addpath('../../kittiTracking/')
 clc
-mode = 'CNN';
+mode = 'CNNc';
 set = 'training';
-sequences = {'0003'};% quite good {'0004','0006'}
+sequences = {'0000'};% quite good {'0004','0006'}
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -47,12 +47,12 @@ global nbrPosStates
 nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
 
-for sim = 4 : 21%length(sequences)
+for sim = 1 : length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
     disp(['--------------------- ', num2str(sim),' ---------------------'])
-sequence = sprintf('%04d',sim-1);
-%sequence = sequences{sim};
+%sequence = sprintf('%04d',sim-1);
+sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -163,6 +163,31 @@ writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 %writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
 end
 end
+
+%% Eval CNN
+set = 'training';
+sequences = {'0004'};% quite good {'0004','0006'}
+global motionModel
+motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
+global birthSpawn
+birthSpawn = 'uniform'; % Choose 'boarders' or 'uniform'
+global egoMotionOn
+egoMotionOn = false; 
+global uniformBirths
+uniformBirths = true;
+
+mode = 'CNNc';
+for sim = 1 : 21
+    clear Xest;
+    disp(['--------------------- ', 'SIM Number ','---------------------']) 
+    disp(['--------------------- ', num2str(sim),' ---------------------'])
+sequence = sprintf('%04d',sim-1);
+%sequence = sequences{sim};
+[nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
+    maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
+    = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
+writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
+end
 %%
 
 clear gt, clear result, clear resultZ
@@ -208,7 +233,7 @@ while 1
     frameNbr = sprintf('%06d',k-1);
     if strcmp(mode,'GT') && ~simMeas
         plotImgEstGT(sequence,set,k,Xest{k});
-    elseif strcmp(mode,'CNN') || simMeas
+    elseif strcmp(mode,'CNN') || simMeas ||strcmp(mode,'CNNc')
         plotImgEst(sequence,set,k,Xest{k},Z{k})
     end
     title(['k = ', num2str(k-1)])
