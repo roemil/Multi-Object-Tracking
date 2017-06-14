@@ -289,7 +289,7 @@ if sum(keepGlobs ~= 0) ~= 0
 else % TODO: Do we wanna do this?!
     disp('keepGlobs is 0')
     for j = 1:size(Xtmp,2)
-    j = 1;
+    j = 1; % TODO: what happened here? Although this should never happen
         if ~isempty(wSum{j})
             if jEst == j
                 jEst = jInd;
