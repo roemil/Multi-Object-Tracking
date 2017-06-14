@@ -245,7 +245,7 @@ wGlob(indEqual) = wGlob(indEqual)-1e6;
 minTmp = min(size(wGlob,2), Nh);
 
 if mean(wGlob) < -500
-   [keepGlobs,C] = murty(-wGlob/100,min(maxNbrGlobal,minTmp));
+    [keepGlobs,C] = murty(-wGlob/100,min(maxNbrGlobal,minTmp));
 else
     [keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
 end

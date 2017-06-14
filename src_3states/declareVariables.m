@@ -326,7 +326,7 @@ if strcmp(mode,'GTnonlinear')
     c = 1e-7;    % clutter intensity % 0.00001
 elseif strcmp(mode,'CNNnonlinear')
     global Pd
-    Pd = 0.85;   % Detection probability % 0.7 ok1
+    Pd = 0.8;   % Detection probability % 0.7 ok1
     global Ps
     Ps = 0.99;   % Survival probability % 0.98 ok1
     global c
