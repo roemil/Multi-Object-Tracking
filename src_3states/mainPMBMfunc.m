@@ -48,12 +48,12 @@ nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
 
 startTotalTime = tic;
-for sim = 1 : length(sequences)
+for sim = 1 : 21 %length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
     disp(['--------------------- ', num2str(sim),' ---------------------'])
-%sequence = sprintf('%04d',sim-1);
-sequence = sequences{sim};
+sequence = sprintf('%04d',sim-1);
+%sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -162,11 +162,30 @@ disp(['Total simulation time: ', num2str(simTime)])
 
 writetofile(Xest,mode,['../../devkit_updated/python/results/tracker/data/',sequence,'.txt']);
 writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
-writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
+%writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
 end
 end
 totalTime = toc(startTotalTime);
 disp(['Total simulation time: ', num2str(totalTime)])
+
+
+
+%% Eval CNN
+mode = 'CNNnonlinear';
+set = 'training';
+for sim = 1 : 21
+    clear Xest;
+    disp(['--------------------- ', 'SIM Number ','---------------------']) 
+    disp(['--------------------- ', num2str(sim),' ---------------------'])
+sequence = sprintf('%04d',sim-1);
+%sequence = sequences{sim};
+[nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
+    maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
+    = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
+writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
+end
+
+
 %%
 
 clear gt, clear result, clear resultZ

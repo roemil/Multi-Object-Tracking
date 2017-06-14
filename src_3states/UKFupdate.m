@@ -57,6 +57,8 @@ X = Xpred+Pxy/S*(Z-yhatpred(:,1));
 %Ppred = Ppred.*(max(1,dMax-Z(3)));
 
 P = Ppred-Pxy/S*Pxy';
+P = 0.5*(P+P');
+%P = P+1e-3*eye(size(P));
 
 v = Z-yhatpred(:,1);
 

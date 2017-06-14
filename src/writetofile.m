@@ -8,7 +8,7 @@ for i = 1 : size(Xest,2)
         if(~isempty(Xest{i}{j}))
             pos = Xest{i}{j}(1:2);
             bbox = [Xest{i}{j}(5),Xest{i}{j}(6)];
-            if(strcmp(mode,'CNN'))
+            if(strcmp(mode,'CNN')) || strcmp(mode,'CNNc')
                 if(Xest{i}{j}(8) == 999)
                     continue;
                 end
