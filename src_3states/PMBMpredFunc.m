@@ -185,13 +185,18 @@ else % TODO: Do we wanna do this?!
     end
 end
 
-if size(Xupd{1},2) ~= 0
+% ind = find(globWeight == 0);
+% if ~isempty(ind)
+%     globWeight = globWeight(1:ind);
+% end
+
+if size(Xupd,2) ~= 0
     normGlobWeights = normalizeLogWeights(globWeight);
 else
     normGlobWeights = [];
 end
 
-for j = 1:size(globWeight,2)
+for j = 1:size(Xupd,2)
     if size(Xupd{j},2) == 1
         Xupd{j}(1).w = normGlobWeights(j);
     end

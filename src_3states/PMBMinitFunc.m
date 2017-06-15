@@ -85,7 +85,12 @@ for i = 1:size(Xtmp{1},2)
     end
 end
 
-if size(Xupd{1},2) ~= 0
+% ind = find(globWeight == 0);
+% if ~isempty(ind)
+%     globWeight = globWeight(1:ind);
+% end
+
+if size(Xupd,2) ~= 0
     normGlobWeights = normalizeLogWeights(globWeight);
 else
     normGlobWeights = [];
