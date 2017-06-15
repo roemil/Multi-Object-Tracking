@@ -4,7 +4,7 @@
 clear Xest
 clear Pest
 close all
-dbstop error
+%dbstop error
 addpath('IMU')
 addpath('mtimesx')
 addpath('evalMOT')
