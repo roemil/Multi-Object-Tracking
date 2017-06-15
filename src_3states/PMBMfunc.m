@@ -289,7 +289,7 @@ if sum(keepGlobs ~= 0) ~= 0
 else % TODO: Do we wanna do this?!
     disp('keepGlobs is 0')
     for j = 1:size(Xtmp,2)
-    j = 1;
+    j = 1; % TODO: what happened here? Although this should never happen
         if ~isempty(wSum{j})
             if jEst == j
                 jEst = jInd;
@@ -322,14 +322,19 @@ end
 %     keyboard
 % end
 
-if size(Xupd{1},2) ~= 0
+% ind = find(globWeight == 0);
+% if ~isempty(ind)
+%     globWeight = globWeight(1:ind);
+% end
+
+if size(Xupd,2) ~= 0
     normGlobWeights = normalizeLogWeights(globWeight);
 else
     normGlobWeights = [];
 end
 
-for j = 1:size(globWeight,2)
-    if size(Xupd{j},2) == 1
+for j = 1:size(Xupd,2)
+    if size(Xupd{j},2) == 1 && ~isempty(Xupd{j})
         Xupd{j}(1).w = normGlobWeights(j);
     end
 end

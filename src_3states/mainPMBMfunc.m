@@ -12,7 +12,8 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequences = {'0004'};% quite good {'0004','0006'}
+sequences = {'0006'};% quite good {'0004','0006'}
+%sequences = {'0004','0006','0010','0018'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -48,12 +49,12 @@ nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
 
 startTotalTime = tic;
-for sim = 1 : 21 %length(sequences)
+for sim = 1 : length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
     disp(['--------------------- ', num2str(sim),' ---------------------'])
-sequence = sprintf('%04d',sim-1);
-%sequence = sequences{sim};
+%sequence = sprintf('%04d',sim-1);
+sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
