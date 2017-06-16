@@ -12,7 +12,7 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequences = {'0006'};% quite good {'0004','0006'}
+sequences = {'0010'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'

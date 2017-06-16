@@ -38,9 +38,9 @@ for k = 1:size(Xest,2)
     end
     labels = plotBirdsEye(sequence,set,Xest,Pest,step,auto,labels,plotConf);
     pause(0.1)
-    print(fig,['img',num2str(k)],'-djpeg')
+    %print(fig,['img',num2str(k)],'-djpeg')
 end
-
+%%
 outputVideo = VideoWriter('video1.avi');
 outputVideo.FrameRate = 10;
 open(outputVideo)
