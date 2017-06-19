@@ -32,7 +32,7 @@ end
 
 Xtmp = zeros(size(Xpred,1),2*n);
 
-W0 = 1-n/3;%1/(2*n+1); 
+W0 = 1-n/3;%1/(2*n+1);
 Wi = (1-W0)/(2*n);
 
 %dMax = 10;
@@ -46,6 +46,10 @@ end
 Xtmp = [Xpred, Xtmp];
 % Only yaw
 hX = H(Xtmp,pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
+
+global H3dTo2d, global nbrMeasStates, global R3dTo2d
+R = [R, zeros(3,2);zeros(2,3), R3dTo2d(nbrMeasStates+1:end,nbrMeasStates+1:end)];
+hX = [hX; H3dTo2d(nbrMeasStates+1:end,1:end-1)*Xtmp];
 % Full rotation matrix
 %hX = H(Xtmp,pose{k}(1:3,4), angles,k);
 
@@ -61,22 +65,5 @@ P = 0.5*(P+P');
 %P = P+1e-3*eye(size(P));
 
 v = Z-yhatpred(:,1);
+v = v(1:3);
 
-% Plot conf
-% if k == 60
-%     seq = '0003';
-%     frameNbr = sprintf('%06d',k-1);
-%     imagePath = strcat('../../kittiTracking/','training','/image_02/',seq,'/',frameNbr,'.png');
-%     img = imread(imagePath);
-%     figure;
-%     imagesc(img);
-%     axis('image')
-%     hold on
-%     plot(hX(1,:),hX(2,:),'r*')
-%     plot(yhatpred(1),yhatpred(2),'r+','linewidth',1)
-%     plot(Z(1),Z(2),'g+','linewidth',1)
-%     phi = linspace(0,2*pi,100);
-%     x = repmat(yhatpred(1:2,1),1,100)+3*sqrtm(S(1:2,1:2))*[cos(phi);sin(phi)];
-%     plot(x(1,:),x(2,:),'-y','LineWidth',1)
-%     waitforbuttonpress
-% end

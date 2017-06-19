@@ -328,7 +328,8 @@ elseif strcmp(mode,'CNNnonlinear')
     global Pd
     Pd = 0.7;   % Detection probability % 0.7 ok1
     global Ps
-    Ps = 0.99;   % Survival probability % 0.98 ok1
+    %Ps = 0.99;   % Survival probability % 0.98 ok1
+    Ps = @(x) PsState(x);
     global c
     c = 1e-7;    % clutter intensity % 0.00001
 else
@@ -402,9 +403,8 @@ elseif strcmp(mode,'CNNnonlinear')
     global distThresh2
     distThresh2 = 7;
     global PbirthFunc
-    PbirthFunc = @(x) diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(x)]);
-    global PinitVeloClose
-    PinitVeloClose = 350;
+    PbirthFunc = @(x) diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) min(Rdistance(x),10)]);
+    
     global PinitVeloFar
     PinitVeloFar = 2;
     global PinitBBsize
@@ -416,6 +416,8 @@ elseif strcmp(mode,'CNNnonlinear')
     global Ptest
     slope = -10;
     startInd = 10;
+    global PinitVeloClose
+    PinitVeloClose = 350;
     Ptest = @(x) max(1,min(PinitVeloClose,slope*(x-startInd)+PinitVeloClose));
 end
 
@@ -463,7 +465,7 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
         covBirth = 0.5*diag([1 0.5 1 2 1 2 20 20]); %*0.5
     else
         %covBirth = 1*diag([1 1 0.5 2 2 1 20 20]); %0.1
-        covBirth = 4*diag([0.8 0.8 1 50 50 50 20 20]); %0.1 2*Q
+        covBirth = 4*diag([1 0.8 1 50 50 50 20 20]); %0.1 2*Q
         covBirth(7:8,7:8) = diag([20 20]);
     end
 end
