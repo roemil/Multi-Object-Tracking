@@ -181,7 +181,8 @@ else
     global k
 %     xlim([pose{k}(1,4) pose{k}(1,4)+120])
 %     ylim([pose{k}(2,4)-35 pose{k}(2,4)+35])
-    xlim([pose{k}(1,4)-40 pose{k}(1,4)+40])
+    %xlim([pose{k}(1,4)-10 pose{k}(1,4)+100])
+    xlim([pose{k}(1,4)-10 pose{k}(1,4)+100])
     ylim([pose{k}(2,4)-35 pose{k}(2,4)+35])
     datapath = strcat('../../kittiTracking/',set,'/','label_02/',seq);
     filename = [datapath,'.txt'];

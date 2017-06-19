@@ -61,15 +61,19 @@ elseif strcmp(birthSpawn, 'uniform')
             % TEST 3
             % TAG: Shall we do this?
             XmuPred(z).P = zeros(10,10);
-            if Z(3,z) < distThresh % && abs(theta) > angleThresh
-                Pbirth = PbirthFunc(Z(3,z)); % TODO: Move to declareVariables
-                [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
-                XmuPred(z).P(4:6,4:6) = PinitVeloClose*XmuPred(z).P(1:3,1:3);
-            else
-                Pbirth = PbirthFunc(Z(3,z)); % TODO: Use different values close and far?
-                [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
-                XmuPred(z).P(4:6,4:6) = PinitVeloFar*XmuPred(z).P(1:3,1:3);
-            end
+%             if Z(3,z) < distThresh % && abs(theta) > angleThresh
+%                 Pbirth = PbirthFunc(Z(3,z)); % TODO: Move to declareVariables
+%                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
+%                 XmuPred(z).P(4:6,4:6) = PinitVeloClose*XmuPred(z).P(1:3,1:3);
+%             else
+%                 Pbirth = PbirthFunc(Z(3,z)); % TODO: Use different values close and far?
+%                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
+%                 XmuPred(z).P(4:6,4:6) = PinitVeloFar*XmuPred(z).P(1:3,1:3);
+%             end
+            
+            Pbirth = PbirthFunc(Z(3,z)); % TODO: Use different values close and far?
+            [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
+            %[XmuPred(z).P(1:3,1:3), tmp] = UKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
             
             global Ptest
             XmuPred(z).P(4:6,4:6) = Ptest(Z(3,z))*XmuPred(z).P(1:3,1:3);

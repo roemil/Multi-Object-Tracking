@@ -18,5 +18,7 @@ K = P*H'/S; % calculate kalman gain
 v = z - H*Xprev; % compute innovation
 X = Xprev+K*v;  % Perform update on states
 P = P - K*S*K'; % Perform update on covariance matrix
+P = 0.5*(P+P');
+%P = P + 1e-3*eye(size(P));
 
 end

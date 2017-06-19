@@ -1,14 +1,26 @@
 function [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, ...
     maxKperGlobal, maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates)
-
+global uniformBirths
+global imgpath
+global rescaleFact
+global wInit
+rescaleFact = 1;
+global T
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Load Detections %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Training 0016 and testing 0001
-if(strcmp(mode,'linear'))
+if(strcmp(mode,'CNN'))
     datapath = strcat('../data/tracking/',set,'/',sequence,'/');
+    filename = [datapath,'inferResult.txt'];
+    formatSpec = '%f%f%f%f%f%f%f%f%f';
+    f = fopen(filename);
+    detections = textscan(f,formatSpec);
+    fclose(f);
+elseif strcmp(mode,'CNNc')
+    datapath = strcat('../data/network_C/',set,'/',sequence,'/');
     filename = [datapath,'inferResult.txt'];
     formatSpec = '%f%f%f%f%f%f%f%f%f';
     f = fopen(filename);
@@ -24,22 +36,41 @@ elseif(strcmp(mode,'nonlinear'))
 elseif(strcmp(mode,'GT'))
     datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
 end
-
+imgpath = strcat('../../kittiTracking/',set,'/','image_02/',sequence,'/');
 %detections = textread(filename); % frame, size_x, size_y, class, cx, cy, w, h, conf
 %Z = cell(size(detections,1),5);
 Z = cell(1);
-if(strcmp(mode,'linear'))
+if(strcmp(mode,'CNN'))
 oldFrame = detections{1}(1)+1;
 count = 1;
-    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1)]; % cx
+    Z{1}(:,1) = [detections{5}(1);detections{6}(1);detections{7}(1);detections{8}(1);detections{9}(1);detections{4}(1)]; % cx
     for i = 2 : size(detections{1},1)
         frame = detections{1}(i)+1;
         if(frame == oldFrame)
-            Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+            Z{frame}(:,count+1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i);detections{4}(i)]; % cx
             count = count + 1;
             oldFrame = frame;
         else
-            Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i)]; % cx
+            Z{frame}(:,1) = [detections{5}(i);detections{6}(i);detections{7}(i);detections{8}(i);detections{9}(i);detections{4}(i)]; % cx
+            count = 1;
+            oldFrame = frame;  
+        end
+    end
+elseif strcmp(mode,'CNNc') 
+    oldFrame = detections{1}(1)+1;
+    count = 1;
+    Z{1}(:,1) = [mean([detections{5}(1) detections{7}(1)]);mean([detections{6}(1) detections{8}(1)]);...
+        detections{7}(1)-detections{5}(1);detections{8}(1)-detections{6}(1);detections{9}(1);detections{4}(1)]; % cx
+    for i = 2 : size(detections{1},1)
+        frame = detections{1}(i)+1;
+        if(frame == oldFrame)
+            Z{frame}(:,count+1) = [mean([detections{5}(i) detections{7}(i)]);mean([detections{6}(i) detections{8}(i)]);...
+                                    detections{7}(i)-detections{5}(i);detections{8}(i)-detections{6}(i);detections{9}(i);detections{4}(i)];
+            count = count + 1;
+            oldFrame = frame;
+        else
+            Z{frame}(:,1) = [mean([detections{5}(i) detections{7}(i)]);mean([detections{6}(i) detections{8}(i)]);...
+                            detections{7}(i)-detections{5}(i);detections{8}(i)-detections{6}(i);detections{9}(i);detections{4}(i)];
             count = 1;
             oldFrame = frame;  
         end
@@ -125,6 +156,25 @@ end
 T = 0.1; % sampling time, 1 fps
 sigmaQ = 35;         % Process (motion) noise % 20 ok1 || 24 apr 10
 sigmaBB = 2;
+if strcmp(mode,'GT')
+    global sigmaQ
+    sigmaQ = 35; % 2 seems ok, 19/23may! % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
+    global sigmaBB
+    sigmaBB = 2;
+elseif strcmp(mode,'CNN')
+    global sigmaQ
+    sigmaQ = 35; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
+    global sigmaBB
+    sigmaBB = 2;
+elseif strcmp(mode,'CNNc')
+    global sigmaQ
+    sigmaQ = 35; % 5!        % Process (motion) noise % 20 ok1 || 24 apr 10
+    global sigmaBB
+    sigmaBB = 2;
+else
+    disp('Not implemented')
+end
+
 dInit = [0 20];
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
 if strcmp(motionModel,'cv')
@@ -161,7 +211,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% Measurement model and covariance matrix %%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+global R
 if ((strcmp(motionModel,'cv')) && (nbrPosStates == 4))
     R = 0.1*eye(2);
 elseif((strcmp(motionModel,'ca')) && (nbrPosStates == 4))
@@ -183,7 +233,7 @@ end
 if(strcmp(mode,'nonlinear'))
     h = {'distance','angle'};
     H = generateMeasurementModel(h,'nonlinear',nbrPosStates, motionModel);
-elseif(strcmp(mode,'linear'))
+elseif(strcmp(mode,'CNN')) || strcmp(mode,'CNNc')
     H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
 elseif(strcmp(mode,'GT'))
     if(strcmp(motionModel,'ca'))
@@ -192,22 +242,45 @@ elseif(strcmp(mode,'GT'))
         H = generateMeasurementModel({},'linear',nbrPosStates, motionModel);
     end
 end
-
+global Pd, global Ps, global c
 Pd = 0.95;   % Detection probability % 0.7 ok1
 Ps = 0.99;   % Survival probability % 0.98 ok1
 c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
+
+global nbrStates
+global nbrMeasStates
+if strcmp(motionModel,'cv')
+        nbrStates = 4; % Total number of states
+        if nbrPosStates == 4
+            nbrMeasStates = 2; % Number of measurements used for weighting
+        elseif nbrPosStates == 6
+            nbrMeasStates = 3;
+        end
+            
+    elseif strcmp(motionModel,'cvBB')
+        nbrStates = 6;
+        if nbrPosStates == 4
+            nbrMeasStates = 2; % Number of measurements used for weighting
+        elseif nbrPosStates == 6
+            nbrMeasStates = 3;
+        end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Thresholds and Murty %%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Threshold existence probability keep for next iteration
+global threshold
 threshold = 1e-3;    % 0.01 ok1
 % Threshold existence probability use estimate
+global thresholdEst
 thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
+global poissThresh
 poissThresh = 1e-5;
 % Murty constant
+global Nhconst
 Nhconst = 100;
 % Max nbr of globals for each old global
 maxKperGlobal = 20;
@@ -232,17 +305,20 @@ nbrOfBirths = 200; % 600 ok1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Initial births %%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+global PbirthFunc
+PbirthFunc = diag([0.2*FOVsize(2,1) 0.2*FOVsize(2,2)]);
 vinit = 0;
 nbrInitBirth = 3000; % 600 ok1
+global covBirth;
 covBirth = 20; % 20 ok1
-wInit = 1;%0.2;
+wInit = 0.7;%0.2;
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];
 XmuUpd = cell(1);
 XuUpd = cell(1);
 % TODO: Should the weights be 1/nbrInitBirth?
+if ~uniformBirths
 if strcmp(motionModel,'cv')
     for i = 1:nbrInitBirth
         XmuUpd{1}(i).w = wInit;    % Pred weight
@@ -296,7 +372,7 @@ elseif strcmp(motionModel,'cvBB')
         XuUpd{1}(i).P = covBirth*eye(6);      % Pred cov
     end
 end
-
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Save everything in simVariables and load at the begining of the filter
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

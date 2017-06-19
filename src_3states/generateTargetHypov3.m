@@ -51,6 +51,10 @@ for z = 1:nbrOfMeas
                 % Bounding box center
                 [Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S(1:nbrMeasStates,1:nbrMeasStates), v]...
                     = UKFupdate(Xpred{j}(i).state,Xpred{j}(i).P, H, Z(1:nbrMeasStates,z), R, 6);
+                % Test to perform the total update in one step, however,
+                % same result
+                %[Xhypo{j,z}(i).state, Xhypo{j,z}(i).P, Xhypo{j,z}(i).S, v]...
+                %    = UKFtest(Xpred{j}(i).state,Xpred{j}(i).P, H, Z(1:end-1,z), R, 8);
             end
             % Enable if gating
             % Check within threshold

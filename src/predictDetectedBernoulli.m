@@ -7,10 +7,10 @@
 %
 %
 %
-function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps, egoPos,fr1,fr2)
+function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)
     %egoMotion = [0;0;egoPos*155;0;0;0];
     %egoMotion = zeros(6,1);
-    if(isempty(XupdPrev))
+    if(isempty(XupdPrev{1}))
         Xpred = [];
     else
         % TODO: Temporary to solve initiate problems with velocity
@@ -42,6 +42,13 @@ function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps, egoPos,fr1,fr2)
                 Xpred{j}(i).box = XupdPrev{j}(i).box;
                 Xpred{j}(i).label = XupdPrev{j}(i).label;
                 Xpred{j}(i).nbrMeasAss = XupdPrev{j}(i).nbrMeasAss; % TAGass
+                Xpred{j}(i).class = XupdPrev{j}(i).class;
+                global color
+                if color
+                    Xpred{j}(i).red = XupdPrev{j}(i).red;
+                    Xpred{j}(i).green = XupdPrev{j}(i).green;
+                    Xpred{j}(i).blue = XupdPrev{j}(i).blue;
+                end
             end
         end
     end

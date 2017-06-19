@@ -4,7 +4,7 @@
 clear Xest
 clear Pest
 close all
-dbstop error
+%dbstop error
 addpath('IMU')
 addpath('mtimesx')
 addpath('evalMOT')
@@ -12,7 +12,9 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequences = {'0006'};% quite good {'0004','0006'}
+%sequences = {'0004'};% quite good {'0004','0006'}
+%sequences = {'0004','0006','0010','0018'};
+sequences = {'0004','0006','0010'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -47,6 +49,7 @@ global nbrPosStates
 nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
 
+startTotalTime = tic;
 for sim = 1 : length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
@@ -157,10 +160,36 @@ disp(['Total simulation time: ', num2str(simTime)])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%% Post Processing %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
+
+
+writetofile(Xest,mode,['../../devkit_updated/python/results/tracker/data/',sequence,'.txt']);
+writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
+%writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
 end
 end
+totalTime = toc(startTotalTime);
+disp(['Total simulation time: ', num2str(totalTime)])
+
+
+
+%% Eval CNN
+mode = 'CNNnonlinear';
+set = 'training';
+for sim = 1 : 21
+    clear Xest;
+    disp(['--------------------- ', 'SIM Number ','---------------------']) 
+    disp(['--------------------- ', num2str(sim),' ---------------------'])
+sequence = sprintf('%04d',sim-1);
+%sequence = sequences{sim};
+[nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
+    maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
+    = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
+writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
+end
+
+
 %%
+
 clear gt, clear result, clear resultZ
 generateData
 
@@ -173,8 +202,6 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
     disp('CNN output')
     disp(['MOTP = ', num2str(ClearMOTZ.MOTP)])
     disp('----------------------------')
-end
-end
 end
 %% Plot birds-eye view pred conf
 step = true;

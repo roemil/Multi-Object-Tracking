@@ -244,7 +244,12 @@ wGlob(indEqual) = wGlob(indEqual)-1e6;
 
 minTmp = min(size(wGlob,2), Nh);
 
-[keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
+if mean(wGlob) < -500
+    [keepGlobs,C] = murty(-wGlob/100,min(maxNbrGlobal,minTmp));
+else
+    [keepGlobs,C] = murty(-wGlob,min(maxNbrGlobal,minTmp));
+end
+%disp(['Globals kept: ', num2str(size(keepGlobs,1)),'/',num2str(size(wGlob,2))])
 %disp('Error: Murty')
 %ind = find(diff(C) > 100);
 %if ~isempty(ind)
@@ -284,7 +289,7 @@ if sum(keepGlobs ~= 0) ~= 0
 else % TODO: Do we wanna do this?!
     disp('keepGlobs is 0')
     for j = 1:size(Xtmp,2)
-    j = 1;
+    j = 1; % TODO: what happened here? Although this should never happen
         if ~isempty(wSum{j})
             if jEst == j
                 jEst = jInd;
@@ -317,14 +322,19 @@ end
 %     keyboard
 % end
 
-if size(Xupd{1},2) ~= 0
+% ind = find(globWeight == 0);
+% if ~isempty(ind)
+%     globWeight = globWeight(1:ind);
+% end
+
+if size(Xupd,2) ~= 0
     normGlobWeights = normalizeLogWeights(globWeight);
 else
     normGlobWeights = [];
 end
 
-for j = 1:size(globWeight,2)
-    if size(Xupd{j},2) == 1
+for j = 1:size(Xupd,2)
+    if size(Xupd{j},2) == 1 && ~isempty(Xupd{j})
         Xupd{j}(1).w = normGlobWeights(j);
     end
 end
