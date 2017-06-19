@@ -15,7 +15,7 @@ a = [];
 fig = figure('units','normalized','position',[.05 .05 .9 .9]);
 hold on
 subplot('position', [0.02 0 0.98 1])
-for k = 204:size(Xest,2)
+for k = 190:size(Xest,2)
     frameNbr = sprintf('%06d',k-1);
     if strcmp(mode,'GTnonlinear') && ~simMeas
         if k > 1
