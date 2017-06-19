@@ -2,7 +2,8 @@ function d = GOSPA(X,Y,k,mode)
 global H, global angles, global pose
 xL = size(X,2); % GT
 yL = size(Y,2); % Estimated trajectories
-c_thresh = 50;
+c_thresh = 200;%50;
+min_overlap = 1e9;%0.5;
 if(strcmp(mode,'CNN'))
     if(xL > yL) % nonnegative symmetry
         tmp = X;
@@ -13,7 +14,7 @@ if(strcmp(mode,'CNN'))
         yL = tmp;
         ol = zeros(1,xL);
         max_cost = 1e9;
-        min_overlap = 50;
+        %min_overlap = 50;
         c = []; % cost
         C = []; % cost matrix
         for i = 1 : xL
@@ -45,7 +46,7 @@ if(strcmp(mode,'CNN'))
     else
         ol = zeros(1,xL);
         max_cost = 1e9;
-        min_overlap = 0.5;
+        %min_overlap = 0.5;
         c = []; % cost
         C = []; % cost matrix
         for i = 1 : xL
@@ -85,7 +86,7 @@ else
         yL = tmp;
         ol = zeros(1,xL);
         max_cost = 1e9;
-        min_overlap = 0.5;
+        %min_overlap = 0.5;
         c = []; % cost
         C = []; % cost matrix
         for i = 1 : xL
@@ -114,7 +115,6 @@ else
     else
         ol = zeros(1,xL);
         max_cost = 1e9;
-        min_overlap = 0.5;
         c = []; % cost
         C = []; % cost matrix
         for i = 1 : xL
