@@ -198,7 +198,8 @@ global Q
 [F, Q] = generateMotionModel(sigmaQ, T, motionModel, nbrPosStates, sigmaBB);
 
 % Test CV for BB size
-sigmaBB = 200;
+%sigmaBB = 200;
+sigmaBB = 800;
 F(9:10,1:8) = zeros(2,8);
 F(1:10,9:10) = [zeros(8,2); eye(2)];
 F(7,9) = T;
