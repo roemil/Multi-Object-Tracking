@@ -13,15 +13,25 @@ if tmp(1) < FOVsize(1,1) || tmp(1) > FOVsize(2,1) || ...
     withinFOV = false;
 end
 
-
 pos = X(1:2)-pose{k}(1:2,4);
 heading = angles{k}.heading-angles{1}.heading;
-angle = 45;
-d = 30;
-p = [cos(heading), -sin(heading); sin(heading) cos(heading)]*d*[1 1;tand(angle), -tand(angle)];%+pose{k}(1:2,4);
-if ~(sum(sign(pos) == sign(p(:,1))) == 2 || sum(sign(pos) == sign(p(:,2))) == 2)
-    withinFOV = false;
-end 
+FOV = 55*pi/180;
+
+angleToObj = atan2(pos(2),pos(1));
+
+if angleToObj < heading-FOV || angleToObj > heading+FOV
+    withinFOV = true;
+end
+
+% Old way. Just check if in correct quarters
+% pos = X(1:2)-pose{k}(1:2,4);
+% heading = angles{k}.heading-angles{1}.heading;
+% angle = 45;
+% d = 30;
+% p = [cos(heading), -sin(heading); sin(heading) cos(heading)]*d*[1 1;tand(angle), -tand(angle)];%+pose{k}(1:2,4);
+% if ~(sum(sign(pos) == sign(p(:,1))) == 2 || sum(sign(pos) == sign(p(:,2))) == 2)
+%     withinFOV = false;
+% end 
 
 
 % if sum(sign(pos) == sign(p(:,1))) == 2
