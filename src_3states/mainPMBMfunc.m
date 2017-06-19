@@ -48,6 +48,7 @@ XuUpd = cell(1,1);
 global nbrPosStates
 nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
+totNbrFrames = 0;
 
 startTotalTime = tic;
 for sim = 1 : length(sequences)
@@ -119,6 +120,7 @@ for t = 1:nbrSim
     %tmp = XuUpd;
     %clear XuUpd;
     %XuUpd{1,1}(1:nbrOfBirths) = tmp{1,1}(end-nbrOfBirths+1:end);
+    totNbrFrames = totNbrFrames+K;
     
     for k = kInit+1:K % For each time step
         disp(['--------------- k = ', num2str(k), '/',num2str(K), ' ---------------'])
@@ -169,6 +171,7 @@ end
 end
 totalTime = toc(startTotalTime);
 disp(['Total simulation time: ', num2str(totalTime)])
+disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
 
 
 

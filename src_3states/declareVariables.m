@@ -348,11 +348,11 @@ thresholdEst = 0.4; % 0.6 ok1
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
-Nhconst = 4;
+Nhconst = 2;%4;
 % Max nbr of globals for each old global
-maxKperGlobal = 20;
+maxKperGlobal = 2;%20;
 % Max nbr globals to pass to next iteration
-maxNbrGlobal = 50;
+maxNbrGlobal = 2;%50;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% Births %%%%%%%%%%%%%%%%%%%%%%%
