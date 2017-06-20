@@ -355,15 +355,15 @@ end
 % Threshold existence probability keep for next iteration
 threshold = 1e-3;    % 0.01 ok1
 % Threshold existence probability use estimate
-thresholdEst = 0.4; % 0.6 ok1
+thresholdEst = 0.4; % 0.3 test20jun 0.4;
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
-Nhconst = 4;
+Nhconst = 2;%4;
 % Max nbr of globals for each old global
-maxKperGlobal = 20;
+maxKperGlobal = 2;%20;
 % Max nbr globals to pass to next iteration
-maxNbrGlobal = 50;
+maxNbrGlobal = 2;%50;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% Births %%%%%%%%%%%%%%%%%%%%%%%
@@ -481,13 +481,13 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
     end
 end
 global wInit
-wInit = 1e-5;%ordinary 0.001. best atm 0.00005
+wInit = 1e-5;% 1e-3 test20jun 1e-5
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];
 
 global FOV
-                % from findFOV
+% from findFOV
 % FOV = [-45 -2 -5;
 %     45 3 150];
 
