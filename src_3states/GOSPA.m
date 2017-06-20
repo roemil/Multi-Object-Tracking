@@ -14,7 +14,6 @@ if(strcmp(mode,'CNN'))
         yL = tmp;
         ol = zeros(1,xL);
         max_cost = 1e9;
-        
         c = []; % cost
         C = []; % cost matrix
         for i = 1 : xL
@@ -120,7 +119,6 @@ else
     else
         ol = zeros(1,xL);
         max_cost = 1e9;
-        %min_overlap = 0.5;
         c = []; % cost
         C = []; % cost matrix
         for i = 1 : xL

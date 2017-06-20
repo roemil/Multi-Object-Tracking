@@ -11,6 +11,7 @@ set = 'training';
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
 
+
 dCNN = zeros(1,size(Z,1));
 for k = 1 : size(Z,2)
     if(~isempty(Xest{k}{1}))
