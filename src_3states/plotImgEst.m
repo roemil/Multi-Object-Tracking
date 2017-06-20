@@ -28,7 +28,10 @@ hold on
 xlim([FOVsize(1,1) FOVsize(2,1)])
 ylim([FOVsize(1,2) FOVsize(2,2)])
 
-ind = find(GT{1} == k-1 & GT{2} ~= -1);
+
+%ind = find(GT{1} == k-1 & GT{2} ~= -1);
+%boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];
+ind = find(GT{1} == k-1 & GT{2} ~= -1 & (~strcmp(GT{3},'Tram')) & (~strcmp(GT{3},'Truck')) & (~strcmp(GT{3},'Misc ')));
 boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];
 
 cx(1:size(ind,1)) = mean([GT{7}(ind),GT{9}(ind)],2);

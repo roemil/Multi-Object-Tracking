@@ -99,6 +99,7 @@ for t = 1:nbrSim
         warning('off', MSGID)
     end
     tic
+    Nh = Nhconst;
     [XuUpd{t,kInit}, Xupd{t,kInit}, Xest{t,kInit}, Pest{t,kInit}, rest{t,kInit}, west{t,kInit}, labelsEst{t,kInit}, newLabel, jEst(kInit), normGlobWeights{kInit}] = ...
         PMBMinitFunc(Z{kInit}, XmuUpd{t,1}, XuUpd{t,1}, nbrOfBirths, maxKperGlobal, maxNbrGlobal, newLabel, birthSpawn, mode);
     disp(['Iteration time: ', num2str(toc)])
@@ -174,6 +175,7 @@ totalTime = toc(startTotalTime);
 disp(['Total simulation time: ', num2str(totalTime)])
 disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
 
+evalGOSPA
 
 
 %% Eval CNN

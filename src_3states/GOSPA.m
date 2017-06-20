@@ -35,9 +35,11 @@ if(strcmp(mode,'CNN'))
         alpha = 2;
         p = 2;
         for i = 1 : xL
+            %sqrt((Y(1,assignment(i))-X(1,i)).^2+(Y(2,assignment(i))-X(2,i)).^2)^2
             distance = (min(c_thresh,sqrt((Y(1,assignment(i))-X(1,i)).^2+(Y(2,assignment(i))-X(2,i)).^2))).^p;
             d =d + distance;
         end
+        d = mean(d);
         d = d +0.5*c_thresh^p*(xL+yL-2*lAss);
         d = d^(1/p);
     else
@@ -61,9 +63,11 @@ if(strcmp(mode,'CNN'))
         alpha = 2;
         p = 2;
         for i = 1 : xL
+            %sqrt((X(1,i)-Y(1,assignment(i))).^2+(X(2,i)-Y(2,assignment(i))).^2)^2
             distance = (min(c_thresh,sqrt((X(1,i)-Y(1,assignment(i))).^2+(X(2,i)-Y(2,assignment(i))).^2))).^p;
             d =d + distance;
         end
+        d = mean(d);
         d = d +0.5*c_thresh^p*(xL+yL-2*lAss);
         d = d^(1/p);
     end
@@ -98,9 +102,11 @@ else
         alpha = 2;
         p = 2;
         for i = 1 : xL
+            %sqrt((Y(1,assignment(i))-X{i}(1)).^2+(Y(2,assignment(i))-X{i}(2)).^2)^2
             distance = (min(c_thresh,sqrt((Y(1,assignment(i))-X{i}(1)).^2+(Y(2,assignment(i))-X{i}(2)).^2))).^p;
             d =d + distance;
         end
+        d = mean(d);
         d = d +0.5*c_thresh^p*(xL+yL-2*lAss);
         d = d^(1/p);
     else
@@ -123,9 +129,11 @@ else
         alpha = 2;
         p = 2;
         for i = 1 : xL
+            %sqrt((X(1,i)-Y{assignment(i)}(1)).^2+(X(2,i)-Y{assignment(i)}(2)).^2)^2
             distance = (min(c_thresh,sqrt((X(1,i)-Y{assignment(i)}(1)).^2+(X(2,i)-Y{assignment(i)}(2)).^2))).^p;
             d =d + distance;
         end
+        d = mean(d); % Mean average error
         d = d +0.5*c_thresh^p*(xL+yL-2*lAss);
         d = d^(1/p);
     end 
