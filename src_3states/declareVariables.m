@@ -326,7 +326,7 @@ if strcmp(mode,'GTnonlinear')
     c = 1e-7;    % clutter intensity % 0.00001
 elseif strcmp(mode,'CNNnonlinear')
     global Pd
-    Pd = 0.7;   % Detection probability % 0.7 ok1
+    Pd = 0.85;   % Detection probability % 0.7 ok1
     global Ps
     %Ps = 0.99;   % Survival probability % 0.98 ok1
     Ps = @(x) PsState(x);
@@ -403,14 +403,15 @@ elseif strcmp(mode,'CNNnonlinear')
     global distThresh2
     distThresh2 = 7;
     global PbirthFunc
-    PbirthFunc = @(x) diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) min(Rdistance(x),10)]);
-    
+    PbirthFunc = @(x) 0.7*diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) 1.3*Rdistance(x)]);
+    global PinitVeloClose
+    PinitVeloClose = 350;
     global PinitVeloFar
     PinitVeloFar = 2;
     global PinitBBsize
     PinitBBsize = diag([20 20]);
     global rescaleFact
-    rescaleFact = 0.9; % 0.9
+    rescaleFact = 1; % 0.9
     
     % Use function instead of just 2 values? 
     global Ptest
