@@ -2,7 +2,7 @@ function d = GOSPA(X,Y,k,mode)
 global H, global angles, global pose
 xL = size(X,2); % GT
 yL = size(Y,2); % Estimated trajectories
-c_thresh = 200;%50;
+c_thresh = 10;%50;
 min_overlap = 1e9;%0.5;
 if(strcmp(mode,'CNN'))
     if(xL > yL) % nonnegative symmetry
@@ -15,22 +15,19 @@ if(strcmp(mode,'CNN'))
         ol = zeros(1,xL);
         max_cost = 1e9;
         %min_overlap = 50;
-        c = []; % cost
-        C = []; % cost matrix
+        C = zeros(xL,yL); % cost matrix
         for i = 1 : xL
             for j = 1 : yL
                 c_tmp =  boxoverlap(Y(:,j),X(:,i),mode); % if ol = 1 then c = 0
                 if(c_tmp <= min_overlap)
-                    c = [c, c_tmp];
+                    C(i,j) = c_tmp;
                 else
-                    c = [c, max_cost];
+                    C(i,j) = max_cost;
                 end
             end
             if c_tmp < 0 
                 keyboard
             end
-            C = [C;c];
-            c = [];
         end
         assignment = murty(C,1);
         lAss = length(assignment);
@@ -47,19 +44,16 @@ if(strcmp(mode,'CNN'))
         ol = zeros(1,xL);
         max_cost = 1e9;
         %min_overlap = 0.5;
-        c = []; % cost
-        C = []; % cost matrix
+        C = zeros(xL,yL); % cost matrix
         for i = 1 : xL
             for j = 1 : yL
                 c_tmp = boxoverlap(X(:,i),Y(:,j),mode); % if ol = 1 then c = 0
                 if(c_tmp <= min_overlap)
-                    c = [c, c_tmp];
+                    C(i,j) = c_tmp;
                 else
-                    c = [c, max_cost];
+                    C(i,j) = max_cost;
                 end
             end
-            C = [C;c];
-            c = [];
         end
         assignment = murty(C,1);
         lAss = length(assignment);
@@ -87,19 +81,16 @@ else
         ol = zeros(1,xL);
         max_cost = 1e9;
         %min_overlap = 0.5;
-        c = []; % cost
-        C = []; % cost matrix
+        C = zeros(xL,yL); % cost matrix
         for i = 1 : xL
             for j = 1 : yL
                 c_tmp = boxoverlap(Y(:,j),X{i},mode); % if ol = 1 then c = 0
                 if(c_tmp <= min_overlap)
-                    c = [c, c_tmp];
+                    C(i,j) = c_tmp;
                 else
-                    c = [c, max_cost];
+                    C(i,j) = max_cost;
                 end
             end
-            C = [C;c];
-            c = [];
         end
         assignment = murty(C,1);
         lAss = length(assignment);
@@ -115,19 +106,16 @@ else
     else
         ol = zeros(1,xL);
         max_cost = 1e9;
-        c = []; % cost
-        C = []; % cost matrix
+        C = zeros(xL,yL); % cost matrix
         for i = 1 : xL
             for j = 1 : yL
                 c_tmp = boxoverlap(X(:,i),Y{j},mode); % if ol = 1 then c = 0
                 if(c_tmp <= min_overlap)
-                    c = [c, c_tmp];
+                    C(i,j) = c_tmp;
                 else
-                    c = [c, max_cost];
+                    C(i,j) = max_cost;
                 end
             end
-            C = [C;c];
-            c = [];
         end
         assignment = murty(C,1);
         lAss = length(assignment);

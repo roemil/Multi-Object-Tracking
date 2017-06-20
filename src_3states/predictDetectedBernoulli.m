@@ -33,6 +33,7 @@ function Xpred = predictDetectedBernoulli(XupdPrev, F, Q, Ps)
                 %Qnew = updateMotionModel(XupdPrev{j}(i));
                 Qnew = Q;
                 % Bernoulli
+                %disp(['j: ', num2str(j),' i: ', num2str(i), ' label: ', num2str(XupdPrev{j}(i).label)])
                 Xpred{j}(i).w = XupdPrev{j}(i).w;      % Pred weight
                 [Xpred{j}(i).state, Xpred{j}(i).P] = KFPred(XupdPrev{j}(i).state, F, XupdPrev{j}(i).P ,Qnew);    % Pred state
                 Xpred{j}(i).r = Ps(Xpred{j}(i).state)*XupdPrev{j}(i).r;   % Pred prob. of existence

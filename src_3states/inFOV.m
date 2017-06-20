@@ -15,20 +15,27 @@ end
 
 pos = X(1:2)-pose{k}(1:2,4);
 heading = angles{k}.heading-angles{1}.heading;
-FOV = 55*pi/180;
+% pos = [cos(heading) -sin(heading); sin(heading), cos(heading)]*pos;
+pos = [cos(heading) sin(heading); -sin(heading), cos(heading)]*pos;
+FOV = 45*pi/180;
 
 angleToObj = atan2(pos(2),pos(1));
 
-if angleToObj < heading-FOV || angleToObj > heading+FOV
-    withinFOV = true;
+if angleToObj < -FOV || angleToObj > FOV
+    withinFOV = false;
 end
+
+% Without rotation of coordinate systems
+% if angleToObj < heading-FOV || angleToObj > heading+FOV
+%     withinFOV = false;
+% end
 
 % Old way. Just check if in correct quarters
 % pos = X(1:2)-pose{k}(1:2,4);
 % heading = angles{k}.heading-angles{1}.heading;
-% angle = 45;
-% d = 30;
-% p = [cos(heading), -sin(heading); sin(heading) cos(heading)]*d*[1 1;tand(angle), -tand(angle)];%+pose{k}(1:2,4);
+%  angle = 45;
+%  d = 30;
+%  p = [cos(heading), -sin(heading); sin(heading) cos(heading)]*d*[1 1;tand(angle), -tand(angle)];%+pose{k}(1:2,4);
 % if ~(sum(sign(pos) == sign(p(:,1))) == 2 || sum(sign(pos) == sign(p(:,2))) == 2)
 %     withinFOV = false;
 % end 
@@ -42,6 +49,11 @@ end
 %     withinFOV = false;
 % end
 
+% angleToObj*180/pi
+% angle = FOV*180/pi;
+% d = 30;
+% %p = [cos(heading), -sin(heading); sin(heading) cos(heading)]*d*[1 1;tand(angle), -tand(angle)];%+pose{k}(1:2,4);
+% p = [cos(heading), sin(heading); -sin(heading) cos(heading)]*d*[1 1;tand(angle), -tand(angle)];%+pose{k}(1:2,4);
 % figure;
 % plot([0 p(1,1)], [0 p(2,1)],'k')
 % hold on
