@@ -326,7 +326,7 @@ if strcmp(mode,'GTnonlinear')
     c = 1e-7;    % clutter intensity % 0.00001
 elseif strcmp(mode,'CNNnonlinear')
     global Pd
-    Pd = 0.85;   % Detection probability % 0.7 ok1
+    Pd = 0.7;   % Detection probability % 0.7 ok1
     global Ps
     %Ps = 0.99;   % Survival probability % 0.98 ok1
     Ps = @(x) PsState(x);
@@ -411,7 +411,7 @@ elseif strcmp(mode,'CNNnonlinear')
     global PinitBBsize
     PinitBBsize = diag([20 20]);
     global rescaleFact
-    rescaleFact = 1; % 0.9
+    rescaleFact = 0.9;
     
     % Use function instead of just 2 values? 
     global Ptest
