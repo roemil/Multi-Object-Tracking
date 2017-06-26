@@ -3,7 +3,7 @@
 
 clear Xest
 clear Pest
-close all
+%close all
 %dbstop error
 addpath('IMU')
 addpath('mtimesx')
@@ -12,9 +12,9 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-sequences = {'0010'};% quite good {'0004','0006'}
+%sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
-%sequences = {'0004','0006','0010'};
+sequences = {'0004','0006','0010'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -49,6 +49,8 @@ global nbrPosStates
 nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
 totNbrFrames = 0;
+
+err = cell(length(sequences),1);
 
 startTotalTime = tic;
 for sim = 1 : length(sequences)
@@ -169,14 +171,21 @@ disp(['Total simulation time: ', num2str(simTime)])
 writetofile(Xest,mode,['../../devkit_updated/python/results/tracker/data/',sequence,'.txt']);
 writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 %writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
+
+% Evaluate 3D state. Distance between estimate and GT. Do GOSPA?
+err{sim} = eval3D(false, false, set, sequence, Xest);
 end
 end
 totalTime = toc(startTotalTime);
 disp(['Total simulation time: ', num2str(totalTime)])
 disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
 
-evalGOSPA
+% Evaluate GOSPA
+%evalGOSPA
 
+% Plot error in 3D space. First input plots error vs distance [m]. Second
+% plots rel error dep on distance
+% plotError(true,true,err)
 
 %% Eval CNN
 mode = 'CNNnonlinear';
