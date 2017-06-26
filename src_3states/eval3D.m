@@ -18,8 +18,9 @@ if nargin < 6
         Xt = [GT{14}(ind)';
                 (GT{15}(ind)-GT{11}(ind)/2)';
                 GT{16}(ind)'];
-        XtCamCoords = Xt;
+        %XtCamCoords = Xt; Here?
         Xt = TveloToImu(1:3,:)*(TcamToVelo*(T20*[Xt;ones(1,size(Xt,2))]));
+        XtCamCoords = Xt;
         heading = angles{k}.heading-angles{1}.heading;
         Xt(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*Xt(1:2,:);
         Xt = Xt+pose{k}(1:3,4);

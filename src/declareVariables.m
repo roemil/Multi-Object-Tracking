@@ -311,7 +311,7 @@ vinit = 0;
 nbrInitBirth = 3000; % 600 ok1
 global covBirth;
 covBirth = 20; % 20 ok1
-wInit = 0.7;%0.2;
+wInit = 1e-2;%0.7;%0.2;
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];
