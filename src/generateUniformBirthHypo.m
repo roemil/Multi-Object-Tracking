@@ -56,6 +56,7 @@ elseif strcmp(birthSpawn, 'uniform')
             % TEST 3
             % TAG: Shall we do this?
             XmuPred(z).P = covBirth*eye(6);
+            %XmuPred(z).P = covBirth*diag([1 1 1 4 4 4]);
 %             if Z(3,z) < distThresh % && abs(theta) > angleThresh
 %                 Pbirth = PbirthFunc(Z(3,z)); % TODO: Move to declareVariables
 %                 [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);

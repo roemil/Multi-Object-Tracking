@@ -11,13 +11,14 @@ set = 'training';
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
 
-
+c_thresh = 10;%50;
+p = 2;
 dCNN = zeros(1,size(Z,1));
 for k = 1 : size(Z,2)
     if(~isempty(Xest{k}{1}))
         dCNN(k) = GOSPA(GT{k},Z{k},k,'CNN');
     else
-        dCNN(k) = 0;
+        dCNN(k) = (0.5*c_thresh^p*size(GT{k},2))^(1/p);
     end
 end
 
@@ -26,7 +27,7 @@ for k = 1 : size(Z,2)
     if(~isempty(Xest{k}{1}))
         d(k) = GOSPA(GT{k},Xest{k},k,'PMBM');
     else
-        d(k) = 0;
+        d(k) = (0.5*c_thresh^p*size(GT{k},2))^(1/p);
     end
 end
 

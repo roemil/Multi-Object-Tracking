@@ -243,9 +243,9 @@ elseif(strcmp(mode,'GT'))
     end
 end
 global Pd, global Ps, global c
-Pd = 0.95;   % Detection probability % 0.7 ok1
+Pd = 0.95;   % Detection probability 
 Ps = 0.99;   % Survival probability % 0.98 ok1
-c = 0.001;    % clutter intensity % 0.001 ok1 || 24 apr 0.0001
+c = 0.001;    % clutter intensity 
 
 global nbrStates
 global nbrMeasStates
@@ -281,11 +281,11 @@ global poissThresh
 poissThresh = 1e-5;
 % Murty constant
 global Nhconst
-Nhconst = 100;
+Nhconst = 100; 
 % Max nbr of globals for each old global
 maxKperGlobal = 20;
 % Max nbr globals to pass to next iteration
-maxNbrGlobal = 50;
+maxNbrGlobal = 50; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% Births %%%%%%%%%%%%%%%%%%%%%%%
@@ -311,7 +311,7 @@ vinit = 0;
 nbrInitBirth = 3000; % 600 ok1
 global covBirth;
 covBirth = 20; % 20 ok1
-wInit = 1e-2;%0.7;%0.2;
+wInit = 1e-2;%0.7;%0.2;  
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];
