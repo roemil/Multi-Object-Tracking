@@ -15,6 +15,7 @@ set = 'training';
 %sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
 sequences = {'0004','0006','0010'};
+%   sequences = {'0006'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -53,6 +54,12 @@ totNbrFrames = 0;
 err = cell(length(sequences),1);
 
 startTotalTime = tic;
+meanCNN = cell(1);
+meanPMBM = cell(1);
+dCNN= cell(1);
+d = cell(1);
+totalCNNGOSPA = 0;
+totalPMBMGOSPA = 0;
 for sim = 1 : length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
@@ -175,13 +182,16 @@ writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 % Evaluate 3D state. Distance between estimate and GT. Do GOSPA?
 err{sim} = eval3D(false, false, set, sequence, Xest);
 end
+% Evaluate GOSPA
+[meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, d{sim}] = evalGOSPA(Xest,Z,sequences{sim}, motionModel, nbrPosStates);
+totalCNNGOSPA = totalCNNGOSPA + meanCNN{sim};
+totalPMBMGOSPA = totalPMBMGOSPA + meanPMBM{sim};
 end
 totalTime = toc(startTotalTime);
 disp(['Total simulation time: ', num2str(totalTime)])
 disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
 
-% Evaluate GOSPA
-%evalGOSPA
+fprintf('%s %f \n%s %f \n%s %f\n%s %f\n', 'Mean GOSPA w/o tracker: ', mean(totalCNNGOSPA), 'Mean GOSPA w/ tracker: ', mean(totalPMBMGOSPA))
 
 % Plot error in 3D space. First input plots error vs distance [m]. Second
 % plots rel error dep on distance
