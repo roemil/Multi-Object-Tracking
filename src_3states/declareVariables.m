@@ -223,6 +223,13 @@ if strcmp(mode,'GTnonlinear') || strcmp(mode,'CNNnonlinear')
     H3dTo2d = [P2(:,1:3), zeros(3,5), P2(:,4); zeros(2,6), eye(2), zeros(2,1)];
     H3dFunc = @(x) (H3dTo2d(1:2,1:8)*x + H3dTo2d(1:2,9))./(x(3,:)+H3dTo2d(3,9));
     
+    % Test with R_rect
+%     H3dFunctest = @(x) (H3dTo2d(1:2,1:8)*x + H3dTo2d(1:2,9))./(x(3,:)+H3dTo2d(3,9));
+%     R0_rect = [9.999239000000e-01 9.837760000000e-03 -7.445048000000e-03
+%         -9.869795000000e-03 9.999421000000e-01 -4.278459000000e-03
+%         7.402527000000e-03 4.351614000000e-03 9.999631000000e-01];
+%     H3dFunc = @(x) H3dFunctest([R0_rect*x(1:3,:); x(4:end,:)]);
+    
     Hdistance = @(x) sqrt(x(1,:).^2+x(2,:).^2+x(3,:).^2);
     %Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
     % If EKF

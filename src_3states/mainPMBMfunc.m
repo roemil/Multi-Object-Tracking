@@ -4,7 +4,7 @@
 clear Xest
 clear Pest
 close all
-%dbstop error
+dbstop error
 addpath('IMU')
 addpath('mtimesx')
 addpath('evalMOT')
@@ -12,9 +12,9 @@ addpath('../../kittiTracking/')
 clc
 mode = 'CNNnonlinear';
 set = 'training';
-%sequences = {'0004'};% quite good {'0004','0006'}
+sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
-sequences = {'0004','0006','0010'};
+%sequences = {'0004','0006','0010'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
