@@ -3,8 +3,8 @@
 
 clear Xest
 clear Pest
-%close all
-%dbstop error
+close all
+dbstop error
 addpath('IMU')
 addpath('mtimesx')
 addpath('evalMOT')
@@ -15,7 +15,6 @@ set = 'training';
 %sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
 sequences = {'0004','0006','0010'};
-%   sequences = {'0006'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -179,6 +178,15 @@ writetofile(Xest,mode,['../../devkit_updated/python/results/tracker/data/',seque
 writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 %writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
 
+% Remove these if GOSPA
+end
+end
+totalTime = toc(startTotalTime);
+disp(['Total simulation time: ', num2str(totalTime)])
+disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
+% Remove these if GOSPA
+
+%%
 % Evaluate 3D state. Distance between estimate and GT. Do GOSPA?
 err{sim} = eval3D(false, false, set, sequence, Xest);
 end

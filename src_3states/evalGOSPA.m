@@ -66,7 +66,6 @@ function [meanCNN, meanPMBM, dCNN, d] = evalGOSPA(Xest, Z, sequence, motionModel
             dCNN(k) = (0.5*c_thresh^p*(xL))^(1/p);
         end
     end
-
     d = zeros(1,size(Xest2,2));
     for k = 1 : min(size(Xest2,2),size(GT,2))
         if(~isempty(Xest2{k}))
