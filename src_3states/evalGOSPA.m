@@ -1,8 +1,9 @@
-function [meanCNN, meanPMBM, dCNN, d] = evalGOSPA(Xest, Z, sequence, motionModel, nbrPosStates)
+function [meanCNN, meanPMBM, dCNN, dPMBM, fpCNN, fpPMBM, fnCNN, fnPMBM, numGTobj]= evalGOSPA(Xest, Z, sequence, motionModel, nbrPosStates, plotOn)
     mode = 'GTnonlinear';
     set = 'training';
     c_thresh = 50;
     p = 2;
+    numGTobj = 0;
 %     [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
 %         maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
 %         = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -10,6 +11,9 @@ function [meanCNN, meanPMBM, dCNN, d] = evalGOSPA(Xest, Z, sequence, motionModel
     datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
     GTdc = generateGTdc(set,sequence,datapath,nbrPosStates);
     GT = generateGT(set,sequence,datapath,nbrPosStates);
+    for i = 1 : size(GT,2)
+        numGTobj = numGTobj + size(GT{i},2);
+    end
 %     mode = 'CNNnonlinear';
 %     set = 'training';
 %     [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
@@ -50,7 +54,7 @@ function [meanCNN, meanPMBM, dCNN, d] = evalGOSPA(Xest, Z, sequence, motionModel
 
     for k = 1 : size(Z2,2)
         if(~isempty(Z2{k}))
-            dCNN(k) = GOSPA(GT{k},Z2{k},k,'CNN',c_thresh);
+            [dCNN(k),fpCNN(k), fnCNN(k)] = GOSPA(GT{k},Z2{k},k,'CNN',c_thresh);
         else
 %             if(size(Z,2) > size(GT,2) && (k > size(GT,2)))
 %                 xL = size(Z{k},2);
@@ -66,10 +70,15 @@ function [meanCNN, meanPMBM, dCNN, d] = evalGOSPA(Xest, Z, sequence, motionModel
             dCNN(k) = (0.5*c_thresh^p*(xL))^(1/p);
         end
     end
-    d = zeros(1,size(Xest2,2));
+
+    fpCNN = sum(fpCNN);
+    fnCNN = sum(fnCNN);
+
+    dPMBM = zeros(1,size(Xest2,2));
+
     for k = 1 : min(size(Xest2,2),size(GT,2))
         if(~isempty(Xest2{k}))
-            d(k) = GOSPA(GT{k},Xest2{k},k,'PMBM',c_thresh);
+            [dPMBM(k),fpPMBM(k), fnPMBM(k)] = GOSPA(GT{k},Xest2{k},k,'PMBM',c_thresh);
         else
 %             if(size(Xest,2) > size(GT,2) && (k > size(GT,2)))
 %                 xL = size(Xest{k},2);
@@ -85,19 +94,23 @@ function [meanCNN, meanPMBM, dCNN, d] = evalGOSPA(Xest, Z, sequence, motionModel
                 else
                     xL = size(Xest2{k},2);
                 end
-            d(k) = (0.5*c_thresh^p*(xL))^(1/p);
+            dPMBM(k) = (0.5*c_thresh^p*(xL))^(1/p);
         end
     end
+    fpPMBM = sum(fpPMBM);
+    fnPMBM = sum(fnPMBM);
 
     % PLOT
     meanCNN = mean(dCNN);
-    meanPMBM = mean(d);
-    figure;
-    plot(1:length(dCNN),dCNN,'r+');hold on;
-    plot(1:length(d),d,'k.-')
-    title({['Mean w/o tracker = ', num2str(meanCNN)] ,['Mean w/ tracker = ', num2str(meanPMBM)]});
-    ylabel('GOSPA')
-    xlabel('k')
-    legend('w/o tracker', 'w/ tracker')
-    fprintf('%s %f \n%s %f \n%s %f\n%s %f\n', 'Mean w/o tracker: ', mean(dCNN), 'Mean w/ tracker: ', mean(d), 'Total distance w/o tracker: ',sum(dCNN), 'Total distance w/ tracker: ',sum(d))
+    meanPMBM = mean(dPMBM);
+    if(plotOn)
+        figure;
+        plot(1:length(dCNN),dCNN,'r+');hold on;
+        plot(1:length(dPMBM),dPMBM,'k.-')
+        title({['Mean w/o tracker = ', num2str(meanCNN)] ,['Mean w/ tracker = ', num2str(meanPMBM)]});
+        ylabel('GOSPA')
+        xlabel('k')
+        legend('w/o tracker', 'w/ tracker')
+        fprintf('%s %f \n%s %f \n%s %f\n%s %f\n', 'Mean w/o tracker: ', mean(dCNN), 'Mean w/ tracker: ', mean(dPMBM), 'Total distance w/o tracker: ',sum(dCNN), 'Total distance w/ tracker: ',sum(dPMBM))
+    end
 end

@@ -59,6 +59,11 @@ dCNN= cell(1);
 d = cell(1);
 totalCNNGOSPA = 0;
 totalPMBMGOSPA = 0;
+totalFPCNN = 0;
+totalFNCNN = 0;
+totalFPPMBM = 0;
+totalFNPMBM = 0;
+totalGTobj = 0;
 for sim = 1 : length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
@@ -179,27 +184,39 @@ writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 %writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
 
 % Remove these if GOSPA
-end
-end
-totalTime = toc(startTotalTime);
-disp(['Total simulation time: ', num2str(totalTime)])
-disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
+% end
+% end
+% totalTime = toc(startTotalTime);
+% disp(['Total simulation time: ', num2str(totalTime)])
+% disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
 % Remove these if GOSPA
 
-%%
 % Evaluate 3D state. Distance between estimate and GT. Do GOSPA?
 err{sim} = eval3D(false, false, set, sequence, Xest);
 end
 % Evaluate GOSPA
-[meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, d{sim}] = evalGOSPA(Xest,Z,sequences{sim}, motionModel, nbrPosStates);
+plotOn = 'false';
+[meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, dPMBM{sim}, fpCNN{sim},...
+    fpPMBM{sim}, fnCNN{sim}, fnPMBM{sim}, numGTobj{sim}] = evalGOSPA(Xest,...
+    Z,sequence, motionModel, nbrPosStates,plotOn);
 totalCNNGOSPA = totalCNNGOSPA + meanCNN{sim};
 totalPMBMGOSPA = totalPMBMGOSPA + meanPMBM{sim};
+totalFPCNN = totalFPCNN + fpCNN{sim};
+totalFNCNN = totalFNCNN + fnCNN{sim};
+totalFPPMBM = totalFPPMBM + fpPMBM{sim};
+totalFNPMBM = totalFNPMBM + fnPMBM{sim};
+totalGTobj = totalGTobj + numGTobj{sim};
 end
 totalTime = toc(startTotalTime);
 disp(['Total simulation time: ', num2str(totalTime)])
 disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
 
-fprintf('%s %f \n%s %f \n%s %f\n%s %f\n', 'Mean GOSPA w/o tracker: ', mean(totalCNNGOSPA), 'Mean GOSPA w/ tracker: ', mean(totalPMBMGOSPA))
+fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
+    'Mean GOSPA w/o tracker: ', mean(totalCNNGOSPA), ...
+    'Mean GOSPA w/ tracker: ', mean(totalPMBMGOSPA),...
+    'FP CNN ',totalFPCNN,'FN CNN ', totalFNCNN, ...
+    'FP PMBM ',totalFPPMBM,'FN PMBM ', totalFNPMBM, ...
+    'Total GT obj: ', totalGTobj)
 
 % Plot error in 3D space. First input plots error vs distance [m]. Second
 % plots rel error dep on distance
@@ -259,17 +276,18 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
 end
 %% Plot estimates Img-plane
 
-a = figure('units','normalized','position',[.05 .05 .9 .9]);
-subplot('position', [0.02 0 0.98 1])
+figure('units','normalized','position',[.05 .05 .9 .9]);
+a = subplot('position', [0.02 0 0.98 1]);
 k = kInit;
+flag = 'true';
 while 1
     frameNbr = sprintf('%06d',k-1);
     if strcmp(mode,'GTnonlinear') && ~simMeas
         plotImgEstGT(sequence,set,k,Xest{k});
     elseif strcmp(mode,'CNNnonlinear') || simMeas
-        plotImgEst(sequence,set,k,Xest{k},Z{k})
+        plotImgEst(sequence,set,k,Xest{k},Z{k});
     end
-    title(['k = ', num2str(k-1)])
+    title(['k = ', num2str(k-1)],'Interpreter','Latex','Fontsize',20)
     try
         waitforbuttonpress; 
     catch
