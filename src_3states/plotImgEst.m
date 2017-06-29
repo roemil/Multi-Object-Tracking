@@ -1,4 +1,4 @@
-function plotImgEst(seq,set,k,X,Z)
+function a = plotImgEst(seq,set,k,X,Z)
 global FOVsize
 global H3dFunc
 global H3dTo2d
@@ -20,13 +20,12 @@ frameNbr = sprintf('%06d',k-1);
 imagePath = strcat('../../kittiTracking/',set,'/image_02/',seq,'/',frameNbr,'.png');
 
 % Read and plot image
-%figure;
 img = imread(imagePath);
 imagesc(img);
 axis('image')
 hold on
-xlim([FOVsize(1,1) FOVsize(2,1)])
-ylim([FOVsize(1,2) FOVsize(2,2)])
+xlim([FOVsize(1,1)+150 FOVsize(2,1)*0.51])
+ylim([FOVsize(1,2) + 110 FOVsize(2,2)*0.7])
 
 
 %ind = find(GT{1} == k-1 & GT{2} ~= -1);
@@ -37,10 +36,10 @@ boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];
 cx(1:size(ind,1)) = mean([GT{7}(ind),GT{9}(ind)],2);
 cy(1:size(ind,1)) = mean([GT{8}(ind),GT{10}(ind)],2);
 
-for i = 1:size(boxes,1)
-    rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
-    plot(cx(i),cy(i),'g*')
-end
+% for i = 1:size(boxes,1)
+%     rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
+%     plot(cx(i),cy(i),'g*')
+% end
 
 if ~isempty(X{1})
     for i = 1:size(X,2)
@@ -58,7 +57,7 @@ end
 if ~isempty(Z)
     for i = 1:size(Z,2)
         box = [Z(1,i)-Z(4,i)/2, Z(2,i)-Z(5,i)/2, Z(4,i), Z(5,i)];
-        rectangle('Position',box,'EdgeColor','c','LineWidth',1,'LineStyle','-.')
-        plot(Z(1,i),Z(2,i),'c*')
+        rectangle('Position',box,'EdgeColor','c','LineWidth',1,'LineStyle','-')
+        %plot(Z(1,i),Z(2,i),'c*')
     end
 end

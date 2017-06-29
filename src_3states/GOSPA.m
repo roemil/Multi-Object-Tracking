@@ -1,5 +1,7 @@
-function d = GOSPA(X,Y,k,mode,c_thresh)
+function [d, fp, fn] = GOSPA(X,Y,k,mode,c_thresh)
 global H, global angles, global pose
+fp = 0;
+fn = 0;
 if(isempty(X))
     p = 2;
     d = 0.5*c_thresh^p*(size(Y,2));
@@ -45,6 +47,11 @@ if(strcmp(mode,'CNN'))
         d = mean(d);
         d = d +0.5*c_thresh^p*(xL+yL-2*(lAss));
         d = d^(1/p);
+        if(xL+yL-2*(lAss) < 0)
+            fp = xL+yL-2*(lAss);
+        elseif(xL+yL-2*(lAss) > 0)
+            fn = xL+yL-2*(lAss);
+        end
     else
         ol = zeros(1,xL);
         max_cost = 1e9;
@@ -70,6 +77,11 @@ if(strcmp(mode,'CNN'))
         d = mean(d);
         d = d +0.5*c_thresh^p*(xL+yL-2*(lAss));
         d = d^(1/p);
+        if(xL+yL-2*(lAss) < 0)
+            fp = xL+yL-2*(lAss);
+        elseif(xL+yL-2*(lAss) > 0)
+            fn = xL+yL-2*(lAss);
+        end
     end
 else
     for i = 1 : yL
@@ -104,6 +116,11 @@ else
         d = mean(d);
         d = d +0.5*c_thresh^p*(xL+yL-2*(lAss));
         d = d^(1/p);
+        if(xL+yL-2*(lAss) < 0)
+            fp = xL+yL-2*(lAss);
+        elseif(xL+yL-2*(lAss) > 0)
+            fn = xL+yL-2*(lAss);
+        end
     else
         ol = zeros(1,xL);
         max_cost = 1e9;
@@ -127,6 +144,11 @@ else
         d = mean(d); % Mean average error
         d = d +0.5*c_thresh^p*(xL+yL-2*(lAss));
         d = d^(1/p);
+        if(xL+yL-2*(lAss) < 0)
+            fp = xL+yL-2*(lAss);
+        elseif(xL+yL-2*(lAss) > 0)
+            fn = xL+yL-2*(lAss);
+        end
     end 
 end
 

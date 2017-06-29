@@ -4,7 +4,7 @@
 clear Xest
 clear Pest
 %close all
-%dbstop error
+dbstop error
 addpath('IMU')
 addpath('mtimesx')
 addpath('evalMOT')
@@ -15,7 +15,7 @@ set = 'training';
 %sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
 sequences = {'0004','0006','0010'};
-%   sequences = {'0006'};
+sequences = {'0003'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -60,12 +60,17 @@ dCNN= cell(1);
 d = cell(1);
 totalCNNGOSPA = 0;
 totalPMBMGOSPA = 0;
-for sim = 1 : length(sequences)
+totalFPCNN = 0;
+totalFNCNN = 0;
+totalFPPMBM = 0;
+totalFNPMBM = 0;
+totalGTobj = 0;
+for sim = 1 : 10%length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
     disp(['--------------------- ', num2str(sim),' ---------------------'])
-%sequence = sprintf('%04d',sim-1);
-sequence = sequences{sim};
+sequence = sprintf('%04d',sim-1);
+%sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -183,15 +188,28 @@ writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 err{sim} = eval3D(false, false, set, sequence, Xest);
 end
 % Evaluate GOSPA
-[meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, d{sim}] = evalGOSPA(Xest,Z,sequences{sim}, motionModel, nbrPosStates);
+plotOn = 'false';
+[meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, dPMBM{sim}, fpCNN{sim},...
+    fpPMBM{sim}, fnCNN{sim}, fnPMBM{sim}, numGTobj{sim}] = evalGOSPA(Xest,...
+    Z,sequence, motionModel, nbrPosStates,plotOn);
 totalCNNGOSPA = totalCNNGOSPA + meanCNN{sim};
 totalPMBMGOSPA = totalPMBMGOSPA + meanPMBM{sim};
+totalFPCNN = totalFPCNN + fpCNN{sim};
+totalFNCNN = totalFNCNN + fnCNN{sim};
+totalFPPMBM = totalFPPMBM + fpPMBM{sim};
+totalFNPMBM = totalFNPMBM + fnPMBM{sim};
+totalGTobj = totalGTobj + numGTobj{sim};
 end
 totalTime = toc(startTotalTime);
 disp(['Total simulation time: ', num2str(totalTime)])
 disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
 
-fprintf('%s %f \n%s %f \n%s %f\n%s %f\n', 'Mean GOSPA w/o tracker: ', mean(totalCNNGOSPA), 'Mean GOSPA w/ tracker: ', mean(totalPMBMGOSPA))
+fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
+    'Mean GOSPA w/o tracker: ', mean(totalCNNGOSPA), ...
+    'Mean GOSPA w/ tracker: ', mean(totalPMBMGOSPA),...
+    'FP CNN ',totalFPCNN,'FN CNN ', totalFNCNN, ...
+    'FP PMBM ',totalFPPMBM,'FN PMBM ', totalFNPMBM, ...
+    'Total GT obj: ', totalGTobj)
 
 % Plot error in 3D space. First input plots error vs distance [m]. Second
 % plots rel error dep on distance
@@ -251,17 +269,18 @@ if ~strcmp(mode,'GTnonlinear') || simMeas
 end
 %% Plot estimates Img-plane
 
-a = figure('units','normalized','position',[.05 .05 .9 .9]);
-subplot('position', [0.02 0 0.98 1])
+figure('units','normalized','position',[.05 .05 .9 .9]);
+a = subplot('position', [0.02 0 0.98 1]);
 k = kInit;
+flag = 'true';
 while 1
     frameNbr = sprintf('%06d',k-1);
     if strcmp(mode,'GTnonlinear') && ~simMeas
         plotImgEstGT(sequence,set,k,Xest{k});
     elseif strcmp(mode,'CNNnonlinear') || simMeas
-        plotImgEst(sequence,set,k,Xest{k},Z{k})
+        plotImgEst(sequence,set,k,Xest{k},Z{k});
     end
-    title(['k = ', num2str(k-1)])
+    title(['k = ', num2str(k-1)],'Interpreter','Latex','Fontsize',20)
     try
         waitforbuttonpress; 
     catch
