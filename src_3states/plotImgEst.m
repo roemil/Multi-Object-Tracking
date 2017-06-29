@@ -24,9 +24,11 @@ img = imread(imagePath);
 imagesc(img);
 axis('image')
 hold on
-xlim([FOVsize(1,1)+150 FOVsize(2,1)*0.51])
-ylim([FOVsize(1,2) + 110 FOVsize(2,2)*0.7])
+%xlim([FOVsize(1,1)+150 FOVsize(2,1)*0.51])
+%ylim([FOVsize(1,2) + 110 FOVsize(2,2)*0.7])
 
+xlim([FOVsize(1,1) FOVsize(2,1)])
+ylim([FOVsize(1,2) FOVsize(2,2)])
 
 %ind = find(GT{1} == k-1 & GT{2} ~= -1);
 %boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];

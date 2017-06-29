@@ -116,6 +116,8 @@ elseif(nbrOfStates == 6)
             ZGT{frame}(:,count) = [pxCoords(1);pxCoords(2);d;bbsize(1);bbsize(2);GT{trackID}(i);map(cell2mat(GT{3}(i)))]; % cx
             count = count+1;
             oldFrame = frame;
+        else
+            ZGT{frame} = [];
         end
     end
 end
