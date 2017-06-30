@@ -35,6 +35,9 @@ for i = 1 : size(Xest,2)
                 elseif(Xest{i}{j}(10) == 4)
                     type = 'Pedestrian';
                     formatSpec = '%06d %d %c%c%c%c%c%c%c%c%c%c %d %d %d %06f %06f %06f %06f %d %d %d %06f %06f %06f %d %d \n';
+                elseif(Xest{i}{j}(10) == 9)
+                    type = 'Pedestrian';
+                    formatSpec = '%06d %d %c%c%c%c%c%c%c%c%c%c %d %d %d %06f %06f %06f %06f %d %d %d %06f %06f %06f %d %d \n';
                 end
             else
                 disp('not implemented for linear case');

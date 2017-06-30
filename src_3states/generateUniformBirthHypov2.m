@@ -78,6 +78,10 @@ elseif strcmp(birthSpawn, 'uniform')
             global Ptest
             XmuPred(z).P(4:6,4:6) = Ptest(Z(3,z))*XmuPred(z).P(1:3,1:3);
             
+            %if k == 104 && z == 5
+            %    1
+            %end
+            
             % Initiate velo?
             if ((Z(3,z) < distThresh2) && (abs(theta) > angleThresh))
                 if k > 1

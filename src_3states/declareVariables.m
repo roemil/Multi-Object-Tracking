@@ -365,11 +365,11 @@ thresholdEst = 0.4; % 0.3 test20jun 0.4;
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
-Nhconst = 2;%4;
+Nhconst = 1;%4;
 % Max nbr of globals for each old global
-maxKperGlobal = 2;%20;
+maxKperGlobal = 1;%20;
 % Max nbr globals to pass to next iteration
-maxNbrGlobal = 2;%50;
+maxNbrGlobal = 1;%50;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% Births %%%%%%%%%%%%%%%%%%%%%%%
@@ -382,7 +382,7 @@ if strcmp(mode,'GTnonlinear')
     global distThresh
     distThresh = 10;
     global distThresh2
-    distThresh2 = 7;
+    distThresh2 = 12;
     global PbirthFunc
     PbirthFunc = @(x) diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(x)]);
     global PinitVeloClose

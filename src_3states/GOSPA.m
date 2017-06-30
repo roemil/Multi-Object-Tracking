@@ -6,7 +6,9 @@ if(isempty(X))
     p = 2;
     d = 0.5*c_thresh^p*(size(Y,2));
     d = d^(1/p);
-    return;
+    fp = size(Y,2);
+    %disp(['k = ', num2str(k),' fp = ', num2str(fp)])
+    %return;
 end
 xL = size(X,2); % GT
 yL = size(Y,2); % Estimated trajectories
@@ -15,6 +17,7 @@ yL = size(Y,2); % Estimated trajectories
 min_overlap = 1e9;%0.5;
 c = 0;
 C = [];
+count_ctresh = 0;
 
 if(strcmp(mode,'CNN'))
     if(xL > yL) % nonnegative symmetry
@@ -28,8 +31,8 @@ if(strcmp(mode,'CNN'))
         max_cost = 1e9;
         %min_overlap = 50;
         % cost matrix
-        xL = size(X,2); % GT
-        yL = size(Y,2); % Estimated trajectories           
+        xL = size(X,2); % Estimated trajectories
+        yL = size(Y,2); % GT
         for i = 1 : xL
             for j = 1 : yL
                 C(i,j) =  boxoverlap(Y(:,j),X(:,i),mode); % if ol = 1 then c = 0
@@ -42,16 +45,21 @@ if(strcmp(mode,'CNN'))
         p = 2;
         for i = 1 : xL
             distance = (min(c_thresh,sqrt((Y(1,assignment(i))-X(1,i)).^2+(Y(2,assignment(i))-X(2,i)).^2))).^p;
+            if distance == c_thresh
+                count_ctresh = count_ctresh+1;
+            end
             d =d + distance;
         end
         d = mean(d);
         d = d +0.5*c_thresh^p*(xL+yL-2*(lAss));
         d = d^(1/p);
-        if(xL+yL-2*(lAss) < 0)
-            fp = xL+yL-2*(lAss);
-        elseif(xL+yL-2*(lAss) > 0)
-            fn = xL+yL-2*(lAss);
-        end
+        fp = count_ctresh;
+        fn = (yL-xL)+count_ctresh;
+%         if(xL+yL-2*(lAss) < 0)
+%             fp = xL+yL-2*(lAss);
+%         elseif(xL+yL-2*(lAss) > 0)
+%             fn = xL+yL-2*(lAss);
+%         end
     else
         ol = zeros(1,xL);
         max_cost = 1e9;
@@ -72,16 +80,21 @@ if(strcmp(mode,'CNN'))
         for i = 1 : xL
             %sqrt((X(1,i)-Y(1,assignment(i))).^2+(X(2,i)-Y(2,assignment(i))).^2)^2
             distance = (min(c_thresh,sqrt((X(1,i)-Y(1,assignment(i))).^2+(X(2,i)-Y(2,assignment(i))).^2))).^p;
+            if distance == c_thresh
+                count_ctresh = count_ctresh+1;
+            end
             d =d + distance;
         end
         d = mean(d);
         d = d +0.5*c_thresh^p*(xL+yL-2*(lAss));
         d = d^(1/p);
-        if(xL+yL-2*(lAss) < 0)
-            fp = xL+yL-2*(lAss);
-        elseif(xL+yL-2*(lAss) > 0)
-            fn = xL+yL-2*(lAss);
-        end
+        fp = (yL-xL)+count_ctresh;
+        fn = count_ctresh;
+%         if(xL+yL-2*(lAss) < 0)
+%             fp = xL+yL-2*(lAss);
+%         elseif(xL+yL-2*(lAss) > 0)
+%             fn = xL+yL-2*(lAss);
+%         end
     end
 else
     for i = 1 : yL
@@ -111,16 +124,21 @@ else
         for i = 1 : xL
             %sqrt((Y(1,assignment(i))-X{i}(1)).^2+(Y(2,assignment(i))-X{i}(2)).^2)^2
                 distance = (min(c_thresh,sqrt((Y(1,assignment(i))-X{i}(1)).^2+(Y(2,assignment(i))-X{i}(2)).^2))).^p;
+                if distance == c_thresh
+                    count_ctresh = count_ctresh+1;
+                end
                 d =d + distance;
         end
         d = mean(d);
         d = d +0.5*c_thresh^p*(xL+yL-2*(lAss));
         d = d^(1/p);
-        if(xL+yL-2*(lAss) < 0)
-            fp = xL+yL-2*(lAss);
-        elseif(xL+yL-2*(lAss) > 0)
-            fn = xL+yL-2*(lAss);
-        end
+        fp = count_ctresh;
+        fn = (yL-xL)+count_ctresh;
+%         if(xL+yL-2*(lAss) < 0)
+%             fp = xL+yL-2*(lAss);
+%         elseif(xL+yL-2*(lAss) > 0)
+%             fn = xL+yL-2*(lAss);
+%         end
     else
         ol = zeros(1,xL);
         max_cost = 1e9;
@@ -139,18 +157,27 @@ else
         p = 2;
         for i = 1 : xL
                 distance = (min(c_thresh,sqrt((X(1,i)-Y{assignment(i)}(1)).^2+(X(2,i)-Y{assignment(i)}(2)).^2))).^p;
+                if distance == c_thresh
+                    count_ctresh = count_ctresh+1;
+                end
                 d = d + distance;
         end
         d = mean(d); % Mean average error
         d = d +0.5*c_thresh^p*(xL+yL-2*(lAss));
         d = d^(1/p);
-        if(xL+yL-2*(lAss) < 0)
-            fp = xL+yL-2*(lAss);
-        elseif(xL+yL-2*(lAss) > 0)
-            fn = xL+yL-2*(lAss);
-        end
+        fp = (yL-xL)+count_ctresh;
+        fn = count_ctresh;
+%         if(xL+yL-2*(lAss) < 0)
+%             fp = xL+yL-2*(lAss);
+%         elseif(xL+yL-2*(lAss) > 0)
+%             fn = xL+yL-2*(lAss);
+%         end
     end 
 end
+
+%if fp ~= 0
+%    disp(['k = ', num2str(k),' fp = ', num2str(fp)])
+%end
 
     
 

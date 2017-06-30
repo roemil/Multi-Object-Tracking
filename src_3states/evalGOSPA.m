@@ -1,7 +1,8 @@
 function [meanCNN, meanPMBM, dCNN, dPMBM, fpCNN, fpPMBM, fnCNN, fnPMBM, numGTobj]= evalGOSPA(Xest, Z, sequence, motionModel, nbrPosStates, plotOn)
+    global H, global angles, global pose
     mode = 'GTnonlinear';
     set = 'training';
-    c_thresh = 50;
+    c_thresh = 400;%50;
     p = 2;
     numGTobj = 0;
 %     [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
@@ -39,10 +40,11 @@ function [meanCNN, meanPMBM, dCNN, dPMBM, fpCNN, fpPMBM, fnCNN, fnPMBM, numGTobj
     
     iInd = 1;
     for i = 1 : size(Xest,2)
+        heading = angles{i}.heading-angles{1}.heading;
         jInd = 1;
         if(~isempty(Xest{i}{1}))
             for j = 1 : size(Xest{i},2)
-                if(~isinside(Xest{i}{j},GTdc{i}))
+                if(~isinside([H(Xest{i}{j},pose{i}(1:3,4),heading);Xest{i}{j}(7:8)],GTdc{i}))
                     Xest2{i}{jInd} = Xest{i}{j};
                     jInd = jInd + 1;
                 end
@@ -51,7 +53,23 @@ function [meanCNN, meanPMBM, dCNN, dPMBM, fpCNN, fpPMBM, fnCNN, fnPMBM, numGTobj
             Xest2{i} = [];
         end
     end
-
+    
+    iInd = 1;
+    for i = 1 : size(GT,2)
+        if(~isempty(GT{i}))
+            jInd = 1;
+            for j = 1 : size(GT{i},2)
+                if(~isinside(GT{i}(:,j),GTdc{i}))
+                    GT2{i}(:,jInd) = GT{i}(:,j);
+                    jInd = jInd + 1;
+                end
+            end
+        else
+            GT2{i} = [];
+        end
+    end
+    GT = GT2;
+%plotEstWithoutDC
     for k = 1 : size(Z2,2)
         if(~isempty(Z2{k}))
             [dCNN(k),fpCNN(k), fnCNN(k)] = GOSPA(GT{k},Z2{k},k,'CNN',c_thresh);

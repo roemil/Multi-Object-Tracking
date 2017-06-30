@@ -49,6 +49,9 @@ for z = 1:nbrOfMeas
     %[XpotNew{z}.w XpotNew{z}.r e]
     XpotNew{z}.S = 0;
     XpotNew{z}.box = Z(nbrMeasStates+1:nbrMeasStates+2,z);
+%     if newLabel == 245
+%         1
+%     end
     XpotNew{z}.label = newLabel;
     %XpotNew{z}.state = XmuUpd{z}.state;
     XpotNew{z}.state = XmuPred(z).state;

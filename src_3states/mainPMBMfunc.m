@@ -14,7 +14,8 @@ mode = 'CNNnonlinear';
 set = 'training';
 %sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
-sequences = {'0004','0006','0010'};
+%sequences = {'0004','0006','0010'};
+sequences = {'0007'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -192,7 +193,7 @@ writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 % Remove these if GOSPA
 
 % Evaluate 3D state. Distance between estimate and GT. Do GOSPA?
-err{sim} = eval3D(false, false, set, sequence, Xest);
+%err{sim} = eval3D(false, false, set, sequence, Xest);
 end
 % Evaluate GOSPA
 plotOn = 'false';
@@ -221,6 +222,25 @@ fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
 % Plot error in 3D space. First input plots error vs distance [m]. Second
 % plots rel error dep on distance
 % plotError(true,true,err)
+
+%%
+[meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, dPMBM{sim}, fpCNN{sim},...
+    fpPMBM{sim}, fnCNN{sim}, fnPMBM{sim}, numGTobj{sim}] = evalGOSPA(Xest,...
+    Z,sequence, motionModel, nbrPosStates,plotOn);
+totalCNNGOSPA = meanCNN{sim};
+totalPMBMGOSPA = meanPMBM{sim};
+totalFPCNN = fpCNN{sim};
+totalFNCNN = fnCNN{sim};
+totalFPPMBM = fpPMBM{sim};
+totalFNPMBM = fnPMBM{sim};
+totalGTobj = numGTobj{sim};
+
+fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
+    'Mean GOSPA w/o tracker: ', mean(totalCNNGOSPA), ...
+    'Mean GOSPA w/ tracker: ', mean(totalPMBMGOSPA),...
+    'FP CNN ',totalFPCNN,'FN CNN ', totalFNCNN, ...
+    'FP PMBM ',totalFPPMBM,'FN PMBM ', totalFNPMBM, ...
+    'Total GT obj: ', totalGTobj)
 
 %% Eval CNN
 mode = 'CNNnonlinear';

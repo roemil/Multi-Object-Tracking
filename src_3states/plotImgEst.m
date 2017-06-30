@@ -24,22 +24,33 @@ img = imread(imagePath);
 imagesc(img);
 axis('image')
 hold on
-xlim([FOVsize(1,1)+150 FOVsize(2,1)*0.51])
-ylim([FOVsize(1,2) + 110 FOVsize(2,2)*0.7])
+%xlim([FOVsize(1,1)+150 FOVsize(2,1)*0.51])
+%ylim([FOVsize(1,2) + 110 FOVsize(2,2)*0.7])
 
+xlim([FOVsize(1,1) FOVsize(2,1)])
+ylim([FOVsize(1,2) FOVsize(2,2)])
 
 %ind = find(GT{1} == k-1 & GT{2} ~= -1);
 %boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];
 ind = find(GT{1} == k-1 & GT{2} ~= -1 & (~strcmp(GT{3},'Tram')) & (~strcmp(GT{3},'Truck')) & (~strcmp(GT{3},'Misc ')));
 boxes = [GT{7}(ind), GT{8}(ind), GT{9}(ind)-GT{7}(ind) GT{10}(ind)-GT{8}(ind)];
 
+indDontCare = find(GT{1} == k-1 & GT{2} == -1);
+indDontCareTruck = find(GT{1} == k-1 & (strcmp(GT{3},'Truck') | strcmp(GT{3},'Van')) );
+indDontCare = [indDontCare;indDontCareTruck]; 
+boxesDontCare = [GT{7}(indDontCare), GT{8}(indDontCare), GT{9}(indDontCare)-GT{7}(indDontCare) GT{10}(indDontCare)-GT{8}(indDontCare)];
+
 cx(1:size(ind,1)) = mean([GT{7}(ind),GT{9}(ind)],2);
 cy(1:size(ind,1)) = mean([GT{8}(ind),GT{10}(ind)],2);
 
-% for i = 1:size(boxes,1)
-%     rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
-%     plot(cx(i),cy(i),'g*')
-% end
+for i = 1:size(boxes,1)
+    rectangle('Position',boxes(i,:),'EdgeColor','g','LineWidth',1)
+    plot(cx(i),cy(i),'g*')
+end
+
+for i = 1:size(boxesDontCare,1)
+    rectangle('Position',boxesDontCare(i,:),'EdgeColor','m','LineWidth',1)
+end
 
 if ~isempty(X{1})
     for i = 1:size(X,2)

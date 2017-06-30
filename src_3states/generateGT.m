@@ -91,7 +91,7 @@ elseif(nbrOfStates == 6)
     count = 2;
     for i = (ind+1) : size(GT{1},1)
         frame = GT{1}(i)+1;
-        if(frame == oldFrame && (GT{trackID}(i) ~= -1) && (~strcmp(GT{3}(i),'Tram')) && (~strcmp(GT{3}(i),'Truck')) && (~strcmp(GT{3}(i),'Misc ')))
+        if(frame == oldFrame && (GT{trackID}(i) ~= -1) && (~strcmp(GT{3}(i),'Tram')) && (~strcmp(GT{3}(i),'Truck')) && (~strcmp(GT{3}(i),'Misc')) && (~strcmp(GT{3}(i),'Van')))
             %R1(1:3,1:3) = Ry(i);
             %P = P2*R1;
             %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
@@ -100,11 +100,11 @@ elseif(nbrOfStates == 6)
             pxCoords = [cx,cy];
             bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
             %ZGT{frame}(:,count+1) = [pxCoords(1);pxCoords(2);GT{zInd}(i);bbsize(1);bbsize(2);GT{trackID}(i)]; % cx
-            d = sqrt(GT{14}(i)^2+(GT{15}(ind)-GT{11}(i)/2)^2+GT{16}(i)^2);
+            d = sqrt(GT{14}(i)^2+(GT{15}(i)-GT{11}(i)/2)^2+GT{16}(i)^2);
             ZGT{frame}(:,count) = [pxCoords(1);pxCoords(2);d;bbsize(1);bbsize(2);GT{trackID}(i);map(cell2mat(GT{3}(i)))]; % cx
             count = count + 1;
             oldFrame = frame;
-        elseif(GT{trackID}(i) ~= -1 && (~strcmp(GT{3}(i),'Tram')) && (~strcmp(GT{3}(i),'Truck')) && (~strcmp(GT{3}(i),'Misc '))) % TODO: only difference is the count?
+        elseif(GT{trackID}(i) ~= -1 && (~strcmp(GT{3}(i),'Tram')) && (~strcmp(GT{3}(i),'Truck')) && (~strcmp(GT{3}(i),'Misc')) && (~strcmp(GT{3}(i),'Van'))) % TODO: only difference is the count?
             %R1(1:3,1:3) = Ry(i);
             %P = P2*R1;
             %pxCoords = camera2pixelcoords([GT{xInd}(i);GT{yInd}(i);GT{zInd}(i)],P);
@@ -113,10 +113,18 @@ elseif(nbrOfStates == 6)
             cy = mean([GT{8}(i),GT{10}(i)]);
             pxCoords = [cx,cy];
             bbsize = [GT{9}(i) - GT{7}(i),GT{10}(i)-GT{8}(i)];
-            d = sqrt(GT{14}(i)^2+(GT{15}(ind)-GT{11}(i)/2)^2+GT{16}(i)^2);
+            d = sqrt(GT{14}(i)^2+(GT{15}(i)-GT{11}(i)/2)^2+GT{16}(i)^2);
             ZGT{frame}(:,count) = [pxCoords(1);pxCoords(2);d;bbsize(1);bbsize(2);GT{trackID}(i);map(cell2mat(GT{3}(i)))]; % cx
             count = count+1;
             oldFrame = frame;  
+        else
+            if frame == oldFrame
+                if ~isempty(ZGT{frame})
+                    ZGT{frame} = ZGT{frame};
+                end
+            else
+                ZGT{frame} = [];
+            end
         end
     end
 end
