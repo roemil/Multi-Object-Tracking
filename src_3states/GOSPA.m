@@ -8,7 +8,7 @@ if(isempty(X))
     d = d^(1/p);
     fp = size(Y,2);
     %disp(['k = ', num2str(k),' fp = ', num2str(fp)])
-    %return;
+    return;
 end
 xL = size(X,2); % GT
 yL = size(Y,2); % Estimated trajectories
@@ -175,9 +175,9 @@ else
     end 
 end
 
-%if fp ~= 0
+% if fp ~= 0
 %    disp(['k = ', num2str(k),' fp = ', num2str(fp)])
-%end
+% end
 
     
 

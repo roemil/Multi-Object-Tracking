@@ -15,7 +15,7 @@ set = 'training';
 %sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
 %sequences = {'0004','0006','0010'};
-sequences = {'0007'};
+sequences = {'0004'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -51,7 +51,10 @@ nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
 totNbrFrames = 0;
 
-err = cell(length(sequences),1);
+%err = cell(length(sequences),1);
+%errCNN = cell(length(sequences),1);
+err = cell(21,1);
+errCNN = cell(21,1);
 
 startTotalTime = tic;
 meanCNN = cell(1);
@@ -193,7 +196,27 @@ writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 % Remove these if GOSPA
 
 % Evaluate 3D state. Distance between estimate and GT. Do GOSPA?
-%err{sim} = eval3D(false, false, set, sequence, Xest);
+err{sim} = eval3D(false, false, set, sequence, Xest);
+global TcamToVelo, global T20, global TveloToImu, global angles, global pose
+Z3D = cell(1);
+for k = 1:size(Z,2)
+    if ~isempty(Z{k})
+        heading = angles{k}.heading-angles{1}.heading;
+        iInd = 1;
+        for i = 1:size(Z{k},2)
+            [zApprox, ~] = pix2coordtest(Z{k}(1:2,i),Z{k}(3,i));
+            Z3D{k}{iInd}(1:3,1) = pixel2cameracoords(Z{k}(1:2,i),zApprox);
+            Z3D{k}{iInd}(1:3,1) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[Z3D{k}{iInd}(1:3);1]));
+            Z3D{k}{iInd}(1:2,1) = [cos(heading), -sin(heading); sin(heading) cos(heading)]*Z3D{k}{iInd}(1:2);
+            Z3D{k}{iInd}(1:3,1) = Z3D{k}{iInd}(1:3) + pose{k}(1:3,4);
+            iInd = iInd+1;
+        end
+    else
+        Z3d{k} = [];
+    end
+end
+errCNN{sim} = eval3D(false, false, set, sequence, Z3D);
+
 end
 % Evaluate GOSPA
 plotOn = 'false';
@@ -221,7 +244,10 @@ fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
 
 % Plot error in 3D space. First input plots error vs distance [m]. Second
 % plots rel error dep on distance
-% plotError(true,true,err)
+[quant95, nErr] = plotError(true,true,err);
+[quant95CNN, nCNN] = plotError(true,true,errCNN);
+disp(['95% rel error PMBM: ', num2str(quant95)])
+disp(['95% rel error CNN: ', num2str(quant95CNN)])
 
 %%
 [meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, dPMBM{sim}, fpCNN{sim},...

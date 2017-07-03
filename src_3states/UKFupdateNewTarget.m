@@ -29,7 +29,7 @@ global pose, global k, global angles
 
 Xtmp = zeros(size(Xpred,1),2*n);
 
-W0 = 1-n/3;%1/(2*n+1);
+W0 = 1/(2*n+1);%1-n/3;%1/(2*n+1);
 Wi = (1-W0)/(2*n);
 
 %dMax = 10;

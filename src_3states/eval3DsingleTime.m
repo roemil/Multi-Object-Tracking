@@ -5,7 +5,7 @@ err = zeros(2,1);
 GTL = size(GT,2); % GT
 XL = size(X,2); % Estimated trajectories
 
-max_cost = 20;
+max_cost = 50;
 min_overlap = 1e9;%0.5;
 
 if(GTL > XL) % nonnegative symmetry

@@ -26,10 +26,12 @@ if nargin < 6
         Xt = Xt+pose{k}(1:3,4);
         Xt(7,:) = GT{2}(ind)';
 
-        if ~isempty(Xest{k}{1})
-            err{k} = eval3DsingleTime(Xest{k},Xt,XtCamCoords);
-        else
-            err{k} = {};
+        if ~isempty(Xest{k})
+            if ~isempty(Xest{k}{1})
+                err{k} = eval3DsingleTime(Xest{k},Xt,XtCamCoords);
+            else
+                err{k} = {};
+            end
         end
     end
 end

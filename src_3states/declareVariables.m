@@ -322,10 +322,11 @@ if strcmp(mode,'GTnonlinear')
     end
 elseif strcmp(mode,'CNNnonlinear')
     %R3dTo2d = diag([170 120 25 40 40]);
-    R3dTo2d = diag([25 25 15 15 15]); % * 0.5?? 
+    R3dTo2d = 2*diag([50 25 15 15 15]); 
+    %R3dTo2d = diag([25 25 15 15 15]); % Before tuning 3/7
     %Rdistance = @(x) (0.161*sqrt(x(1)^2+x(2)^2+x(3)^2)/1.959964)^2;
-    Rdistance = @(x) (0.161.*x./1.959964).^2;
-    %Rdistance = @(x) 5;
+    Rdistance = @(x) (0.161.*(x+10)./1.959964).^2;
+    %Rdistance = @(x) (0.161.*x./1.959964).^2; % Before tuning 3/7
     if egoMotionOn
         Rcam = @(x)[R3dTo2d(1:2,1:2), zeros(2,1); zeros(1,2), Rdistance(x)];
         R = @(x) Rcam(x);
@@ -421,6 +422,7 @@ elseif strcmp(mode,'CNNnonlinear')
     distThresh2 = 7;
     global PbirthFunc
     PbirthFunc = @(x) diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) min(Rdistance(x),10)]);%0.7*diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) 1.3*Rdistance(x)]);
+    %PbirthFunc = @(x) diag([0.4*FOVsize(2,1) 0.4*FOVsize(2,2) Rdistance(x)]); % This slightly improves 3D rel Err
     global PinitVeloClose
     PinitVeloClose = 350;
     global PinitVeloFar

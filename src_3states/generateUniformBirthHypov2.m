@@ -72,8 +72,8 @@ elseif strcmp(birthSpawn, 'uniform')
 %             end
             
             Pbirth = PbirthFunc(Z(3,z)); % TODO: Use different values close and far?
-            [XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
-            %[XmuPred(z).P(1:3,1:3), tmp] = UKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
+            %[XmuPred(z).P(1:3,1:3), tmp] = CKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
+            [XmuPred(z).P(1:3,1:3), tmp] = UKFupdateNewTarget(Z(1:3,z), Pbirth, 3);
             
             global Ptest
             XmuPred(z).P(4:6,4:6) = Ptest(Z(3,z))*XmuPred(z).P(1:3,1:3);

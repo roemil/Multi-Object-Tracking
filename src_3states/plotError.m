@@ -1,4 +1,5 @@
-function plotError(plot1,plot2,err)
+function [quant95, nRelErr] = plotError(plot1,plot2,err)
+nRelErr = 0;
 
 %% Plot err vs distance
 if plot1
@@ -28,15 +29,19 @@ if plot2
     for sim = 1:size(err,1)
         for k = 1:size(err{sim},1)
             if ~isempty(err{sim}{k})
-                relErr = [relErr, err{sim}{k}(1,i)/err{sim}{k}(2,i)];
+                for i = 1:size(err{sim}{k},2)
+                    relErr = [relErr, err{sim}{k}(1,i)/err{sim}{k}(2,i)];
+                end
             end
         end
     end
 
+    nRelErr = size(relErr,2);
     quant95 = quantile(relErr,0.95);
     figure;
     histogram(relErr,20)
     hold on
-    plot([quant95,quant95],ylim,'r--')
+    qua = plot([quant95,quant95],ylim,'r--');
     xlabel('Relative error')
+    legend([qua],['quant95 = ', num2str(quant95)])
 end

@@ -1,4 +1,4 @@
-function labels = plotBirdsEye(seq,set,X,P,step, auto,labels,plotConf)
+function labels = plotBirdsEye(seq,set,X,P,step, auto,labels,plotConf,Z)
 
 global egoMotionOn, global pose, global R20, global T20, global RcamToVelo,
 global TcamToVelo, global RimuToVelo, global TimuToVelo,
@@ -12,6 +12,9 @@ legFOVOn = true;
 FOVon = true;
 angle = 45;
 d = 30;
+
+n = 100;
+phi = linspace(0,2*pi,n);
 
 if ~auto
     figure('units','normalized','position',[.05 .05 .9 .9]);
@@ -235,6 +238,17 @@ else
                    text(X{k}{i}(1)-1,X{k}{i}(2)+3,num2str(X{k}{i}(9)),'Fontsize',18,'Color','red')
                %    labels = [labels, X{k}{i}(9)];
                % end
+            end
+            if plotConf
+                x = repmat(X{k}{i}(1:2),1,n)+3*sqrtm(P{k}{i}(1:2,1:2))*[cos(phi);sin(phi)];
+                plot(x(1,:),x(2,:),'-r','LineWidth',1)
+            end
+        end
+    end
+    if nargin == 9
+        if ~isempty(Z{k})
+            for i = 1:size(Z{k},2)
+                plot(Z{k}(1,i),Z{k}(2,i),'c*')
             end
         end
     end

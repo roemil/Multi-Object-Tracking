@@ -1,11 +1,28 @@
 %% Plot estimates Img-plane
 
-plotConf = false;
+plotConf = true;
 step = true;
 auto = true;
 global k
 labels = [];
 a = [];
+
+global TcamToVelo, global T20, global TveloToImu, global angles, global pose
+Z3D = cell(1,size(Z,2));
+for k = 1:size(Z,2)
+    if ~isempty(Z{k})
+        heading = angles{k}.heading-angles{1}.heading;
+        iInd = 1;
+        for i = 1:size(Z{k},2)
+            [zApprox, ~] = pix2coordtest(Z{k}(1:2,i),Z{k}(3,i));
+            Z3D{k}(1:3,iInd) = pixel2cameracoords(Z{k}(1:2,i),zApprox);
+            Z3D{k}(1:3,iInd) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[Z3D{k}(1:3,iInd);1]));
+            Z3D{k}(1:2,iInd) = [cos(heading), -sin(heading); sin(heading) cos(heading)]*Z3D{k}(1:2,iInd);
+            Z3D{k}(1:3,iInd) = Z3D{k}(1:3,iInd) + pose{k}(1:3,4);
+            iInd = iInd+1;
+        end
+    end
+end
 
 %seq = '0000';
 %meas = 'GT'; %% GT or CNN
@@ -36,8 +53,8 @@ for k = 1:size(Xest,2)
     if k > 1
         cla(b)
     end
-    labels = plotBirdsEye(sequence,set,Xest,Pest,step,auto,labels,plotConf);
-    pause(0.1)
+    labels = plotBirdsEye(sequence,set,Xest,Pest,step,auto,labels,plotConf,Z3D);
+    pause(1)
     %print(fig,['img',num2str(k)],'-djpeg')
 end
 %%
