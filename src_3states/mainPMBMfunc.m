@@ -14,8 +14,8 @@ mode = 'CNNnonlinear';
 set = 'training';
 %sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
-%sequences = {'0004','0006','0010'};
-sequences = {'0004'};
+sequences = {'0004','0006','0010'};
+%sequences = {'0004'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
