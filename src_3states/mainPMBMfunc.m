@@ -68,12 +68,12 @@ totalFNCNN = 0;
 totalFPPMBM = 0;
 totalFNPMBM = 0;
 totalGTobj = 0;
-for sim = 1 : length(sequences)
+for sim = 1 : 21%length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
     disp(['--------------------- ', num2str(sim),' ---------------------'])
-%sequence = sprintf('%04d',sim-1);
-sequence = sequences{sim};
+sequence = sprintf('%04d',sim-1);
+%sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -241,6 +241,7 @@ fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
     'FP CNN ',totalFPCNN,'FN CNN ', totalFNCNN, ...
     'FP PMBM ',totalFPPMBM,'FN PMBM ', totalFNPMBM, ...
     'Total GT obj: ', totalGTobj)
+plotGOSPA(meanCNN, meanPMBM,fpCNN,fpPMBM,fnCNN,fnPMBM)
 
 % Plot error in 3D space. First input plots error vs distance [m]. Second
 % plots rel error dep on distance
