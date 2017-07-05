@@ -2,7 +2,7 @@ function ans = isinside(Xest,GT)
 ans = 0;
 a = Xest;
 %thresh = 0.55; if alt1
-thresh = 0.7;%0.65; % if alt2
+thresh = 0.6;%0.65; % if alt2
 eps = 1e-1;
 
 x1a = max(0,a(1)-a(4)*0.5);
