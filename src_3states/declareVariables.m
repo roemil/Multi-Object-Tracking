@@ -366,7 +366,7 @@ thresholdEst = 0.4; % 0.3 test20jun 0.4;
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
 % Murty constant
-Nhconst = 1;%4;
+Nhconst = 4;
 % Max nbr of globals for each old global
 maxKperGlobal = 1;%20;
 % Max nbr globals to pass to next iteration
@@ -489,8 +489,10 @@ elseif strcmp(motionModel,'cvBB') && strcmp(mode,'CNNnonlinear')
         covBirth(7:8,7:8) = diag([20 20]);
     end
 end
+global c
 global wInit
-wInit = 1e-3;% 1e-3 test20jun 1e-5
+
+wInit = 1e-3; %test20jun 1e-5
 
 FOVinit = FOVsize;+50*[-1 -1;
                     1 1];
