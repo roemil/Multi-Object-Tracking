@@ -1,4 +1,4 @@
-function [d, fp, fn] = GOSPA(X,Y,k,mode,c_thresh)
+function [d, fp, fn] = GOSPA3D(X,Y,k,mode,c_thresh)
 global H, global angles, global pose
 fp = 0;
 fn = 0;
@@ -35,7 +35,7 @@ if(strcmp(mode,'CNN'))
         yL = size(Y,2); % GT
         for i = 1 : xL
             for j = 1 : yL
-                C(i,j) =  boxoverlap(Y(:,j),X(:,i),mode); % if ol = 1 then c = 0
+                C(i,j) = norm(Y(1:3,j)-X(1:3,i)); % if ol = 1 then c = 0
             end
         end
         assignment = murty(C,1);
@@ -44,8 +44,8 @@ if(strcmp(mode,'CNN'))
         alpha = 2;
         p = 2;
         for i = 1 : xL
-            distance = (min(c_thresh,sqrt((Y(1,assignment(i))-X(1,i)).^2+(Y(2,assignment(i))-X(2,i)).^2))).^p;
-            if distance == c_thresh^p
+            distance = (min(c_thresh,norm(Y(1:3,assignment(i))-X(1:3,i)))).^p;
+            if distance == c_thresh
                 count_ctresh = count_ctresh+1;
             end
             d =d + distance;
@@ -69,7 +69,7 @@ if(strcmp(mode,'CNN'))
         yL = size(Y,2); % Estimated trajectories
         for i = 1 : xL
             for j = 1 : yL
-                C(i,j) =  boxoverlap(Y(:,j),X(:,i),mode); % if ol = 1 then c = 0
+                C(i,j) =  norm(Y(1:3,j)-X(1:3,i)); % if ol = 1 then c = 0
             end
         end
         assignment = murty(C,1);
@@ -79,8 +79,8 @@ if(strcmp(mode,'CNN'))
         p = 2;
         for i = 1 : xL
             %sqrt((X(1,i)-Y(1,assignment(i))).^2+(X(2,i)-Y(2,assignment(i))).^2)^2
-            distance = (min(c_thresh,sqrt((X(1,i)-Y(1,assignment(i))).^2+(X(2,i)-Y(2,assignment(i))).^2))).^p;
-            if distance == c_thresh^p
+            distance = (min(c_thresh,norm(Y(1:3,assignment(i))-X(1:3,i)))).^p;
+            if distance == c_thresh
                 count_ctresh = count_ctresh+1;
             end
             d =d + distance;
@@ -97,9 +97,6 @@ if(strcmp(mode,'CNN'))
 %         end
     end
 else
-    for i = 1 : yL
-        Y{i}(1:3) = H(Y{i},pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
-    end
     if(xL > yL) % nonnegative symmetry
         tmp = X;
         X = Y;
@@ -113,7 +110,7 @@ else
         % cost matrix
         for i = 1 : xL
             for j = 1 : yL
-                C(i,j) =  boxoverlap(Y(:,j),X{i},mode); % if ol = 1 then c = 0
+                C(i,j) =  norm(Y(1:3,j)-X(1:3,i)); % if ol = 1 then c = 0
             end
         end
         assignment = murty(C,1);
@@ -123,8 +120,8 @@ else
         p = 2;
         for i = 1 : xL
             %sqrt((Y(1,assignment(i))-X{i}(1)).^2+(Y(2,assignment(i))-X{i}(2)).^2)^2
-                distance = (min(c_thresh,sqrt((Y(1,assignment(i))-X{i}(1)).^2+(Y(2,assignment(i))-X{i}(2)).^2))).^p;
-                if distance == c_thresh^p
+                distance = (min(c_thresh,norm(Y(1:3,assignment(i))-X(1:3,i)))).^p;
+                if distance == c_thresh
                     count_ctresh = count_ctresh+1;
                 end
                 d =d + distance;
@@ -147,7 +144,7 @@ else
         yL = size(Y,2); % Estimated trajectories
         for i = 1 : xL
             for j = 1 : yL
-                C(i,j) =  boxoverlap(Y{j},X(:,i),mode); % if ol = 1 then c = 0
+                C(i,j) =  norm(Y(1:3,j)-X(1:3,i)); % if ol = 1 then c = 0
             end
         end
         assignment = murty(C,1);
@@ -156,8 +153,8 @@ else
         alpha = 2;
         p = 2;
         for i = 1 : xL
-                distance = (min(c_thresh,sqrt((X(1,i)-Y{assignment(i)}(1)).^2+(X(2,i)-Y{assignment(i)}(2)).^2))).^p;
-                if distance == c_thresh^p
+                distance = (min(c_thresh,norm(Y(1:3,assignment(i))-X(1:3,i)))).^p;
+                if distance == c_thresh
                     count_ctresh = count_ctresh+1;
                 end
                 d = d + distance;

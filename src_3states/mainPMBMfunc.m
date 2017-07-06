@@ -15,7 +15,7 @@ set = 'training';
 %sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
 sequences = {'0004','0006','0010'};
-%sequences = {'0004'};
+sequences = {'0019'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -51,8 +51,8 @@ nbrPosStates = 6; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
 totNbrFrames = 0;
 
-%err = cell(length(sequences),1);
-%errCNN = cell(length(sequences),1);
+err = cell(length(sequences),1);
+errCNN = cell(length(sequences),1);
 err = cell(21,1);
 errCNN = cell(21,1);
 
@@ -61,6 +61,11 @@ meanCNN = cell(1);
 meanPMBM = cell(1);
 dCNN= cell(1);
 d = cell(1);
+fpCNN = cell(1);
+fnCNN = cell(1);
+fpPMBM = cell(1);
+fnPMBM = cell(1);
+numGTobj = cell(1);
 totalCNNGOSPA = 0;
 totalPMBMGOSPA = 0;
 totalFPCNN = 0;
@@ -68,12 +73,27 @@ totalFNCNN = 0;
 totalFPPMBM = 0;
 totalFNPMBM = 0;
 totalGTobj = 0;
-for sim = 1 : 21%length(sequences)
+
+meanCNN3D = cell(1);
+meanPMBM3D = cell(1);
+totalCNNGOSPA3D = 0;
+totalPMBMGOSPA3D = 0;
+totalGTobj3D = 0;
+numGTobj3D = cell(1);
+fpCNN3D = cell(1);
+fnCNN3D = cell(1);
+fpPMBM3D = cell(1);
+fnPMBM3D = cell(1);
+
+%XestAllSim = cell(21,1);
+%ZallSim = cell(21,1);
+
+for sim = 1 : length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
     disp(['--------------------- ', num2str(sim),' ---------------------'])
 sequence = sprintf('%04d',sim-1);
-%sequence = sequences{sim};
+sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -88,6 +108,26 @@ nbrSim = 1; % Nbr of simulations
 
 nbrMissmatch = zeros(1,nbrSim);
 newLabel = 1;
+
+% Remove dont care before filter
+% datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
+% GTdc = generateGTdc(set,sequence,datapath,nbrPosStates);
+% Z2 = cell(size(Z));
+% iInd = 1;
+% for i = 1 : size(Z,2)
+%     if(~isempty(Z{i}))
+%         jInd = 1;
+%         for j = 1 : size(Z{i},2)
+%             if(~isinside(Z{i}(:,j),GTdc{i}))
+%                 Z2{i}(:,jInd) = Z{i}(:,j);
+%                 jInd = jInd + 1;
+%             end
+%         end
+%     else
+%         Z2{i} = [];
+%     end
+% end
+% Z = Z2;
 
 jEst = zeros(1,K);
 normGlobWeights = cell(K,1);
@@ -104,13 +144,14 @@ for t = 1:nbrSim
     disp(['--------------- k = ', num2str(1), '/',num2str(K), '---------------'])
     global k
     global kInit
-    kInit = 1;
-%     for z = 1:size(Z,2)
-%         if ~isempty(Z{z})
-%             kInit = z;
-%             break
-%         end
-%     end
+    %kInit = 1;
+    initiated = false;
+    for z = 1:size(Z,2)
+        if ~isempty(Z{z}) && ~initiated
+            kInit = z;
+            initiated = true;
+        end
+    end
     if ~isempty(lastwarn())
         [a, MSGID] = lastwarn();
         warning('off', MSGID)
@@ -195,8 +236,45 @@ writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 % disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
 % Remove these if GOSPA
 
+% If err3D
+% global TcamToVelo, global T20, global TveloToImu, global angles, global pose
+% Z3D = cell(1);
+% for k = 1:size(Z,2)
+%     if ~isempty(Z{k})
+%         heading = angles{k}.heading-angles{1}.heading;
+%         iInd = 1;
+%         for i = 1:size(Z{k},2)
+%             [zApprox, ~] = pix2coordtest(Z{k}(1:2,i),Z{k}(3,i));
+%             Z3D{k}{iInd}(1:3,1) = pixel2cameracoords(Z{k}(1:2,i),zApprox);
+%             Z3D{k}{iInd}(1:3,1) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[Z3D{k}{iInd}(1:3);1]));
+%             Z3D{k}{iInd}(1:2,1) = [cos(heading), -sin(heading); sin(heading) cos(heading)]*Z3D{k}{iInd}(1:2);
+%             Z3D{k}{iInd}(1:3,1) = Z3D{k}{iInd}(1:3) + pose{k}(1:3,4);
+%             iInd = iInd+1;
+%         end
+%     else
+%         Z3D{k} = [];
+%     end
+% end
+%errCNN{sim} = eval3D(false, false, set, sequence, Z3D);
+
 % Evaluate 3D state. Distance between estimate and GT. Do GOSPA?
-err{sim} = eval3D(false, false, set, sequence, Xest);
+%err{sim} = eval3D(false, false, set, sequence, Xest);
+end
+% Evaluate GOSPA
+plotOn = false;
+[meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, dPMBM{sim}, fpCNN{sim},...
+            fpPMBM{sim}, fnCNN{sim}, fnPMBM{sim}, numGTobj{sim},loc_errCNN(sim),loc_errPMBM(sim), car_errCNN(sim), car_errPMBM(sim)] = ...
+            evalGOSPA(Xest,...
+            Z,sequence, motionModel, nbrPosStates,plotOn);
+totalCNNGOSPA = totalCNNGOSPA + meanCNN{sim};
+totalPMBMGOSPA = totalPMBMGOSPA + meanPMBM{sim};
+totalFPCNN = totalFPCNN + fpCNN{sim};
+totalFNCNN = totalFNCNN + fnCNN{sim};
+totalFPPMBM = totalFPPMBM + fpPMBM{sim};
+totalFNPMBM = totalFNPMBM + fnPMBM{sim};
+totalGTobj = totalGTobj + numGTobj{sim};
+
+
 global TcamToVelo, global T20, global TveloToImu, global angles, global pose
 Z3D = cell(1);
 for k = 1:size(Z,2)
@@ -205,50 +283,73 @@ for k = 1:size(Z,2)
         iInd = 1;
         for i = 1:size(Z{k},2)
             [zApprox, ~] = pix2coordtest(Z{k}(1:2,i),Z{k}(3,i));
-            Z3D{k}{iInd}(1:3,1) = pixel2cameracoords(Z{k}(1:2,i),zApprox);
-            Z3D{k}{iInd}(1:3,1) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[Z3D{k}{iInd}(1:3);1]));
-            Z3D{k}{iInd}(1:2,1) = [cos(heading), -sin(heading); sin(heading) cos(heading)]*Z3D{k}{iInd}(1:2);
-            Z3D{k}{iInd}(1:3,1) = Z3D{k}{iInd}(1:3) + pose{k}(1:3,4);
+            Z3D{k}(1:3,iInd) = pixel2cameracoords(Z{k}(1:2,i),zApprox);
+            Z3D{k}(1:3,iInd) = TveloToImu(1:3,:)*(TcamToVelo*(T20*[Z3D{k}(1:3,iInd);1]));
+            Z3D{k}(1:2,iInd) = [cos(heading), -sin(heading); sin(heading) cos(heading)]*Z3D{k}(1:2,iInd);
+            Z3D{k}(1:3,iInd) = Z3D{k}(1:3,iInd) + pose{k}(1:3,4);
             iInd = iInd+1;
         end
     else
-        Z3d{k} = [];
+        Z3D{k} = [];
     end
 end
-errCNN{sim} = eval3D(false, false, set, sequence, Z3D);
+[meanCNN3D{sim}, meanPMBM3D{sim}, ~, ~, fnCNN3D{sim},...
+fpPMBM3D{sim}, fnCNN3D{sim}, fnPMBM3D{sim}, numGTobj3D{sim},loc_err3DCNN(sim),loc_err3DPMBM(sim), car_errCNN3D(sim), car_errPMBM3D(sim)] = ...
+    evalGOSPA3D(Xest,...
+    Z, Z3D,sequence, motionModel, nbrPosStates,plotOn);
+    totalCNNGOSPA3D = totalCNNGOSPA3D + meanCNN3D{sim};
+    totalPMBMGOSPA3D = totalPMBMGOSPA3D + meanPMBM3D{sim};
+    totalGTobj3D = totalGTobj3D + numGTobj3D{sim};
 
-end
-% Evaluate GOSPA
-plotOn = 'false';
-[meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, dPMBM{sim}, fpCNN{sim},...
-    fpPMBM{sim}, fnCNN{sim}, fnPMBM{sim}, numGTobj{sim}] = evalGOSPA(Xest,...
-    Z,sequence, motionModel, nbrPosStates,plotOn);
-totalCNNGOSPA = totalCNNGOSPA + meanCNN{sim};
-totalPMBMGOSPA = totalPMBMGOSPA + meanPMBM{sim};
-totalFPCNN = totalFPCNN + fpCNN{sim};
-totalFNCNN = totalFNCNN + fnCNN{sim};
-totalFPPMBM = totalFPPMBM + fpPMBM{sim};
-totalFNPMBM = totalFNPMBM + fnPMBM{sim};
-totalGTobj = totalGTobj + numGTobj{sim};
+%XestAllSim{sim} = Xest;
+%ZallSim{sim} = Z;
+
 end
 totalTime = toc(startTotalTime);
 disp(['Total simulation time: ', num2str(totalTime)])
 disp(['Average time per frame: ', num2str(totalTime/totNbrFrames)])
 
-fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
-    'Mean GOSPA w/o tracker: ', mean(totalCNNGOSPA), ...
-    'Mean GOSPA w/ tracker: ', mean(totalPMBMGOSPA),...
+fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
+    'Mean GOSPA w/o tracker: ', mean(cell2mat(meanCNN)), ...
+    'Mean GOSPA w/ tracker: ', mean(cell2mat(meanPMBM)),...
     'FP CNN ',totalFPCNN,'FN CNN ', totalFNCNN, ...
     'FP PMBM ',totalFPPMBM,'FN PMBM ', totalFNPMBM, ...
-    'Total GT obj: ', totalGTobj)
-plotGOSPA(meanCNN, meanPMBM,fpCNN,fpPMBM,fnCNN,fnPMBM)
+    'Total GT obj: ', totalGTobj,...
+    'Mean loc error CNN: ', mean(loc_errCNN),...
+    'Mean loc error PMBM: ', mean(loc_errPMBM),...
+    'Mean car error CNN: ', mean(car_errCNN),...
+    'Mean car error PMBM: ', mean(car_errPMBM))
+
+fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f',...
+    'Mean 3D GOSPA w/o tracker: ', mean(cell2mat(meanCNN3D)), ...
+    'Mean 3D GOSPA w/ tracker: ', mean(cell2mat(meanPMBM3D)), ...
+    'FP CNN ',totalFPCNN,'FN CNN ', totalFNCNN, ...
+    'FP PMBM ',totalFPPMBM,'FN PMBM ', totalFNPMBM, ...
+    'Total GT obj: ', totalGTobj3D,...
+    'Mean loc error CNN: ', mean(loc_err3DCNN),...
+    'Mean loc error PMBM: ', mean(loc_err3DPMBM),...
+    'Mean car error CNN: ', mean(car_errCNN3D),...
+    'Mean car error PMBM: ', mean(car_errPMBM3D))
+
+%plotGOSPA(meanCNN, meanPMBM,fpCNN,fpPMBM,fnCNN,fnPMBM)
+
+% fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
+%     'Mean GOSPA w/o tracker: ', mean(cell2mat(meanCNN)), ...
+%     'Mean GOSPA w/ tracker: ', mean(cell2mat(meanPMBM)),...
+%     'FP CNN ',totalFPCNN,'FN CNN ', totalFNCNN, ...
+%     'FP PMBM ',totalFPPMBM,'FN PMBM ', totalFNPMBM, ...
+%     'Total GT obj: ', totalGTobj)
+% fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f',...
+%     'Mean 3D GOSPA w/o tracker: ', mean(cell2mat(meanCNN3D)), ...
+%     'Mean 3D GOSPA w/ tracker: ', mean(cell2mat(meanPMBM3D)), ...
+%     'Total GT obj: ', totalGTobj3D)
 
 % Plot error in 3D space. First input plots error vs distance [m]. Second
 % plots rel error dep on distance
-[quant95, nErr] = plotError(true,true,err);
-[quant95CNN, nCNN] = plotError(true,true,errCNN);
-disp(['95% rel error PMBM: ', num2str(quant95)])
-disp(['95% rel error CNN: ', num2str(quant95CNN)])
+%[quant95CNN, nCNN] = plotError(false,true,errCNN);
+%[quant95, nErr] = plotError(false,true,err);
+%disp(['95% rel error PMBM: ', num2str(quant95)])
+%disp(['95% rel error CNN: ', num2str(quant95CNN)])
 
 %%
 [meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, dPMBM{sim}, fpCNN{sim},...

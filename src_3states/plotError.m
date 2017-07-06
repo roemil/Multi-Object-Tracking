@@ -1,4 +1,4 @@
-function [quant95, nRelErr] = plotError(plot1,plot2,err)
+function [quant95, nRelErr] = plotError(plot1,plot2,err, n)
 nRelErr = 0;
 
 %% Plot err vs distance
@@ -35,7 +35,11 @@ if plot2
             end
         end
     end
-
+    
+    if nargin == 4
+        relErr = sort(relErr);
+        relErr = relErr(1:n);
+    end
     nRelErr = size(relErr,2);
     quant95 = quantile(relErr,0.95);
     figure;
