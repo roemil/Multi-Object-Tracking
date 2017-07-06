@@ -35,7 +35,7 @@ if ~isempty(GTdc)
     end
 end
 
-if ~isempty(X)
+if ~isempty(X{1})
     for i = 1:size(X,2) % CONT HERE
         tmp = H(X{i}(1:end-2),pose{k}(1:3,4), angles{k}.heading-angles{1}.heading);
         box = [tmp(1)-X{i}(end-3)/2, tmp(2)-X{i}(end-2)/2, X{i}(end-3), X{i}(end-2)];

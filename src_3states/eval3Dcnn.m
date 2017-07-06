@@ -1,4 +1,4 @@
-function err = eval3D(plot1, plot2, set, sequence, Xest)
+function err = eval3Dcnn(plot1, plot2, set, sequence, Xest)
 % Script for evaluating distance between estimate and GT in a 3D world
 
 global TveloToImu, global TcamToVelo, global T20, global angles, global pose

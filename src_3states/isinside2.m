@@ -1,8 +1,8 @@
-function ans = isinside(Xest,GT)
+function [ans, c] = isinside2(Xest,GT,thresh,mode)
 ans = 0;
 a = Xest;
 %thresh = 0.55; if alt1
-thresh = 0.6;%0.7; % if alt2
+%thresh = 0.6;%0.7; % if alt2
 eps = 1e-1;
 
 x1a = max(0,a(1)-a(4)*0.5);
@@ -26,19 +26,32 @@ for z = 1:size(GT,2)
 
     if w<=0 || h<=0
         ol = 0; 
-    elseif abs((w*h) - (Xest(4)*Xest(5))) < eps
-        ol = 1;
-    elseif abs((w*h)-(b(3)*b(4))) < eps
-        ol = 1;
+%     elseif abs((w*h) - (Xest(4)*Xest(5))) < eps
+%         ol = 1;
+%     elseif abs((w*h)-(b(3)*b(4))) < eps
+%         ol = 1;
     else
         inter = w*h;
         aarea = (x2a-x1a)*(y2a-y1a);
         barea = (x2b-x1b)*(y2b-y1b);
         % intersection over union overlap
-        %ol = inter / (aarea+barea-inter); % alt1
-        ol = inter/aarea;%min(aarea,barea); % alt2
+        if strcmp(mode,'care')
+            ol = inter / (aarea+barea-inter); % alt1
+        elseif strcmp(mode,'dontcare')
+            ol = inter/aarea;%min(aarea,barea); % alt2
+        end
     end
     
+%     boxX = [x1a, y1a, a(4), a(5)];
+%     boxGT = [x1b, y1b, a(4), a(5)];
+%     figure;
+%     rectangle('Position',boxX,'EdgeColor','r','LineWidth',1)
+%     hold on
+%     rectangle('Position',boxGT,'EdgeColor','g','LineWidth',1)
+%     title([num2str(ol)])
+%     waitforbuttonpress
+    
+    c = 1-ol;
     if ol > thresh
         ans = 1;
         return

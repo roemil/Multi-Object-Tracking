@@ -18,6 +18,7 @@ heading = angles{k}.heading-angles{1}.heading;
 % pos = [cos(heading) -sin(heading); sin(heading), cos(heading)]*pos;
 pos = [cos(heading) sin(heading); -sin(heading), cos(heading)]*pos;
 FOV = 45*pi/180;
+%FOV = 40*pi/180;
 
 angleToObj = atan2(pos(2),pos(1));
 
