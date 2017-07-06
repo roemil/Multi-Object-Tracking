@@ -69,7 +69,7 @@ function [meanCNN, meanPMBM, dCNN, dPMBM, fpCNN, fpPMBM, fnCNN, fnPMBM, numGTobj
     
     for k = 1:size(GT,2)
         ind = find(GTraw{1} == k-1 & GTraw{2} ~= -1);
-        ind2 = find((~strcmp(GTraw{3}(ind),'Van')) & (~strcmp(GTraw{3}(ind),'Tram')) & (~strcmp(GTraw{3}(ind),'Truck')) & (~strcmp(GTraw{3}(ind),'Misc')));
+        ind2 = find((~strcmp(GTraw{3}(ind),'Van')) & (~strcmp(GTraw{3}(ind),'Tram')) & (~strcmp(GTraw{3}(ind),'Truck')) & (~strcmp(GTraw{3}(ind),'Misc')) & (GTraw{4}(ind) == 0));
         ind = ind(ind2);
         if ~isempty(ind)
             Xt{k} = [GTraw{14}(ind)';

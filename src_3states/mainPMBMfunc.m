@@ -15,7 +15,7 @@ set = 'training';
 %sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
 sequences = {'0004','0006','0010'};
-sequences = {'0019'};
+sequences = {'0011'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -85,15 +85,15 @@ fnCNN3D = cell(1);
 fpPMBM3D = cell(1);
 fnPMBM3D = cell(1);
 
-%XestAllSim = cell(21,1);
-%ZallSim = cell(21,1);
+XestAllSim = cell(21,1);
+ZallSim = cell(21,1);
 
-for sim = 1 : length(sequences)
+for sim = 1 : 21 %length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
     disp(['--------------------- ', num2str(sim),' ---------------------'])
 sequence = sprintf('%04d',sim-1);
-sequence = sequences{sim};
+%sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -301,8 +301,8 @@ fpPMBM3D{sim}, fnCNN3D{sim}, fnPMBM3D{sim}, numGTobj3D{sim},loc_err3DCNN(sim),lo
     totalPMBMGOSPA3D = totalPMBMGOSPA3D + meanPMBM3D{sim};
     totalGTobj3D = totalGTobj3D + numGTobj3D{sim};
 
-%XestAllSim{sim} = Xest;
-%ZallSim{sim} = Z;
+XestAllSim{sim} = Xest;
+ZallSim{sim} = Z;
 
 end
 totalTime = toc(startTotalTime);
@@ -323,8 +323,8 @@ fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%
 fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f',...
     'Mean 3D GOSPA w/o tracker: ', mean(cell2mat(meanCNN3D)), ...
     'Mean 3D GOSPA w/ tracker: ', mean(cell2mat(meanPMBM3D)), ...
-    'FP CNN ',totalFPCNN,'FN CNN ', totalFNCNN, ...
-    'FP PMBM ',totalFPPMBM,'FN PMBM ', totalFNPMBM, ...
+    'FP CNN ',sum(cell2mat(fpCNN3D)),'FN CNN ', sum(cell2mat(fnCNN3D)), ...
+    'FP PMBM ',sum(cell2mat(fpPMBM3D)),'FN PMBM ', sum(cell2mat(fnPMBM3D)), ...
     'Total GT obj: ', totalGTobj3D,...
     'Mean loc error CNN: ', mean(loc_err3DCNN),...
     'Mean loc error PMBM: ', mean(loc_err3DPMBM),...

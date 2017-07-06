@@ -4,7 +4,6 @@ fp = 0;
 fn = 0;
 count_dontcare = 0;
 loc_err = 0;
-
 threshAss = 0.5;
 threshDC = 0.5;
 
