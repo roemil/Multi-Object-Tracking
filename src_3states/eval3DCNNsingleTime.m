@@ -1,9 +1,11 @@
-function err = eval3DsingleTime(X,GT,XtCamCoords)
+function err = eval3DCNNsingleTime(X,GT,XtCamCoords)
 
 err = zeros(2,1);
 
 GTL = size(GT,2); % GT
 XL = size(X,2); % Estimated trajectories
+
+GTass = cell(size(GT,2));
 
 max_cost = 20;
 min_overlap = 1e9;%0.5;
