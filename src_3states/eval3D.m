@@ -1,42 +1,62 @@
-function err = eval3D(plot1, plot2, set, sequence, Xest)
+function [errCNN, errPMBM] = eval3D(plot1, plot2, set, sequence, Xest, Z, Z3D)
 % Script for evaluating distance between estimate and GT in a 3D world
+
+global TveloToImu, global TcamToVelo, global T20, global angles, global pose
+global nbrPosStates
+datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
+filename = [datapath,'.txt'];
+formatSpec = '%f%f%s%f%f%f%f%f%f%f%f%f%f%f%f%f%f';
+f = fopen(filename);
+GTdc = generateGTdcTrunc(set,sequence,datapath,nbrPosStates);
+GT = generateGTtrunc(set,sequence,datapath,nbrPosStates);
+fclose(f);
+
+c_thresh = 20;
+errCNN = zeros(size(Xest,2),1);
+errPMBM = zeros(size(Xest,2),1);
 
 global TveloToImu, global TcamToVelo, global T20, global angles, global pose
 datapath = strcat('../../kittiTracking/',set,'/','label_02/',sequence);
 filename = [datapath,'.txt'];
 formatSpec = '%f%f%s%f%f%f%f%f%f%f%f%f%f%f%f%f%f';
 f = fopen(filename);
-GT = textscan(f,formatSpec);
+GTraw = textscan(f,formatSpec);
 fclose(f);
-
-err = cell(size(Xest,2),1);
-
-for k = 1:size(Xest,2)
-    ind = find(GT{1} == k-1 & GT{2} ~= -1);
-    ind2 = find((~strcmp(GT{3}(ind),'Van')) & (~strcmp(GT{3}(ind),'Tram')) & (~strcmp(GT{3}(ind),'Truck')) & (~strcmp(GT{3}(ind),'Misc')));
+for k = 1:size(GT,2)
+    ind = find(GTraw{1} == k-1 & GTraw{2} ~= -1);
+    ind2 = find((~strcmp(GTraw{3}(ind),'Van')) & (~strcmp(GTraw{3}(ind),'Tram')) & (~strcmp(GTraw{3}(ind),'Truck')) & (~strcmp(GTraw{3}(ind),'Misc')) & (GTraw{4}(ind) == 0));
     ind = ind(ind2);
     if ~isempty(ind)
-        Xt = [GT{14}(ind)';
-                (GT{15}(ind)-GT{11}(ind)/2)';
-                GT{16}(ind)'];
+        Xt{k} = [GTraw{14}(ind)';
+                (GTraw{15}(ind)-GTraw{11}(ind)/2)';
+                GTraw{16}(ind)'];
         %XtCamCoords = Xt; Here?
-        Xt = TveloToImu(1:3,:)*(TcamToVelo*(T20*[Xt;ones(1,size(Xt,2))]));
-        XtCamCoords = Xt;
+        Xt{k} = TveloToImu(1:3,:)*(TcamToVelo*(T20*[Xt{k};ones(1,size(Xt{k},2))]));
+        XtCamCoords{k} = Xt{k};
         heading = angles{k}.heading-angles{1}.heading;
-        Xt(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*Xt(1:2,:);
-        Xt = Xt+pose{k}(1:3,4);
-        Xt(7,:) = GT{2}(ind)';
+        Xt{k}(1:2,:) = [cos(-heading), sin(-heading); -sin(-heading) cos(-heading)]*Xt{k}(1:2,:);
+        Xt{k} = Xt{k}+pose{k}(1:3,4);
+        Xt{k}(6,:) = GTraw{2}(ind)';
     else
-        Xt = [];
-        XtCamCoords = [];
+        %if isempty(Xt{k})
+            Xt{k} = [];
+        %end
     end
-
-    if ~isempty(Xest{k})
-        if ~isempty(Xest{k}{1})
-            err{k} = eval3DsingleTime(Xest{k},Xt,XtCamCoords);
-        else
-            err{k} = {};
+    
+    if(~isempty(Z3D{k}))
+        errCNN(k) = eval3DCNNsingleTime2(GT{k},Xt{k},Z{k},Z3D{k},k,'CNN',c_thresh,GTdc{k}, XtCamCoords{k}); % Unfiltered
+    else
+        errCNN(k) = [];
+    end
+    
+    if(~isempty(Xest{k}{1}))
+        for i = 1:size(Xest{k},2)
+            X{k}(1:5,i) = [H(Xest{k}{i},pose{k}(1:3,4), angles{k}.heading-angles{1}.heading); Xest{k}{i}(7:8)];
+            Xest2{k}(1:3,i) = Xest{k}{i}(1:3);
         end
+        errPMBM(k) = eval3DCNNsingleTime2(GT{k},Xt{k},X{k},Zest2{k},k,'CNN',c_thresh,GTdc{k}, XtCamCoords);
+    else
+        errPMBM(k) = [];
     end
 end
 

@@ -4,7 +4,7 @@
 clear Xest
 clear Pest
 close all
-dbstop error
+%dbstop error
 addpath('IMU')
 addpath('mtimesx')
 addpath('evalMOT')
@@ -15,7 +15,7 @@ set = 'training';
 %sequences = {'0004'};% quite good {'0004','0006'}
 %sequences = {'0004','0006','0010','0018'};
 sequences = {'0004','0006','0010'};
-sequences = {'0011'};
+sequences = {'0001'};
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn
@@ -85,8 +85,8 @@ fnCNN3D = cell(1);
 fpPMBM3D = cell(1);
 fnPMBM3D = cell(1);
 
-XestAllSim = cell(21,1);
-ZallSim = cell(21,1);
+%XestAllSim = cell(21,1);
+%ZallSim = cell(21,1);
 
 for sim = 1 : 21 %length(sequences)
     clear Xest;
@@ -301,8 +301,8 @@ fpPMBM3D{sim}, fnCNN3D{sim}, fnPMBM3D{sim}, numGTobj3D{sim},loc_err3DCNN(sim),lo
     totalPMBMGOSPA3D = totalPMBMGOSPA3D + meanPMBM3D{sim};
     totalGTobj3D = totalGTobj3D + numGTobj3D{sim};
 
-XestAllSim{sim} = Xest;
-ZallSim{sim} = Z;
+%XestAllSim{sim} = Xest;
+%ZallSim{sim} = Z;
 
 end
 totalTime = toc(startTotalTime);

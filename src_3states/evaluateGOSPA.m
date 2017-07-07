@@ -70,6 +70,7 @@ for sim = 1:size(XestAllSim,1)
                 Z3D{k} = [];
             end
         end
+        %[errCNN(sim), errPMBM(sim)] = eval3D(false, false, set, sequence, XestAllSim{sim}, ZallSim{sim}, Z3D);
         %errCNN{sim} = eval3D(false, false, set, sequence, Z3D);
 
         % Evaluate 3D state. Distance between estimate and GT. Do GOSPA?
@@ -121,4 +122,4 @@ fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%
     'Mean car error PMBM: ', mean(car_errPMBM3D))
 
 plotGOSPA(meanCNN, meanPMBM,fpCNN,fpPMBM,fnCNN,fnPMBM)
-plotGOSPA(meanCNN3D, meanPMBM3D,fpCNN3D,fpPMBM3D,fnCNN3D,fnPMBM3D)
+%plotGOSPA(meanCNN3D, meanPMBM3D,fpCNN3D,fpPMBM3D,fnCNN3D,fnPMBM3D)
