@@ -16,6 +16,7 @@ set = 'training';
 %sequences = {'0004','0006','0010','0018'};
 sequences = {'0004','0006','0010'};
 sequences = {'0001'};
+set = 'training';
 global motionModel
 motionModel = 'cvBB'; % Choose 'cv' or 'cvBB'
 global birthSpawn

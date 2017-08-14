@@ -365,6 +365,7 @@ threshold = 1e-3;    % 0.01 ok1
 thresholdEst = 0.4; % 0.3 test20jun 0.4;
 % Threshold weight undetected targets keep for next iteration
 poissThresh = 1e-5;
+poissThresh = 1e-2;
 % Murty constant
 Nhconst = 1;%4;
 % Max nbr of globals for each old global
