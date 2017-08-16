@@ -48,12 +48,29 @@ global nbrPosStates
 nbrPosStates = 4; % Nbr of position states, pos and velo, choose 4 or 6
 ClearMOT = cell(1);
 
-for sim = 1 : length(sequences)
+meanCNN = cell(1);
+meanPMBM = cell(1);
+dCNN= cell(1);
+d = cell(1);
+fpCNN = cell(1);
+fnCNN = cell(1);
+fpPMBM = cell(1);
+fnPMBM = cell(1);
+numGTobj = cell(1);
+totalCNNGOSPA = 0;
+totalPMBMGOSPA = 0;
+totalFPCNN = 0;
+totalFNCNN = 0;
+totalFPPMBM = 0;
+totalFNPMBM = 0;
+totalGTobj = 0;
+
+for sim = 1 : 21%length(sequences)
     clear Xest;
     disp(['--------------------- ', 'SIM Number ','---------------------']) 
     disp(['--------------------- ', num2str(sim),' ---------------------'])
-%sequence = sprintf('%04d',sim-1);
-sequence = sequences{sim};
+sequence = sprintf('%04d',sim-1);
+%sequence = sequences{sim};
 [nbrInitBirth, wInit, FOVinit, vinit, covBirth, Z, nbrOfBirths, maxKperGlobal,...
     maxNbrGlobal, Nhconst, XmuUpd, XuUpd, FOVsize] ...
     = declareVariables(mode, set, sequence, motionModel, nbrPosStates);
@@ -163,8 +180,48 @@ writetofile(Xest,mode,['../../devkit_updated/python/results/tracker/data/',seque
 writeCNNtofile(Z,['../../devkit_updated/python/results/cnn/data/',sequence]);
 %writetofile(Xest,mode,['../../devkit_updated/python/results/sha_key/data/',sequence,'.txt']);
 end
+%
+% Evaluate GOSPA
+plotOn = false;
+[meanCNN{sim}, meanPMBM{sim}, dCNN{sim}, dPMBM{sim}, fpCNN{sim},...
+            fpPMBM{sim}, fnCNN{sim}, fnPMBM{sim}, numGTobj{sim},loc_errCNN(sim),loc_errPMBM(sim), car_errCNN(sim), car_errPMBM(sim)] = ...
+            evalGOSPA(Xest,...
+            Z,sequence, motionModel, nbrPosStates,plotOn);
+totalCNNGOSPA = totalCNNGOSPA + meanCNN{sim};
+totalPMBMGOSPA = totalPMBMGOSPA + meanPMBM{sim};
+totalFPCNN = totalFPCNN + fpCNN{sim};
+totalFNCNN = totalFNCNN + fnCNN{sim};
+totalFPPMBM = totalFPPMBM + fpPMBM{sim};
+totalFNPMBM = totalFNPMBM + fnPMBM{sim};
+totalGTobj = totalGTobj + numGTobj{sim};
+
+end
+%%
+plotOn = true;
+if(plotOn)
+    figure;
+    plot(cell2mat(meanCNN),'r+','Markersize',15);hold on;
+    plot(cell2mat(meanPMBM),'k.-','Markersize',15)
+    %title({['Mean w/o tracker = ', num2str(mean(cell2mat(meanCNN)))] ,['Mean w/ tracker = ', num2str(mean(cell2mat(meanPMBM)))]});
+    title('GOSPA per Sequence','Interpreter','latex','FontSize',20)
+    ylabel('Average GOSPA','Interpreter','latex','FontSize',20)
+    xlabel('Sequence','Interpreter','latex','FontSize',20)
+    legend({'CNN','PMBM'},'Fontsize',20,'Location','NorthWest')
+    %set(leg,'FontSize',20);
+    %fprintf('%s %f \n%s %f \n%s %f\n%s %f\n', 'Mean w/o tracker: ', mean(dCNN), 'Mean w/ tracker: ', mean(dPMBM), 'Total distance w/o tracker: ',sum(dCNN), 'Total distance w/ tracker: ',sum(dPMBM))
 end
 
+fprintf('\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f\n%s%f', ...
+    'Mean GOSPA w/o tracker: ', mean(cell2mat(meanCNN)), ...
+    'Mean GOSPA w/ tracker: ', mean(cell2mat(meanPMBM)),...
+    'FP CNN ',totalFPCNN,'FN CNN ', totalFNCNN, ...
+    'FP PMBM ',totalFPPMBM,'FN PMBM ', totalFNPMBM, ...
+    'Total GT obj: ', totalGTobj,...
+    'Mean loc error CNN: ', mean(loc_errCNN),...
+    'Mean loc error PMBM: ', mean(loc_errPMBM),...
+    'Mean car error CNN: ', mean(car_errCNN),...
+    'Mean car error PMBM: ', mean(car_errPMBM))
+%plotGOSPA(meanCNN, meanPMBM,fpCNN,fpPMBM,fnCNN,fnPMBM)
 %% Eval CNN
 set = 'training';
 sequences = {'0004'};% quite good {'0004','0006'}
